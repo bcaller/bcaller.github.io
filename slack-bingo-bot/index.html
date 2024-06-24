@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Slack Bingo bot</title>
+		<meta name="description" content="I am writing about my experiences as a naval navel-gazer.">
+		<link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		<link rel="alternate" href="/feed/feed.json" type="application/json" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		
+		<style>/**
+ * okaidia theme for JavaScript, CSS and HTML
+ * Loosely based on Monokai textmate theme by http://www.monokai.nl/
+ * @author ocodia
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: #f8f8f2;
+	background: none;
+	text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	font-size: 1em;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: 1em;
+	margin: .5em 0;
+	overflow: auto;
+	border-radius: 0.3em;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #272822;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .1em;
+	border-radius: .3em;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: #8292a2;
+}
+
+.token.punctuation {
+	color: #f8f8f2;
+}
+
+.token.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #f92672;
+}
+
+.token.boolean,
+.token.number {
+	color: #ae81ff;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #a6e22e;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.variable {
+	color: #f8f8f2;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.function,
+.token.class-name {
+	color: #e6db74;
+}
+
+.token.keyword {
+	color: #66d9ef;
+}
+
+.token.regex,
+.token.important {
+	color: #fd971f;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+/*
+ * New diff- syntax
+ */
+
+pre[class*="language-diff-"] {
+	--eleventy-code-padding: 1.25em;
+	padding-left: var(--eleventy-code-padding);
+	padding-right: var(--eleventy-code-padding);
+}
+.token.deleted {
+	background-color: hsl(0, 51%, 37%);
+	color: inherit;
+}
+.token.inserted {
+	background-color: hsl(126, 31%, 39%);
+	color: inherit;
+}
+
+/* Make the + and - characters unselectable for copy/paste */
+.token.prefix.unchanged,
+.token.prefix.inserted,
+.token.prefix.deleted {
+	-webkit-user-select: none;
+	user-select: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+.token.prefix.inserted,
+.token.prefix.deleted {
+	width: var(--eleventy-code-padding);
+	background-color: rgba(0,0,0,.2);
+}
+
+/* Optional: full-width background color */
+.token.inserted:not(.prefix),
+.token.deleted:not(.prefix) {
+	display: block;
+	margin-left: calc(-1 * var(--eleventy-code-padding));
+	margin-right: calc(-1 * var(--eleventy-code-padding));
+	text-decoration: none; /* override del, ins, mark defaults */
+	color: inherit; /* override del, ins, mark defaults */
+}
+* { box-sizing: border-box; }
+/* Defaults */
+:root {
+	--font-family: -apple-system, system-ui, sans-serif;
+	--font-family-monospace: Consolas, Menlo, Monaco, Andale Mono WT, Andale Mono, Lucida Console, Lucida Sans Typewriter, DejaVu Sans Mono, Bitstream Vera Sans Mono, Liberation Mono, Nimbus Mono L, Courier New, Courier, monospace;
+}
+
+/* Theme colors */
+:root {
+	--color-gray-20: #e0e0e0;
+	--color-gray-50: #C0C0C0;
+	--color-gray-90: #333;
+
+	--background-color: #fff;
+
+	--text-color: var(--color-gray-90);
+	--text-color-link: #082840;
+	--text-color-link-active: #5f2b48;
+	--text-color-link-visited: #17050F;
+
+	--syntax-tab-size: 2;
+
+	--pinyin-font: 'Arima Madurai';
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-gray-20: #e0e0e0;
+		--color-gray-50: #C0C0C0;
+		--color-gray-90: #dad8d8;
+
+		/* --text-color is assigned to --color-gray-_ above */
+		--text-color-link: #1493fb;
+		--text-color-link-active: #6969f7;
+		--text-color-link-visited: #a6a6f8;
+
+		--background-color: #15202b;
+	}
+}
+
+
+/* Global stylesheet */
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	padding: 0;
+	margin: 0 auto;
+	font-family: var(--font-family);
+	color: var(--text-color);
+	background-color: var(--background-color);
+}
+html {
+	overflow-y: scroll;
+}
+body {
+	max-width: 55em;
+}
+
+/* https://www.a11yproject.com/posts/how-to-hide-content/ */
+.visually-hidden {
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
+p:last-child {
+	margin-bottom: 0;
+}
+p {
+	line-height: 1.5;
+}
+
+li {
+	line-height: 1.5;
+}
+
+a[href] {
+	color: var(--text-color-link);
+}
+a[href]:visited {
+	color: var(--text-color-link-visited);
+}
+a[href]:hover,
+a[href]:active {
+	color: var(--text-color-link-active);
+}
+
+main {
+	padding: 1rem;
+}
+main :first-child {
+	margin-top: 0;
+}
+
+header {
+	border-bottom: 1px dashed var(--color-gray-20);
+}
+header:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.links-nextprev {
+	list-style: none;
+	border-top: 1px dashed var(--color-gray-20);
+	padding: 1em 0;
+}
+
+table {
+	margin: 1em 0;
+}
+table td,
+table th {
+	padding-right: 1em;
+}
+
+pre,
+code {
+	font-family: var(--font-family-monospace);
+}
+pre:not([class*="language-"]) {
+	margin: .5em 0;
+	line-height: 1.375; /* 22px /16 */
+	-moz-tab-size: var(--syntax-tab-size);
+	-o-tab-size: var(--syntax-tab-size);
+	tab-size: var(--syntax-tab-size);
+	-webkit-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+	direction: ltr;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+}
+code {
+	word-break: break-all;
+}
+p > code {
+	color: #722;
+	text-decoration: underline #7222;
+}
+
+/* Header */
+header {
+	display: flex;
+	gap: 1em .5em;
+	flex-wrap: wrap;
+	align-items: center;
+	padding: 1em;
+}
+.home-link {
+	font-size: 1em; /* 16px /16 */
+	font-weight: 700;
+	margin-right: 2em;
+}
+.home-link:link:not(:hover) {
+	text-decoration: none;
+}
+
+/* Nav */
+.nav {
+	display: flex;
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+.nav-item {
+	display: inline-block;
+	margin-right: 1em;
+}
+.nav-item a[href]:not(:hover) {
+	text-decoration: none;
+}
+.nav a[href][aria-current="page"] {
+	text-decoration: underline;
+}
+
+/* Posts list */
+.postlist {
+	list-style: none;
+	padding: 0;
+	padding-left: 1.5rem;
+}
+.postlist-item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	counter-increment: start-from -1;
+	margin-bottom: 1em;
+}
+.postlist-item:before {
+	display: inline-block;
+	pointer-events: none;
+	content: "" counter(start-from, decimal-leading-zero) ". ";
+	line-height: 100%;
+	text-align: right;
+	margin-left: -1.5rem;
+}
+.postlist-date,
+.postlist-item:before {
+	font-size: 0.8125em; /* 13px /16 */
+	color: var(--color-gray-90);
+}
+.postlist-date {
+	word-spacing: -0.5px;
+}
+.postlist-link {
+	font-size: 1.1875em; /* 19px /16 */
+	font-weight: 700;
+	flex-basis: calc(100% - 1.5rem);
+	padding-left: .25em;
+	padding-right: .5em;
+	text-underline-position: from-font;
+	text-underline-offset: 0;
+	text-decoration-thickness: 1px;
+}
+.postlist-item-active .postlist-link {
+	font-weight: bold;
+}
+
+/* Tags */
+.post-tag {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	text-transform: capitalize;
+	font-style: italic;
+}
+.postlist-item > .post-tag {
+	align-self: center;
+}
+
+/* Tags list */
+.post-metadata {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: .5em;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.post-metadata time {
+	margin-right: 1em;
+}
+
+/* Direct Links / Markdown Headers */
+.header-anchor {
+	text-decoration: none;
+	font-style: normal;
+	font-size: 1em;
+	margin-left: .1em;
+}
+a[href].header-anchor,
+a[href].header-anchor:visited {
+	color: transparent;
+}
+a[href].header-anchor:focus,
+a[href].header-anchor:hover {
+	text-decoration: underline;
+}
+a[href].header-anchor:focus,
+:hover > a[href].header-anchor {
+	color: #aaa;
+}
+
+h2 + .header-anchor {
+	font-size: 1.5em;
+}
+
+.pyin {
+	font-family: var(--pinyin-font), cursive;
+}
+
+figure {
+	margin: -1.7em 0 0.7em 0;
+}
+
+figcaption {
+	font-style: italic;
+}
+
+figure img {
+	border: 1px solid #ccc;
+}</style>
+		<link href="https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700" rel="stylesheet" referrerpolicy="no-referrer">
+	</head>
+	<body>
+		<a href="#skip" class="visually-hidden">Skip to main content</a>
+
+		<header>
+			<a href="/" class="home-link">ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ</a>
+			<nav>
+				<h2 class="visually-hidden">Top level navigation menu</h2>
+				<ul class="nav">
+					<li class="nav-item"><a href="/">Home</a></li>
+					<li class="nav-item"><a href="/blog/">Archive</a></li>
+					<li class="nav-item"><a href="/about/">About Me</a></li>
+				</ul>
+			</nav>
+		</header>
+
+		<main id="skip">
+			
+<h1>Slack Bingo bot</h1>
+
+<ul class="post-metadata">
+	<li><time datetime="2016-02-07">2016年02月</time></li>
+	<li><a href="/tags/slack/" class="post-tag">slack</a>, </li>
+	<li><a href="/tags/node/" class="post-tag">node</a>, </li>
+	<li><a href="/tags/bot/" class="post-tag">bot</a></li>
+</ul>
+
+<p>Companies love Slack, and lots of services integrate via their API. While slash commands are simple web hooks,
+bots can listen in to the conversations taking place on a channel and participate. Meet @bingo!
+Add your buzzword to the list, and whoever mentions the word in the channel first will get the bingo.
+It's a really simple unintelligent bot.</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/zPL-6uRiBa-1163.avif 1163w"><source type="image/webp" srcset="/img/zPL-6uRiBa-1163.webp 1163w"><img alt="@bingo hello" loading="lazy" decoding="async" src="/img/zPL-6uRiBa-1163.png" width="1163" height="275"></picture><figcaption>@bingo hello</figcaption></figure></p>
+<p>To add words to the list, private message @bingo e.g. 'add banana reload &quot;internet of things&quot;'. The user who adds the word is excluded from getting the bingo.</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/yHjReysd3H-1200.avif 1200w"><source type="image/webp" srcset="/img/yHjReysd3H-1200.webp 1200w"><img alt="It's stopped working! How do I **reload** the **internet of things**?" loading="lazy" decoding="async" src="/img/yHjReysd3H-1200.png" width="1200" height="917"></picture><figcaption>It's stopped working! How do I <strong>reload</strong> the <strong>internet of things</strong>?</figcaption></figure></p>
+<p>The first time a keyword is used, @bingo will shout Bingo and show a GIF!</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/RaI_y3a0KQ-1030.avif 1030w"><source type="image/webp" srcset="/img/RaI_y3a0KQ-1030.webp 1030w"><img alt="Can I put a **selfie** in my **spreadsheet**?" loading="lazy" decoding="async" src="/img/RaI_y3a0KQ-1030.png" width="1030" height="943"></picture><figcaption>Can I put a <strong>selfie</strong> in my <strong>spreadsheet</strong>?</figcaption></figure></p>
+<h1 id="installation" tabindex="-1">Installation <a class="header-anchor" href="#installation">#</a></h1>
+<p>The source for bingo is available at <a href="https://github.com/bcaller/slack-bingo-bot"><img alt=":octocat:" src="https://github.githubassets.com/images/icons/emoji/octocat.png?v8" style="max-width: 1em; max-height: 1em; display: inline-block;">bcaller/slack-bingo-bot</a>.</p>
+<h2 id="fa-slackslack-team-settings" tabindex="-1">:fa-slack:Slack Team Settings <a class="header-anchor" href="#fa-slackslack-team-settings">#</a></h2>
+<p>Custom integrations &gt; Bots &gt; ... &gt; Get a token.</p>
+<h2 id="install" tabindex="-1">Install <a class="header-anchor" href="#install">#</a></h2>
+<p>Clone, install dependencies, set the <code>SLACK_TOKEN</code> environment variable and run <code>npm start</code></p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token function">git</span> clone https://github.com/bcaller/slack-bingo-bot.git
+<span class="token builtin class-name">cd</span> slack-bingo-bot`
+<span class="token function">npm</span> <span class="token function">install</span>
+<span class="token assign-left variable">SLACK_TOKEN</span><span class="token operator">=</span>xtokenX <span class="token function">npm</span> start</code></pre>
+<p>A server is not really necessary: a WebSocket connection to Slack can be created from any computer.
+When not running, @bingo just will appear offline.</p>
+<p>You can change the starting words in initial.txt</p>
+<h2 id="in-the-channel" tabindex="-1">In the channel <a class="header-anchor" href="#in-the-channel">#</a></h2>
+<p><code>/invite @bingo</code> invites the bingo bot.</p>
+<h1 id="code-make-a-fa-slackbot" tabindex="-1">Code: Make a :fa-slack:bot <a class="header-anchor" href="#code-make-a-fa-slackbot">#</a></h1>
+<p>We used the awesome botkit library. GIFs come from the giphy API. Uses arrow functions, <code>let</code> and template strings, so use an appropriate Node version.</p>
+<p>It's important to note that there are many events and API calls which are not explicitly documented in the
+<a href="https://github.com/howdyai/botkit">botkit</a> README.
+However, the <a href="https://api.slack.com/methods">Slack API calls</a> are available as <code>bot.api.x.y(data, cb)</code>: see <a href="https://github.com/bcaller/slack-bingo-bot/blob/5145b89ee1ca3e9b830ea816d4e8d8991be25945/react.js">my use of reactions.add</a>.
+If you increase the <code>logLevel</code>, you can see which events are being triggered.</p>
+<p>We start the WebSocket connection (Real Time Messaging) <a href="https://github.com/bcaller/slack-bingo-bot/blob/5145b89ee1ca3e9b830ea816d4e8d8991be25945/index.js#L26">with</a></p>
+<pre class="language-js" tabindex="0"><code class="language-js"><span class="token keyword">var</span> controller <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'botkit'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">slackbot</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+controller<span class="token punctuation">.</span><span class="token function">spawn</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    <span class="token literal-property property">token</span><span class="token operator">:</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">SLACK_TOKEN</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">startRTM</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre>
+<p>We spy on all messages <a href="https://github.com/bcaller/slack-bingo-bot/blob/5145b89ee1ca3e9b830ea816d4e8d8991be25945/index.js#L114">with</a></p>
+<pre class="language-js" tabindex="0"><code class="language-js">controller<span class="token punctuation">.</span><span class="token function">on</span><span class="token punctuation">(</span><span class="token string">'ambient'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">bot<span class="token punctuation">,</span> message</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token comment">/*process message*/</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre>
+<p>We can reply to <code>message</code> with <code>bot.reply(message, {/*reply data*/})</code></p>
+<p>Listen for bingo's secret direct message &quot;cheat&quot;:</p>
+<pre class="language-js" tabindex="0"><code class="language-js">controller<span class="token punctuation">.</span><span class="token function">hears</span><span class="token punctuation">(</span><span class="token string">'cheat'</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token string">'direct_message'</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">bot<span class="token punctuation">,</span> message</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token function">react</span><span class="token punctuation">(</span>bot<span class="token punctuation">,</span> <span class="token string">'wink'</span><span class="token punctuation">,</span> message<span class="token punctuation">,</span> noop<span class="token punctuation">)</span>
+    bot<span class="token punctuation">.</span><span class="token function">reply</span><span class="token punctuation">(</span>message<span class="token punctuation">,</span> words<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token parameter">w</span> <span class="token operator">=></span> w<span class="token punctuation">.</span>word<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token string">', '</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre>
+<p>Things get more complicated when you need to have actual conversations with your bots and deal with multiple teams,
+but this is a quick way to get started.</p>
+
+<ul class="links-nextprev"><li>Previous: <a href="/pebble-xin-nian-kuai-le/">Pebble 新年快乐</a></li><li>Next: <a href="/chinese-character-of-the-day-chang/">Chinese character of the day 倀</a></li>
+</ul>
+
+		</main>
+
+		<footer></footer>
+
+		<!-- Current page: /slack-bingo-bot/ -->
+	</body>
+</html>

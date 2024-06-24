@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>They Have Your Info</title>
+		<meta name="description" content="I am writing about my experiences as a naval navel-gazer.">
+		<link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		<link rel="alternate" href="/feed/feed.json" type="application/json" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		
+		<style>/**
+ * okaidia theme for JavaScript, CSS and HTML
+ * Loosely based on Monokai textmate theme by http://www.monokai.nl/
+ * @author ocodia
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: #f8f8f2;
+	background: none;
+	text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	font-size: 1em;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: 1em;
+	margin: .5em 0;
+	overflow: auto;
+	border-radius: 0.3em;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #272822;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .1em;
+	border-radius: .3em;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: #8292a2;
+}
+
+.token.punctuation {
+	color: #f8f8f2;
+}
+
+.token.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #f92672;
+}
+
+.token.boolean,
+.token.number {
+	color: #ae81ff;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #a6e22e;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.variable {
+	color: #f8f8f2;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.function,
+.token.class-name {
+	color: #e6db74;
+}
+
+.token.keyword {
+	color: #66d9ef;
+}
+
+.token.regex,
+.token.important {
+	color: #fd971f;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+/*
+ * New diff- syntax
+ */
+
+pre[class*="language-diff-"] {
+	--eleventy-code-padding: 1.25em;
+	padding-left: var(--eleventy-code-padding);
+	padding-right: var(--eleventy-code-padding);
+}
+.token.deleted {
+	background-color: hsl(0, 51%, 37%);
+	color: inherit;
+}
+.token.inserted {
+	background-color: hsl(126, 31%, 39%);
+	color: inherit;
+}
+
+/* Make the + and - characters unselectable for copy/paste */
+.token.prefix.unchanged,
+.token.prefix.inserted,
+.token.prefix.deleted {
+	-webkit-user-select: none;
+	user-select: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+.token.prefix.inserted,
+.token.prefix.deleted {
+	width: var(--eleventy-code-padding);
+	background-color: rgba(0,0,0,.2);
+}
+
+/* Optional: full-width background color */
+.token.inserted:not(.prefix),
+.token.deleted:not(.prefix) {
+	display: block;
+	margin-left: calc(-1 * var(--eleventy-code-padding));
+	margin-right: calc(-1 * var(--eleventy-code-padding));
+	text-decoration: none; /* override del, ins, mark defaults */
+	color: inherit; /* override del, ins, mark defaults */
+}
+* { box-sizing: border-box; }
+/* Defaults */
+:root {
+	--font-family: -apple-system, system-ui, sans-serif;
+	--font-family-monospace: Consolas, Menlo, Monaco, Andale Mono WT, Andale Mono, Lucida Console, Lucida Sans Typewriter, DejaVu Sans Mono, Bitstream Vera Sans Mono, Liberation Mono, Nimbus Mono L, Courier New, Courier, monospace;
+}
+
+/* Theme colors */
+:root {
+	--color-gray-20: #e0e0e0;
+	--color-gray-50: #C0C0C0;
+	--color-gray-90: #333;
+
+	--background-color: #fff;
+
+	--text-color: var(--color-gray-90);
+	--text-color-link: #082840;
+	--text-color-link-active: #5f2b48;
+	--text-color-link-visited: #17050F;
+
+	--syntax-tab-size: 2;
+
+	--pinyin-font: 'Arima Madurai';
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-gray-20: #e0e0e0;
+		--color-gray-50: #C0C0C0;
+		--color-gray-90: #dad8d8;
+
+		/* --text-color is assigned to --color-gray-_ above */
+		--text-color-link: #1493fb;
+		--text-color-link-active: #6969f7;
+		--text-color-link-visited: #a6a6f8;
+
+		--background-color: #15202b;
+	}
+}
+
+
+/* Global stylesheet */
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	padding: 0;
+	margin: 0 auto;
+	font-family: var(--font-family);
+	color: var(--text-color);
+	background-color: var(--background-color);
+}
+html {
+	overflow-y: scroll;
+}
+body {
+	max-width: 55em;
+}
+
+/* https://www.a11yproject.com/posts/how-to-hide-content/ */
+.visually-hidden {
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
+p:last-child {
+	margin-bottom: 0;
+}
+p {
+	line-height: 1.5;
+}
+
+li {
+	line-height: 1.5;
+}
+
+a[href] {
+	color: var(--text-color-link);
+}
+a[href]:visited {
+	color: var(--text-color-link-visited);
+}
+a[href]:hover,
+a[href]:active {
+	color: var(--text-color-link-active);
+}
+
+main {
+	padding: 1rem;
+}
+main :first-child {
+	margin-top: 0;
+}
+
+header {
+	border-bottom: 1px dashed var(--color-gray-20);
+}
+header:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.links-nextprev {
+	list-style: none;
+	border-top: 1px dashed var(--color-gray-20);
+	padding: 1em 0;
+}
+
+table {
+	margin: 1em 0;
+}
+table td,
+table th {
+	padding-right: 1em;
+}
+
+pre,
+code {
+	font-family: var(--font-family-monospace);
+}
+pre:not([class*="language-"]) {
+	margin: .5em 0;
+	line-height: 1.375; /* 22px /16 */
+	-moz-tab-size: var(--syntax-tab-size);
+	-o-tab-size: var(--syntax-tab-size);
+	tab-size: var(--syntax-tab-size);
+	-webkit-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+	direction: ltr;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+}
+code {
+	word-break: break-all;
+}
+p > code {
+	color: #722;
+	text-decoration: underline #7222;
+}
+
+/* Header */
+header {
+	display: flex;
+	gap: 1em .5em;
+	flex-wrap: wrap;
+	align-items: center;
+	padding: 1em;
+}
+.home-link {
+	font-size: 1em; /* 16px /16 */
+	font-weight: 700;
+	margin-right: 2em;
+}
+.home-link:link:not(:hover) {
+	text-decoration: none;
+}
+
+/* Nav */
+.nav {
+	display: flex;
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+.nav-item {
+	display: inline-block;
+	margin-right: 1em;
+}
+.nav-item a[href]:not(:hover) {
+	text-decoration: none;
+}
+.nav a[href][aria-current="page"] {
+	text-decoration: underline;
+}
+
+/* Posts list */
+.postlist {
+	list-style: none;
+	padding: 0;
+	padding-left: 1.5rem;
+}
+.postlist-item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	counter-increment: start-from -1;
+	margin-bottom: 1em;
+}
+.postlist-item:before {
+	display: inline-block;
+	pointer-events: none;
+	content: "" counter(start-from, decimal-leading-zero) ". ";
+	line-height: 100%;
+	text-align: right;
+	margin-left: -1.5rem;
+}
+.postlist-date,
+.postlist-item:before {
+	font-size: 0.8125em; /* 13px /16 */
+	color: var(--color-gray-90);
+}
+.postlist-date {
+	word-spacing: -0.5px;
+}
+.postlist-link {
+	font-size: 1.1875em; /* 19px /16 */
+	font-weight: 700;
+	flex-basis: calc(100% - 1.5rem);
+	padding-left: .25em;
+	padding-right: .5em;
+	text-underline-position: from-font;
+	text-underline-offset: 0;
+	text-decoration-thickness: 1px;
+}
+.postlist-item-active .postlist-link {
+	font-weight: bold;
+}
+
+/* Tags */
+.post-tag {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	text-transform: capitalize;
+	font-style: italic;
+}
+.postlist-item > .post-tag {
+	align-self: center;
+}
+
+/* Tags list */
+.post-metadata {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: .5em;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.post-metadata time {
+	margin-right: 1em;
+}
+
+/* Direct Links / Markdown Headers */
+.header-anchor {
+	text-decoration: none;
+	font-style: normal;
+	font-size: 1em;
+	margin-left: .1em;
+}
+a[href].header-anchor,
+a[href].header-anchor:visited {
+	color: transparent;
+}
+a[href].header-anchor:focus,
+a[href].header-anchor:hover {
+	text-decoration: underline;
+}
+a[href].header-anchor:focus,
+:hover > a[href].header-anchor {
+	color: #aaa;
+}
+
+h2 + .header-anchor {
+	font-size: 1.5em;
+}
+
+.pyin {
+	font-family: var(--pinyin-font), cursive;
+}
+
+figure {
+	margin: -1.7em 0 0.7em 0;
+}
+
+figcaption {
+	font-style: italic;
+}
+
+figure img {
+	border: 1px solid #ccc;
+}</style>
+		<link href="https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700" rel="stylesheet" referrerpolicy="no-referrer">
+	</head>
+	<body>
+		<a href="#skip" class="visually-hidden">Skip to main content</a>
+
+		<header>
+			<a href="/" class="home-link">ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ</a>
+			<nav>
+				<h2 class="visually-hidden">Top level navigation menu</h2>
+				<ul class="nav">
+					<li class="nav-item"><a href="/">Home</a></li>
+					<li class="nav-item"><a href="/blog/">Archive</a></li>
+					<li class="nav-item"><a href="/about/">About Me</a></li>
+				</ul>
+			</nav>
+		</header>
+
+		<main id="skip">
+			
+<h1>They Have Your Info</h1>
+
+<ul class="post-metadata">
+	<li><time datetime="2014-12-12">2014年12月</time></li>
+	<li><a href="/tags/web-app/" class="post-tag">web app</a>, </li>
+	<li><a href="/tags/location/" class="post-tag">location</a>, </li>
+	<li><a href="/tags/google/" class="post-tag">Google</a>, </li>
+	<li><a href="/tags/data-mining/" class="post-tag">data mining</a>, </li>
+	<li><a href="/tags/maps/" class="post-tag">maps</a>, </li>
+	<li><a href="/tags/clustering/" class="post-tag">clustering</a></li>
+</ul>
+
+<p><strong>Project abandoned, sorry</strong></p>
+<p>They have your info. Your life has been mapped. What does Google's location reporting reveal about you?
+If you use Google products on your phone, you may be surprised by the hundreds of thousands of data points gathered each year.
+Just remember, you have nothing to fear…</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/JFSS5A89qW-1132.avif 1132w"><source type="image/webp" srcset="/img/JFSS5A89qW-1132.webp 1132w"><img alt="I lived near Paris and in Saint-Martin-d'Hères" loading="lazy" decoding="async" src="/img/JFSS5A89qW-1132.png" width="1132" height="1194"></picture><figcaption>I lived near Paris and in Saint-Martin-d'Hères</figcaption></figure></p>
+<p>Between December 2012 and January 2016, Google has recorded my location <strong>701,564 times</strong>.
+You can download your location history from <a href="https://takeout.google.com/settings/takeout">Google Takeout</a> showing where your Android phone has tracked you. It's quite creepy.</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/TZUYGcQbhs-1200.avif 1200w"><source type="image/webp" srcset="/img/TZUYGcQbhs-1200.webp 1200w"><img alt="Caught skiing at 2400m at Les 2 Alpes with a nice 'Street'-view. Not 100% certain of the velocity units." loading="lazy" decoding="async" src="/img/TZUYGcQbhs-1200.png" width="1200" height="719"></picture><figcaption>Caught skiing at 2400m at Les 2 Alpes with a nice 'Street'-view. Not 100% certain of the velocity units.</figcaption></figure></p>
+<p>Most time points contain latitude and longitude, but for some points (e.g. whilst navigating with Maps) they have your speed and heading.
+By analysing this data, <code>TheyHaveYour.Info</code> can infer places you have lived and worked, calculate your median arrival time at work, see where you go at weekends, where you went on vacations, what you normally do at 3:45pm on a Tuesday, etc.</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/LYsg1qiB-7-1200.avif 1200w"><source type="image/webp" srcset="/img/LYsg1qiB-7-1200.webp 1200w"><img alt="Where I spent my time in Grenoble, though the median departure time marks me out as a bit of a slacker" loading="lazy" decoding="async" src="/img/LYsg1qiB-7-1200.png" width="1200" height="552"></picture><figcaption>Where I spent my time in Grenoble, though the median departure time marks me out as a bit of a slacker</figcaption></figure></p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/1owSNtAqp3-1200.avif 1200w"><source type="image/webp" srcset="/img/1owSNtAqp3-1200.webp 1200w"><img alt="I went wakeboarding at the awesome Exo 38 in Tencin, but never on a Monday" loading="lazy" decoding="async" src="/img/1owSNtAqp3-1200.png" width="1200" height="653"></picture><figcaption>I went wakeboarding at the awesome Exo 38 in Tencin, but never on a Monday</figcaption></figure></p>
+<p>To avoid processing user location data, the web app works client side. I felt it could make use of the Google Maps / Places API since Google already has your data. You browser may stall as it reads the 189.5 MB LocationHistory.json file file - just wait. When I built this, Web Workers were not the solution because of having to transfer the massive location history object.</p>
+<p>Alas, Google now has a pretty decent website for viewing your location data (I did record a lot of traffic from Mountain View after I released this). But maybe consider turning off location history.</p>
+<p><strong>STATUS:</strong> It works, I'm proud of it, but I'm not likely to update it. <strong>Don't</strong> try it out at <code>theyhaveyour.info</code> - I stopped paying for the domain and now it's a malware.</p>
+<h3 id="libraries-tech" tabindex="-1">Libraries / Tech <a class="header-anchor" href="#libraries-tech">#</a></h3>
+<ul>
+<li><a href="https://bcaller.github.io/ClusterFlag"><img alt=":octocat:" src="https://github.githubassets.com/images/icons/emoji/octocat.png?v8" style="max-width: 1em; max-height: 1em; display: inline-block;">ClusterFlag</a> - My Google Maps marker clustering library because the other client side libraries will die trying to show 700k data points.
+Other libraries recalculate the clusters each time you move the map! ClusterFlag does take a while to pre-compute the clusters,
+but finding which points are within an area is fast.</li>
+<li>JSZip - Yes, apparently you can read ZIP files in javascript!</li>
+<li>Google Maps API</li>
+</ul>
+<h3 id="fixme-todo" tabindex="-1">FIXME / TODO <a class="header-anchor" href="#fixme-todo">#</a></h3>
+<ul>
+<li>Fix daylight savings time when making histograms</li>
+<li>More timezone issues. Timezones are horrid!</li>
+<li>Use Web Workers (with workaround for large data transfer)</li>
+<li>Zooming is buggy (especially with touch gestures)</li>
+<li>Intersection of location history for 2 people</li>
+<li>Redo the view of a specific day</li>
+<li>Relative cluster size is calculated by the number of time points. The interval between readings is not constant and should be taken into account.</li>
+</ul>
+
+<ul class="links-nextprev"><li>Previous: <a href="/xbox-360-live-gamercard/">Xbox 360 Live Gamercard</a></li><li>Next: <a href="/pebble-xin-nian-kuai-le/">Pebble 新年快乐</a></li>
+</ul>
+
+		</main>
+
+		<footer></footer>
+
+		<!-- Current page: /they-have-your-info/ -->
+	</body>
+</html>

@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>v380 IPcam: Hardware Hackz</title>
+		<meta name="description" content="I am writing about my experiences as a naval navel-gazer.">
+		<link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		<link rel="alternate" href="/feed/feed.json" type="application/json" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		
+		<style>/**
+ * okaidia theme for JavaScript, CSS and HTML
+ * Loosely based on Monokai textmate theme by http://www.monokai.nl/
+ * @author ocodia
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: #f8f8f2;
+	background: none;
+	text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	font-size: 1em;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: 1em;
+	margin: .5em 0;
+	overflow: auto;
+	border-radius: 0.3em;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #272822;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .1em;
+	border-radius: .3em;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: #8292a2;
+}
+
+.token.punctuation {
+	color: #f8f8f2;
+}
+
+.token.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #f92672;
+}
+
+.token.boolean,
+.token.number {
+	color: #ae81ff;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #a6e22e;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.variable {
+	color: #f8f8f2;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.function,
+.token.class-name {
+	color: #e6db74;
+}
+
+.token.keyword {
+	color: #66d9ef;
+}
+
+.token.regex,
+.token.important {
+	color: #fd971f;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+/*
+ * New diff- syntax
+ */
+
+pre[class*="language-diff-"] {
+	--eleventy-code-padding: 1.25em;
+	padding-left: var(--eleventy-code-padding);
+	padding-right: var(--eleventy-code-padding);
+}
+.token.deleted {
+	background-color: hsl(0, 51%, 37%);
+	color: inherit;
+}
+.token.inserted {
+	background-color: hsl(126, 31%, 39%);
+	color: inherit;
+}
+
+/* Make the + and - characters unselectable for copy/paste */
+.token.prefix.unchanged,
+.token.prefix.inserted,
+.token.prefix.deleted {
+	-webkit-user-select: none;
+	user-select: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+.token.prefix.inserted,
+.token.prefix.deleted {
+	width: var(--eleventy-code-padding);
+	background-color: rgba(0,0,0,.2);
+}
+
+/* Optional: full-width background color */
+.token.inserted:not(.prefix),
+.token.deleted:not(.prefix) {
+	display: block;
+	margin-left: calc(-1 * var(--eleventy-code-padding));
+	margin-right: calc(-1 * var(--eleventy-code-padding));
+	text-decoration: none; /* override del, ins, mark defaults */
+	color: inherit; /* override del, ins, mark defaults */
+}
+* { box-sizing: border-box; }
+/* Defaults */
+:root {
+	--font-family: -apple-system, system-ui, sans-serif;
+	--font-family-monospace: Consolas, Menlo, Monaco, Andale Mono WT, Andale Mono, Lucida Console, Lucida Sans Typewriter, DejaVu Sans Mono, Bitstream Vera Sans Mono, Liberation Mono, Nimbus Mono L, Courier New, Courier, monospace;
+}
+
+/* Theme colors */
+:root {
+	--color-gray-20: #e0e0e0;
+	--color-gray-50: #C0C0C0;
+	--color-gray-90: #333;
+
+	--background-color: #fff;
+
+	--text-color: var(--color-gray-90);
+	--text-color-link: #082840;
+	--text-color-link-active: #5f2b48;
+	--text-color-link-visited: #17050F;
+
+	--syntax-tab-size: 2;
+
+	--pinyin-font: 'Arima Madurai';
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-gray-20: #e0e0e0;
+		--color-gray-50: #C0C0C0;
+		--color-gray-90: #dad8d8;
+
+		/* --text-color is assigned to --color-gray-_ above */
+		--text-color-link: #1493fb;
+		--text-color-link-active: #6969f7;
+		--text-color-link-visited: #a6a6f8;
+
+		--background-color: #15202b;
+	}
+}
+
+
+/* Global stylesheet */
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	padding: 0;
+	margin: 0 auto;
+	font-family: var(--font-family);
+	color: var(--text-color);
+	background-color: var(--background-color);
+}
+html {
+	overflow-y: scroll;
+}
+body {
+	max-width: 55em;
+}
+
+/* https://www.a11yproject.com/posts/how-to-hide-content/ */
+.visually-hidden {
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
+p:last-child {
+	margin-bottom: 0;
+}
+p {
+	line-height: 1.5;
+}
+
+li {
+	line-height: 1.5;
+}
+
+a[href] {
+	color: var(--text-color-link);
+}
+a[href]:visited {
+	color: var(--text-color-link-visited);
+}
+a[href]:hover,
+a[href]:active {
+	color: var(--text-color-link-active);
+}
+
+main {
+	padding: 1rem;
+}
+main :first-child {
+	margin-top: 0;
+}
+
+header {
+	border-bottom: 1px dashed var(--color-gray-20);
+}
+header:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.links-nextprev {
+	list-style: none;
+	border-top: 1px dashed var(--color-gray-20);
+	padding: 1em 0;
+}
+
+table {
+	margin: 1em 0;
+}
+table td,
+table th {
+	padding-right: 1em;
+}
+
+pre,
+code {
+	font-family: var(--font-family-monospace);
+}
+pre:not([class*="language-"]) {
+	margin: .5em 0;
+	line-height: 1.375; /* 22px /16 */
+	-moz-tab-size: var(--syntax-tab-size);
+	-o-tab-size: var(--syntax-tab-size);
+	tab-size: var(--syntax-tab-size);
+	-webkit-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+	direction: ltr;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+}
+code {
+	word-break: break-all;
+}
+p > code {
+	color: #722;
+	text-decoration: underline #7222;
+}
+
+/* Header */
+header {
+	display: flex;
+	gap: 1em .5em;
+	flex-wrap: wrap;
+	align-items: center;
+	padding: 1em;
+}
+.home-link {
+	font-size: 1em; /* 16px /16 */
+	font-weight: 700;
+	margin-right: 2em;
+}
+.home-link:link:not(:hover) {
+	text-decoration: none;
+}
+
+/* Nav */
+.nav {
+	display: flex;
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+.nav-item {
+	display: inline-block;
+	margin-right: 1em;
+}
+.nav-item a[href]:not(:hover) {
+	text-decoration: none;
+}
+.nav a[href][aria-current="page"] {
+	text-decoration: underline;
+}
+
+/* Posts list */
+.postlist {
+	list-style: none;
+	padding: 0;
+	padding-left: 1.5rem;
+}
+.postlist-item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	counter-increment: start-from -1;
+	margin-bottom: 1em;
+}
+.postlist-item:before {
+	display: inline-block;
+	pointer-events: none;
+	content: "" counter(start-from, decimal-leading-zero) ". ";
+	line-height: 100%;
+	text-align: right;
+	margin-left: -1.5rem;
+}
+.postlist-date,
+.postlist-item:before {
+	font-size: 0.8125em; /* 13px /16 */
+	color: var(--color-gray-90);
+}
+.postlist-date {
+	word-spacing: -0.5px;
+}
+.postlist-link {
+	font-size: 1.1875em; /* 19px /16 */
+	font-weight: 700;
+	flex-basis: calc(100% - 1.5rem);
+	padding-left: .25em;
+	padding-right: .5em;
+	text-underline-position: from-font;
+	text-underline-offset: 0;
+	text-decoration-thickness: 1px;
+}
+.postlist-item-active .postlist-link {
+	font-weight: bold;
+}
+
+/* Tags */
+.post-tag {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	text-transform: capitalize;
+	font-style: italic;
+}
+.postlist-item > .post-tag {
+	align-self: center;
+}
+
+/* Tags list */
+.post-metadata {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: .5em;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.post-metadata time {
+	margin-right: 1em;
+}
+
+/* Direct Links / Markdown Headers */
+.header-anchor {
+	text-decoration: none;
+	font-style: normal;
+	font-size: 1em;
+	margin-left: .1em;
+}
+a[href].header-anchor,
+a[href].header-anchor:visited {
+	color: transparent;
+}
+a[href].header-anchor:focus,
+a[href].header-anchor:hover {
+	text-decoration: underline;
+}
+a[href].header-anchor:focus,
+:hover > a[href].header-anchor {
+	color: #aaa;
+}
+
+h2 + .header-anchor {
+	font-size: 1.5em;
+}
+
+.pyin {
+	font-family: var(--pinyin-font), cursive;
+}
+
+figure {
+	margin: -1.7em 0 0.7em 0;
+}
+
+figcaption {
+	font-style: italic;
+}
+
+figure img {
+	border: 1px solid #ccc;
+}</style>
+		<link href="https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700" rel="stylesheet" referrerpolicy="no-referrer">
+	</head>
+	<body>
+		<a href="#skip" class="visually-hidden">Skip to main content</a>
+
+		<header>
+			<a href="/" class="home-link">ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ</a>
+			<nav>
+				<h2 class="visually-hidden">Top level navigation menu</h2>
+				<ul class="nav">
+					<li class="nav-item"><a href="/">Home</a></li>
+					<li class="nav-item"><a href="/blog/">Archive</a></li>
+					<li class="nav-item"><a href="/about/">About Me</a></li>
+				</ul>
+			</nav>
+		</header>
+
+		<main id="skip">
+			
+<h1>v380 IPcam: Hardware Hackz</h1>
+
+<ul class="post-metadata">
+	<li><time datetime="2018-02-22">2018年02月</time></li>
+	<li><a href="/tags/security/" class="post-tag">security</a>, </li>
+	<li><a href="/tags/hardware/" class="post-tag">hardware</a>, </li>
+	<li><a href="/tags/v380-ipcam/" class="post-tag">v380 IPcam</a></li>
+</ul>
+
+<p>At SecTalks, blinken ran a Hardware Hacking 101 session where we investigated a Chinese IPcam &quot;WiFi Smart Net Camera&quot; v380.</p>
+<p>Some specs:</p>
+<ul>
+<li>720p video</li>
+<li>IR LED</li>
+<li>2-way intercom (talk to your pets)</li>
+<li>Pan / tilt (motor)</li>
+<li>Microsd card slot</li>
+<li>ONVIF, or use the gross &quot;V380&quot; app</li>
+<li>Either connects to an access point, or runs its own hotspot</li>
+<li>&quot;Smart&quot; motion detection</li>
+<li>Internet of shit cloud connecting to servers in China without TLS</li>
+<li>Anyka AK3918E system-on-chip</li>
+</ul>
+<p>It is sold by different manufacturers under different names, but, as of April 2020, is <a href="https://www.amazon.co.uk/gp/product/B079MCYDG2?tag=3l1t3-21">on sale for £16.47</a>. The box has no manufacturer's name on it.
+Lots of info on <a href="https://docs.google.com/presentation/d/1K0I1d0Ek5ODJp4QufWXswy6SngLz3r38ok0oN9lBNkg">blinken's slides</a>.</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/iKXbK3M1sH-1100.avif 1100w"><source type="image/webp" srcset="/img/iKXbK3M1sH-1100.webp 1100w"><img alt="Promo" loading="lazy" decoding="async" src="/img/iKXbK3M1sH-1100.jpeg" width="1100" height="1004"></picture><figcaption>Promo</figcaption></figure></p>
+<h2 id="read-debug-logs-via-uart" tabindex="-1">Read debug logs via UART <a class="header-anchor" href="#read-debug-logs-via-uart">#</a></h2>
+<p>Pull open the case (the side with the sdcard slot comes off) and expose the guts.</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/9AQF8M78-m-1200.avif 1200w"><source type="image/webp" srcset="/img/9AQF8M78-m-1200.webp 1200w"><img alt="Inside the camera, with USB-Serial cable attached to debug ports" loading="lazy" decoding="async" src="/img/9AQF8M78-m-1200.jpeg" width="1200" height="1239"></picture><figcaption>Inside the camera, with USB-Serial cable attached to debug ports</figcaption></figure>
+‌<figure><picture><source type="image/avif" srcset="/img/WnvYO8Q3V8-1200.avif 1200w"><source type="image/webp" srcset="/img/WnvYO8Q3V8-1200.webp 1200w"><img alt="Closer view of board" loading="lazy" decoding="async" src="/img/WnvYO8Q3V8-1200.jpeg" width="1200" height="1540"></picture><figcaption>Closer view of board</figcaption></figure>
+‌<figure><picture><source type="image/avif" srcset="/img/7gwnT_pUya-1200.avif 1200w"><source type="image/webp" srcset="/img/7gwnT_pUya-1200.webp 1200w"><img alt="Other side of board" loading="lazy" decoding="async" src="/img/7gwnT_pUya-1200.jpeg" width="1200" height="930"></picture><figcaption>Other side of board</figcaption></figure></p>
+<p>A USB-to-serial cable can be attached to the exposed RS232 serial UART (RX, TX, GND). Connect to it using e.g. <code>sudo screen /dev/ttyUSB0 115200</code> and power on the camera.</p>
+<pre class="language-terminal" tabindex="0"><code class="language-terminal">Cloud39E spiboot V1.1.01
+load spiflash bios ......
+asic clk:60000000, pre-scaler=1 (wanted 20Mhz, got 15Mhz)
+the manufacture id is 001720c2
+spi param: id=001740ef, total_size=8388608, page_size=256, program_size=16.
+erase_size=4096, clock=25000000, flag=0, protect_mask=0.
+asic clk:60000000, pre-scaler=1 (wanted 25Mhz, got 15Mhz)
+file cnt:4
+Read file BIOS
+start:560
+file len:2095880
+ld addr:0x82008000
+Load bios from spiflash successfuly!
+Uncompressing Linux... done, booting the kernel.
+Anyka Linux Kernel Version: 2.1.06
+Booting Linux on physical CPU 0
+Linux version 3.4.35 (root@lin) (gcc version 4.4.1 (Sourcery G++ Lite 2009q3-67) ) #2 Fri Sep 1 15:13:49 CST 2017
+CPU: ARM926EJ-S [41069265] revision 5 (ARMv5TEJ), cr=00053177
+CPU: VIVT data cache, VIVT instruction cache
+Machine: Cloud39E_AK3918E+H42_V1.0.2
+Memory policy: ECC disabled, Data cache writeback
+ANYKA CPU AK3916 (ID 0x20150200)
+
+...
+
+V380E login:</code></pre>
+<p>Lots of juicy info here, the ability to monitor what's going on as you interact with the camera, and the chance to login as root (I don't know the password yet though).</p>
+<h2 id="ports-v380-android-app" tabindex="-1">Ports, V380 Android app <a class="header-anchor" href="#ports-v380-android-app">#</a></h2>
+<p>Ports 5050, 5051, 8800 and 8899 are open according to <code>nmap</code>.</p>
+<p>Not sure what protocol the app uses to talk to the camera, but it all happens on port 8800. The app logic is mainly in native code, so reverse engineering will be annoying.</p>
+<p>One day I might play around a bit more.</p>
+
+<ul class="links-nextprev"><li>Previous: <a href="/pebble-bike-sharer/">Pebble Bike Sharer</a></li><li>Next: <a href="/avoiding-injection-with-taint-analysis/">Avoiding injection with taint analysis</a></li>
+</ul>
+
+		</main>
+
+		<footer></footer>
+
+		<!-- Current page: /v380-ipcam-hardware-hackz/ -->
+	</body>
+</html>

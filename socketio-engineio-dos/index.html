@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>SocketIO / EngineIO DoS</title>
+		<meta name="description" content="I am writing about my experiences as a naval navel-gazer.">
+		<link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		<link rel="alternate" href="/feed/feed.json" type="application/json" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		
+		<style>/**
+ * okaidia theme for JavaScript, CSS and HTML
+ * Loosely based on Monokai textmate theme by http://www.monokai.nl/
+ * @author ocodia
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: #f8f8f2;
+	background: none;
+	text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	font-size: 1em;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: 1em;
+	margin: .5em 0;
+	overflow: auto;
+	border-radius: 0.3em;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #272822;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .1em;
+	border-radius: .3em;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: #8292a2;
+}
+
+.token.punctuation {
+	color: #f8f8f2;
+}
+
+.token.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #f92672;
+}
+
+.token.boolean,
+.token.number {
+	color: #ae81ff;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #a6e22e;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.variable {
+	color: #f8f8f2;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.function,
+.token.class-name {
+	color: #e6db74;
+}
+
+.token.keyword {
+	color: #66d9ef;
+}
+
+.token.regex,
+.token.important {
+	color: #fd971f;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+/*
+ * New diff- syntax
+ */
+
+pre[class*="language-diff-"] {
+	--eleventy-code-padding: 1.25em;
+	padding-left: var(--eleventy-code-padding);
+	padding-right: var(--eleventy-code-padding);
+}
+.token.deleted {
+	background-color: hsl(0, 51%, 37%);
+	color: inherit;
+}
+.token.inserted {
+	background-color: hsl(126, 31%, 39%);
+	color: inherit;
+}
+
+/* Make the + and - characters unselectable for copy/paste */
+.token.prefix.unchanged,
+.token.prefix.inserted,
+.token.prefix.deleted {
+	-webkit-user-select: none;
+	user-select: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+.token.prefix.inserted,
+.token.prefix.deleted {
+	width: var(--eleventy-code-padding);
+	background-color: rgba(0,0,0,.2);
+}
+
+/* Optional: full-width background color */
+.token.inserted:not(.prefix),
+.token.deleted:not(.prefix) {
+	display: block;
+	margin-left: calc(-1 * var(--eleventy-code-padding));
+	margin-right: calc(-1 * var(--eleventy-code-padding));
+	text-decoration: none; /* override del, ins, mark defaults */
+	color: inherit; /* override del, ins, mark defaults */
+}
+* { box-sizing: border-box; }
+/* Defaults */
+:root {
+	--font-family: -apple-system, system-ui, sans-serif;
+	--font-family-monospace: Consolas, Menlo, Monaco, Andale Mono WT, Andale Mono, Lucida Console, Lucida Sans Typewriter, DejaVu Sans Mono, Bitstream Vera Sans Mono, Liberation Mono, Nimbus Mono L, Courier New, Courier, monospace;
+}
+
+/* Theme colors */
+:root {
+	--color-gray-20: #e0e0e0;
+	--color-gray-50: #C0C0C0;
+	--color-gray-90: #333;
+
+	--background-color: #fff;
+
+	--text-color: var(--color-gray-90);
+	--text-color-link: #082840;
+	--text-color-link-active: #5f2b48;
+	--text-color-link-visited: #17050F;
+
+	--syntax-tab-size: 2;
+
+	--pinyin-font: 'Arima Madurai';
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-gray-20: #e0e0e0;
+		--color-gray-50: #C0C0C0;
+		--color-gray-90: #dad8d8;
+
+		/* --text-color is assigned to --color-gray-_ above */
+		--text-color-link: #1493fb;
+		--text-color-link-active: #6969f7;
+		--text-color-link-visited: #a6a6f8;
+
+		--background-color: #15202b;
+	}
+}
+
+
+/* Global stylesheet */
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	padding: 0;
+	margin: 0 auto;
+	font-family: var(--font-family);
+	color: var(--text-color);
+	background-color: var(--background-color);
+}
+html {
+	overflow-y: scroll;
+}
+body {
+	max-width: 55em;
+}
+
+/* https://www.a11yproject.com/posts/how-to-hide-content/ */
+.visually-hidden {
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
+p:last-child {
+	margin-bottom: 0;
+}
+p {
+	line-height: 1.5;
+}
+
+li {
+	line-height: 1.5;
+}
+
+a[href] {
+	color: var(--text-color-link);
+}
+a[href]:visited {
+	color: var(--text-color-link-visited);
+}
+a[href]:hover,
+a[href]:active {
+	color: var(--text-color-link-active);
+}
+
+main {
+	padding: 1rem;
+}
+main :first-child {
+	margin-top: 0;
+}
+
+header {
+	border-bottom: 1px dashed var(--color-gray-20);
+}
+header:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.links-nextprev {
+	list-style: none;
+	border-top: 1px dashed var(--color-gray-20);
+	padding: 1em 0;
+}
+
+table {
+	margin: 1em 0;
+}
+table td,
+table th {
+	padding-right: 1em;
+}
+
+pre,
+code {
+	font-family: var(--font-family-monospace);
+}
+pre:not([class*="language-"]) {
+	margin: .5em 0;
+	line-height: 1.375; /* 22px /16 */
+	-moz-tab-size: var(--syntax-tab-size);
+	-o-tab-size: var(--syntax-tab-size);
+	tab-size: var(--syntax-tab-size);
+	-webkit-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+	direction: ltr;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+}
+code {
+	word-break: break-all;
+}
+p > code {
+	color: #722;
+	text-decoration: underline #7222;
+}
+
+/* Header */
+header {
+	display: flex;
+	gap: 1em .5em;
+	flex-wrap: wrap;
+	align-items: center;
+	padding: 1em;
+}
+.home-link {
+	font-size: 1em; /* 16px /16 */
+	font-weight: 700;
+	margin-right: 2em;
+}
+.home-link:link:not(:hover) {
+	text-decoration: none;
+}
+
+/* Nav */
+.nav {
+	display: flex;
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+.nav-item {
+	display: inline-block;
+	margin-right: 1em;
+}
+.nav-item a[href]:not(:hover) {
+	text-decoration: none;
+}
+.nav a[href][aria-current="page"] {
+	text-decoration: underline;
+}
+
+/* Posts list */
+.postlist {
+	list-style: none;
+	padding: 0;
+	padding-left: 1.5rem;
+}
+.postlist-item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	counter-increment: start-from -1;
+	margin-bottom: 1em;
+}
+.postlist-item:before {
+	display: inline-block;
+	pointer-events: none;
+	content: "" counter(start-from, decimal-leading-zero) ". ";
+	line-height: 100%;
+	text-align: right;
+	margin-left: -1.5rem;
+}
+.postlist-date,
+.postlist-item:before {
+	font-size: 0.8125em; /* 13px /16 */
+	color: var(--color-gray-90);
+}
+.postlist-date {
+	word-spacing: -0.5px;
+}
+.postlist-link {
+	font-size: 1.1875em; /* 19px /16 */
+	font-weight: 700;
+	flex-basis: calc(100% - 1.5rem);
+	padding-left: .25em;
+	padding-right: .5em;
+	text-underline-position: from-font;
+	text-underline-offset: 0;
+	text-decoration-thickness: 1px;
+}
+.postlist-item-active .postlist-link {
+	font-weight: bold;
+}
+
+/* Tags */
+.post-tag {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	text-transform: capitalize;
+	font-style: italic;
+}
+.postlist-item > .post-tag {
+	align-self: center;
+}
+
+/* Tags list */
+.post-metadata {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: .5em;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.post-metadata time {
+	margin-right: 1em;
+}
+
+/* Direct Links / Markdown Headers */
+.header-anchor {
+	text-decoration: none;
+	font-style: normal;
+	font-size: 1em;
+	margin-left: .1em;
+}
+a[href].header-anchor,
+a[href].header-anchor:visited {
+	color: transparent;
+}
+a[href].header-anchor:focus,
+a[href].header-anchor:hover {
+	text-decoration: underline;
+}
+a[href].header-anchor:focus,
+:hover > a[href].header-anchor {
+	color: #aaa;
+}
+
+h2 + .header-anchor {
+	font-size: 1.5em;
+}
+
+.pyin {
+	font-family: var(--pinyin-font), cursive;
+}
+
+figure {
+	margin: -1.7em 0 0.7em 0;
+}
+
+figcaption {
+	font-style: italic;
+}
+
+figure img {
+	border: 1px solid #ccc;
+}</style>
+		<link href="https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700" rel="stylesheet" referrerpolicy="no-referrer">
+	</head>
+	<body>
+		<a href="#skip" class="visually-hidden">Skip to main content</a>
+
+		<header>
+			<a href="/" class="home-link">ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ</a>
+			<nav>
+				<h2 class="visually-hidden">Top level navigation menu</h2>
+				<ul class="nav">
+					<li class="nav-item"><a href="/">Home</a></li>
+					<li class="nav-item"><a href="/blog/">Archive</a></li>
+					<li class="nav-item"><a href="/about/">About Me</a></li>
+				</ul>
+			</nav>
+		</header>
+
+		<main id="skip">
+			
+<h1>SocketIO / EngineIO DoS</h1>
+
+<ul class="post-metadata">
+	<li><time datetime="2020-05-07">2020年05月</time></li>
+	<li><a href="/tags/security/" class="post-tag">security</a>, </li>
+	<li><a href="/tags/poc/" class="post-tag">poc</a>, </li>
+	<li><a href="/tags/research/" class="post-tag">research</a>, </li>
+	<li><a href="/tags/nodejs/" class="post-tag">nodejs</a>, </li>
+	<li><a href="/tags/python/" class="post-tag">python</a></li>
+</ul>
+
+<p>Quite a while ago, I reported an application Denial of Service vulnerability in the Socket.IO / Engine.IO parser implementations in nodejs and python.
+A single HTTP POST request can cause extreme CPU and memory usage, but in nodejs, a single HTTP POST request can even kill the server with a <code>Javascript heap out of memory</code> fatal error.</p>
+<p>I assume some of what I've written is incorrect as I'm not an expert on v8 internals, but I do really love getting to the bottom of edge-case performance issues.</p>
+<h1 id="protocol" tabindex="-1">Protocol <a class="header-anchor" href="#protocol">#</a></h1>
+<p>The <a href="https://github.com/socketio/engine.io-protocol">engine.io protocol</a> allows bi-directional communication between a server and client, abstracting away the actual transport. The transport can be WebSockets, but if that isn't supported then another transport such as HTTP long polling is possible.</p>
+<p>When the WebSocket transport is used, packets are encapsulated by the engine.io protocol. First there is a number specifying the <a href="https://github.com/socketio/engine.io-protocol#packet">packet type</a>. For instance, ping packets starting with <code>2</code> are sent as WebSocket data even though WebSocket has its own heartbeat mechanism. Sending the JSON data <code>{&quot;a&quot;: 123}</code> requires prefixing with a <code>4</code>. The socket.io protocol on top of that, if used, will add a <code>2</code> prefix meaning <a href="https://github.com/socketio/socket.io-protocol#packet">EVENT</a>, so a WebSocket listener will receive <code>&quot;42{\&quot;a\&quot;:123}&quot;</code>.</p>
+<p>Using the long-polling transport, a payload containing multiple packets can be sent. In <a href="https://github.com/socketio/engine.io-protocol/tree/v3#payload">version 3 of the protocol</a>, the payload is encoded as:</p>
+<pre><code>&lt;length1&gt;:&lt;packet1&gt;[&lt;length2&gt;:&lt;packet2&gt;[...]]
+</code></pre>
+<p>e.g <code>6:42[{}]11:4abcdefghij1:2</code> contains 3 packets:</p>
+<ol>
+<li>Socket.io packet of length 6: Message (4), Event (2, <code>[{}]</code>)</li>
+<li>Packet of length 11: Message (4), Data (<code>abcdefghij</code>)</li>
+<li>Packet of length 1: Ping (2)</li>
+</ol>
+<p>With WebSockets, the 3 packets would be sent separately. With HTTP long polling, the payload would be POSTed to <code>http(s)://host/socket.io/?EIO=3&amp;transport=polling&amp;sid=$SESSIONID</code>.</p>
+<p>The denial-of-service bug lies in:</p>
+<ul>
+<li>Inefficient parsing of packets from payloads</li>
+<li>Maximum HTTP body size of 100MB</li>
+</ul>
+<h1 id="make-your-100mb-count" tabindex="-1">Make your 100MB count <a class="header-anchor" href="#make-your-100mb-count">#</a></h1>
+<p>You can send a payload containing 1e8 bytes to the server. That's quite a huge message, but how can we cause the server the most pain and suffering?
+The main methods are:</p>
+<ul>
+<li><strong>Many tiny packets</strong>: send 25,000,000 empty event packets <code>2:422:422:422:42</code></li>
+<li><strong>One giant int</strong>: send the largest possible packet with integer data <code>99999991:42222222222222222222...</code></li>
+<li><strong>Many heartbeats</strong>: send 33,333,333 ping packets <code>1:21:21:21:2...</code></li>
+</ul>
+<p>Loading the body string into memory automatically eats up 100MB as a starting point, but it gets a hell of a lot worse.</p>
+<h1 id="nodejs" tabindex="-1">Nodejs <a class="header-anchor" href="#nodejs">#</a></h1>
+<p>With NodeJS, if the ping timeout (default 30s) is exceeded then the processing appears to be cancelled. Therefore, sending a payload which is so large it doesn't reach the memory exhausting step within the ping timeout will not kill the process. It will just waste CPU for 30 seconds. Sending a slightly smaller payload instead may cause the process to exit.</p>
+<h2 id="many-tiny-packets" tabindex="-1">Many tiny packets <a class="header-anchor" href="#many-tiny-packets">#</a></h2>
+<p>The bug here is due to <a href="https://github.com/socketio/socket.io/commit/e60bd5a4da9173acba7553c9e631b79770a8c8be">this 2016 change</a>. As the parser reads packets from the payload, it doesn't emit the <code>socket.onpacket</code> event immediately. Instead it queues up a new closure with <code>process.nextTick</code>. Since the next tick of the event loop doesn't come until all packets have been parsed, memory usage blows up.</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/Y-8Vu___o9-1200.avif 1200w"><source type="image/webp" srcset="/img/Y-8Vu___o9-1200.webp 1200w"><img alt="FixedQueue retaining many closures to be executed before the next tick" loading="lazy" decoding="async" src="/img/Y-8Vu___o9-1200.png" width="1200" height="825"></picture><figcaption>FixedQueue retaining many closures to be executed before the next tick</figcaption></figure></p>
+<p><code>process.nextTick</code> stores the closures in <a href="https://github.com/nodejs/node/blob/master/lib/internal/fixed_queue.js">FixedCircularBuffers inside a FixedQueue</a>. Each of these closures retains 200 bytes of heap memory (retained means that if this closure could be garbage collected, it would free this amount of heap memory). Not a lot per closure (no giant objects retained), but it adds up to ~5gb.</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/wkytSCdtpO-1200.avif 1200w"><source type="image/webp" srcset="/img/wkytSCdtpO-1200.webp 1200w"><img alt="A huge number of closures. Closure code (96 bytes) + context (64 bytes) + packet (72 - 32 due to double counting) = 200 bytes" loading="lazy" decoding="async" src="/img/wkytSCdtpO-1200.png" width="1200" height="923"></picture><figcaption>A huge number of closures. Closure code (96 bytes) + context (64 bytes) + packet (72 - 32 due to double counting) = 200 bytes</figcaption></figure></p>
+<h2 id="one-giant-integer" tabindex="-1">One giant integer <a class="header-anchor" href="#one-giant-integer">#</a></h2>
+<p>This is best explained by looking at <a href="https://github.com/socketio/socket.io-parser/commit/dcb942d24db97162ad16a67c2a0cf30875342d55">my fix</a>.</p>
+<p>Luckily string concatenation in v8 doesn't create an entirely new string like in some languages where string builders are required. Instead, <code>a + b</code> becomes <code>ConsString { first = a, second = b }</code> pointing to the two smaller strings. There are even optimised versions <code>ConsOneByteString</code> and <code>ConsTwoByteString</code>.</p>
+<p>Sending the &quot;One giant int&quot; packet can cause OOM via building up many many
+<code>ConsOneByteString</code> objects (32 bytes each) due to concatenation:
+99999989 <code>ConsOneByteString</code>s and then converting the massive integer to
+a <code>Number</code>.</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/AVEvjBVShA-1200.avif 1200w"><source type="image/webp" srcset="/img/AVEvjBVShA-1200.webp 1200w"><img alt="ConsOneByteString" loading="lazy" decoding="async" src="/img/AVEvjBVShA-1200.png" width="1200" height="884"></picture><figcaption>ConsOneByteString</figcaption></figure></p>
+<pre class="language-txt" tabindex="0"><code class="language-txt">==== JS stack trace =========================================
+
+    0: ExitFrame [pc: 0x13c5b79]
+Security context: 0x152fe7b808d1 &lt;JSObject>
+    1: decodeString [0x2dd385fb5d1] [/node_modules/socket.io-parser/index.js:~276] [pc=0xf59746881be](this=0x175d34c42b69 &lt;JSGlobal Object>,0x14eccff10fe1 &lt;Very long string[69999990]>)
+    2: add [0x31fc2693da29] [/node_modules/socket.io-parser/index.js:242] [bytecode=0xa7ed6554889 offset=11](this=0x0a2881be5069 &lt;Decoder map = 0x3ceaa8bf48c9>,0x14eccff10fe1 &lt;Very...
+
+FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
+ 1: 0xa09830 node::Abort() [node]
+ 2: 0xa09c55 node::OnFatalError(char const*, char const*) [node]
+ 3: 0xb7d71e v8::Utils::ReportOOMFailure(v8::internal::Isolate*, char const*, bool) [node]
+ 4: 0xb7da99 v8::internal::V8::FatalProcessOutOfMemory(v8::internal::Isolate*, char const*, bool) [node]
+ 5: 0xd2a1f5  [node]
+ 6: 0xd2a886 v8::internal::Heap::RecomputeLimits(v8::internal::GarbageCollector) [node]
+ 7: 0xd37105 v8::internal::Heap::PerformGarbageCollection(v8::internal::GarbageCollector, v8::GCCallbackFlags) [node]
+ 8: 0xd37fb5 v8::internal::Heap::CollectGarbage(v8::internal::AllocationSpace, v8::internal::GarbageCollectionReason, v8::GCCallbackFlags) [node]
+ 9: 0xd3965f v8::internal::Heap::HandleGCRequest() [node]
+10: 0xce8395 v8::internal::StackGuard::HandleInterrupts() [node]
+11: 0x1042cb6 v8::internal::Runtime_StackGuard(int, unsigned long*, v8::internal::Isolate*) [node]
+12: 0x13c5b79  [node]</code></pre>
+<h2 id="many-heartbeats" tabindex="-1">Many heartbeats <a class="header-anchor" href="#many-heartbeats">#</a></h2>
+<p>This causes OOM as many pongs are created to reply to all the pings.</p>
+<h1 id="python" tabindex="-1">Python <a class="header-anchor" href="#python">#</a></h1>
+<p>With eventlet, a single payload can DoS the entire server until processing completes due to the absence of <code>eventlet.sleep</code> calls. Without eventlet, the non-production server remains responsive until the thread pool is exhausted, so requires more than 1 concurrent request.</p>
+<h2 id="many-tiny-packets-special" tabindex="-1">Many tiny packets (special) <a class="header-anchor" href="#many-tiny-packets-special">#</a></h2>
+<p>Payload: <code>2:4¼2:4¼2:4¼2:4¼2:4¼2:4¼...</code></p>
+<p>When non-ascii characters are present in the payload,</p>
+<pre class="language-python" tabindex="0"><code class="language-python">encoded_payload<span class="token punctuation">.</span>decode<span class="token punctuation">(</span><span class="token string">'utf-8'</span><span class="token punctuation">,</span> errors<span class="token operator">=</span><span class="token string">'ignore'</span><span class="token punctuation">)</span></code></pre>
+<p>is much slower:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token builtin class-name">export</span> <span class="token assign-left variable">N</span><span class="token operator">=</span><span class="token number">100000</span><span class="token punctuation">;</span> python <span class="token parameter variable">-m</span> timeit <span class="token parameter variable">-s</span> <span class="token string">"x=b'2:42' * <span class="token variable">$N</span>"</span> <span class="token string">"x.decode('utf-8', errors='ignore')"</span><span class="token punctuation">;</span> python <span class="token parameter variable">-m</span> timeit <span class="token parameter variable">-s</span> <span class="token string">"x=b'2:4<span class="token entity" title="\xbc">\xbc</span>' * <span class="token variable">$N</span>"</span> <span class="token string">"x.decode('utf-8', errors='ignore')"</span><span class="token punctuation">;</span>
+<span class="token number">10000</span> loops, best of <span class="token number">3</span>: <span class="token number">37.6</span> usec per loop
+<span class="token number">10</span> loops, best of <span class="token number">3</span>: <span class="token number">29.3</span> msec per loop
+
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">N</span><span class="token operator">=</span><span class="token number">10000000</span><span class="token punctuation">;</span> python <span class="token parameter variable">-m</span> timeit <span class="token parameter variable">-s</span> <span class="token string">"x=b'2:42' * <span class="token variable">$N</span>"</span> <span class="token string">"x.decode('utf-8', errors='ignore')"</span><span class="token punctuation">;</span> python <span class="token parameter variable">-m</span> timeit <span class="token parameter variable">-s</span> <span class="token string">"x=b'2:4<span class="token entity" title="\xbc">\xbc</span>' * <span class="token variable">$N</span>"</span> <span class="token string">"x.decode('utf-8', errors='ignore')"</span><span class="token punctuation">;</span>
+<span class="token number">100</span> loops, best of <span class="token number">3</span>: <span class="token number">9.08</span> msec per loop
+<span class="token number">10</span> loops, best of <span class="token number">3</span>: <span class="token number">2.95</span> sec per loop</code></pre>
+<p>As engineio reads a packet, it decodes the entire remaining payload and
+then advances the length of the packet. So for an N-packet payload, the
+decode function is applied to:</p>
+<ul>
+<li>(string of N packets)</li>
+<li>(string of N-1 packets)</li>
+<li>(string of N-2 packets)</li>
+</ul>
+<p>so slowing down the decoding makes the DoS much more potent as it's O(n<sup>2</sup>)!</p>
+<p>This was <a href="https://github.com/miguelgrinberg/python-engineio/commit/64a34fc1550458ded57014301d5f9e97534f0843#diff-a2b90c63f58ef76954869020513f8e9bL72">fixed by the maintainer</a>.</p>
+<h2 id="all-others" tabindex="-1">All others <a class="header-anchor" href="#all-others">#</a></h2>
+<p>The python code seems to generally run slower than the nodejs code. Large payloads cause DoS primarily by wasting CPU time since python doesn't have a max heap size in the same way as v8. One giant int is slow as <code>int(&quot;2&quot; * int(1e7))</code> is incredibly slow in python, perhaps because it allows Unicode digits like ٣ as well.</p>
+<h1 id="exploit" tabindex="-1">Exploit <a class="header-anchor" href="#exploit">#</a></h1>
+<p>I made a repo <a href="https://github.com/bcaller/kill-engine-io"><img alt=":octocat:" src="https://github.githubassets.com/images/icons/emoji/octocat.png?v8" style="max-width: 1em; max-height: 1em; display: inline-block;">bcaller/kill-engine-io</a> containing test servers and code to trigger the DoS. Enjoy.</p>
+<p>Servers with a lower max HTTP body size are less vulnerable. In fact, the default has been lowered in newer versions.</p>
+
+<ul class="links-nextprev"><li>Previous: <a href="/v380-ipcam-firmware-patching/">v380 IPcam: Firmware patching</a></li><li>Next: <a href="/wo-men-du-bu-wan-mei/">我們都不完美</a></li>
+</ul>
+
+		</main>
+
+		<footer></footer>
+
+		<!-- Current page: /socketio-engineio-dos/ -->
+	</body>
+</html>

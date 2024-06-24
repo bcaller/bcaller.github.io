@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Xbox 360 Live Gamercard</title>
+		<meta name="description" content="I am writing about my experiences as a naval navel-gazer.">
+		<link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		<link rel="alternate" href="/feed/feed.json" type="application/json" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		
+		<style>/**
+ * okaidia theme for JavaScript, CSS and HTML
+ * Loosely based on Monokai textmate theme by http://www.monokai.nl/
+ * @author ocodia
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: #f8f8f2;
+	background: none;
+	text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	font-size: 1em;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: 1em;
+	margin: .5em 0;
+	overflow: auto;
+	border-radius: 0.3em;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #272822;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .1em;
+	border-radius: .3em;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: #8292a2;
+}
+
+.token.punctuation {
+	color: #f8f8f2;
+}
+
+.token.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #f92672;
+}
+
+.token.boolean,
+.token.number {
+	color: #ae81ff;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #a6e22e;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.variable {
+	color: #f8f8f2;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.function,
+.token.class-name {
+	color: #e6db74;
+}
+
+.token.keyword {
+	color: #66d9ef;
+}
+
+.token.regex,
+.token.important {
+	color: #fd971f;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+/*
+ * New diff- syntax
+ */
+
+pre[class*="language-diff-"] {
+	--eleventy-code-padding: 1.25em;
+	padding-left: var(--eleventy-code-padding);
+	padding-right: var(--eleventy-code-padding);
+}
+.token.deleted {
+	background-color: hsl(0, 51%, 37%);
+	color: inherit;
+}
+.token.inserted {
+	background-color: hsl(126, 31%, 39%);
+	color: inherit;
+}
+
+/* Make the + and - characters unselectable for copy/paste */
+.token.prefix.unchanged,
+.token.prefix.inserted,
+.token.prefix.deleted {
+	-webkit-user-select: none;
+	user-select: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+.token.prefix.inserted,
+.token.prefix.deleted {
+	width: var(--eleventy-code-padding);
+	background-color: rgba(0,0,0,.2);
+}
+
+/* Optional: full-width background color */
+.token.inserted:not(.prefix),
+.token.deleted:not(.prefix) {
+	display: block;
+	margin-left: calc(-1 * var(--eleventy-code-padding));
+	margin-right: calc(-1 * var(--eleventy-code-padding));
+	text-decoration: none; /* override del, ins, mark defaults */
+	color: inherit; /* override del, ins, mark defaults */
+}
+* { box-sizing: border-box; }
+/* Defaults */
+:root {
+	--font-family: -apple-system, system-ui, sans-serif;
+	--font-family-monospace: Consolas, Menlo, Monaco, Andale Mono WT, Andale Mono, Lucida Console, Lucida Sans Typewriter, DejaVu Sans Mono, Bitstream Vera Sans Mono, Liberation Mono, Nimbus Mono L, Courier New, Courier, monospace;
+}
+
+/* Theme colors */
+:root {
+	--color-gray-20: #e0e0e0;
+	--color-gray-50: #C0C0C0;
+	--color-gray-90: #333;
+
+	--background-color: #fff;
+
+	--text-color: var(--color-gray-90);
+	--text-color-link: #082840;
+	--text-color-link-active: #5f2b48;
+	--text-color-link-visited: #17050F;
+
+	--syntax-tab-size: 2;
+
+	--pinyin-font: 'Arima Madurai';
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-gray-20: #e0e0e0;
+		--color-gray-50: #C0C0C0;
+		--color-gray-90: #dad8d8;
+
+		/* --text-color is assigned to --color-gray-_ above */
+		--text-color-link: #1493fb;
+		--text-color-link-active: #6969f7;
+		--text-color-link-visited: #a6a6f8;
+
+		--background-color: #15202b;
+	}
+}
+
+
+/* Global stylesheet */
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	padding: 0;
+	margin: 0 auto;
+	font-family: var(--font-family);
+	color: var(--text-color);
+	background-color: var(--background-color);
+}
+html {
+	overflow-y: scroll;
+}
+body {
+	max-width: 55em;
+}
+
+/* https://www.a11yproject.com/posts/how-to-hide-content/ */
+.visually-hidden {
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
+p:last-child {
+	margin-bottom: 0;
+}
+p {
+	line-height: 1.5;
+}
+
+li {
+	line-height: 1.5;
+}
+
+a[href] {
+	color: var(--text-color-link);
+}
+a[href]:visited {
+	color: var(--text-color-link-visited);
+}
+a[href]:hover,
+a[href]:active {
+	color: var(--text-color-link-active);
+}
+
+main {
+	padding: 1rem;
+}
+main :first-child {
+	margin-top: 0;
+}
+
+header {
+	border-bottom: 1px dashed var(--color-gray-20);
+}
+header:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.links-nextprev {
+	list-style: none;
+	border-top: 1px dashed var(--color-gray-20);
+	padding: 1em 0;
+}
+
+table {
+	margin: 1em 0;
+}
+table td,
+table th {
+	padding-right: 1em;
+}
+
+pre,
+code {
+	font-family: var(--font-family-monospace);
+}
+pre:not([class*="language-"]) {
+	margin: .5em 0;
+	line-height: 1.375; /* 22px /16 */
+	-moz-tab-size: var(--syntax-tab-size);
+	-o-tab-size: var(--syntax-tab-size);
+	tab-size: var(--syntax-tab-size);
+	-webkit-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+	direction: ltr;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+}
+code {
+	word-break: break-all;
+}
+p > code {
+	color: #722;
+	text-decoration: underline #7222;
+}
+
+/* Header */
+header {
+	display: flex;
+	gap: 1em .5em;
+	flex-wrap: wrap;
+	align-items: center;
+	padding: 1em;
+}
+.home-link {
+	font-size: 1em; /* 16px /16 */
+	font-weight: 700;
+	margin-right: 2em;
+}
+.home-link:link:not(:hover) {
+	text-decoration: none;
+}
+
+/* Nav */
+.nav {
+	display: flex;
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+.nav-item {
+	display: inline-block;
+	margin-right: 1em;
+}
+.nav-item a[href]:not(:hover) {
+	text-decoration: none;
+}
+.nav a[href][aria-current="page"] {
+	text-decoration: underline;
+}
+
+/* Posts list */
+.postlist {
+	list-style: none;
+	padding: 0;
+	padding-left: 1.5rem;
+}
+.postlist-item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	counter-increment: start-from -1;
+	margin-bottom: 1em;
+}
+.postlist-item:before {
+	display: inline-block;
+	pointer-events: none;
+	content: "" counter(start-from, decimal-leading-zero) ". ";
+	line-height: 100%;
+	text-align: right;
+	margin-left: -1.5rem;
+}
+.postlist-date,
+.postlist-item:before {
+	font-size: 0.8125em; /* 13px /16 */
+	color: var(--color-gray-90);
+}
+.postlist-date {
+	word-spacing: -0.5px;
+}
+.postlist-link {
+	font-size: 1.1875em; /* 19px /16 */
+	font-weight: 700;
+	flex-basis: calc(100% - 1.5rem);
+	padding-left: .25em;
+	padding-right: .5em;
+	text-underline-position: from-font;
+	text-underline-offset: 0;
+	text-decoration-thickness: 1px;
+}
+.postlist-item-active .postlist-link {
+	font-weight: bold;
+}
+
+/* Tags */
+.post-tag {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	text-transform: capitalize;
+	font-style: italic;
+}
+.postlist-item > .post-tag {
+	align-self: center;
+}
+
+/* Tags list */
+.post-metadata {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: .5em;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.post-metadata time {
+	margin-right: 1em;
+}
+
+/* Direct Links / Markdown Headers */
+.header-anchor {
+	text-decoration: none;
+	font-style: normal;
+	font-size: 1em;
+	margin-left: .1em;
+}
+a[href].header-anchor,
+a[href].header-anchor:visited {
+	color: transparent;
+}
+a[href].header-anchor:focus,
+a[href].header-anchor:hover {
+	text-decoration: underline;
+}
+a[href].header-anchor:focus,
+:hover > a[href].header-anchor {
+	color: #aaa;
+}
+
+h2 + .header-anchor {
+	font-size: 1.5em;
+}
+
+.pyin {
+	font-family: var(--pinyin-font), cursive;
+}
+
+figure {
+	margin: -1.7em 0 0.7em 0;
+}
+
+figcaption {
+	font-style: italic;
+}
+
+figure img {
+	border: 1px solid #ccc;
+}</style>
+		<link href="https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700" rel="stylesheet" referrerpolicy="no-referrer">
+	</head>
+	<body>
+		<a href="#skip" class="visually-hidden">Skip to main content</a>
+
+		<header>
+			<a href="/" class="home-link">ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ</a>
+			<nav>
+				<h2 class="visually-hidden">Top level navigation menu</h2>
+				<ul class="nav">
+					<li class="nav-item"><a href="/">Home</a></li>
+					<li class="nav-item"><a href="/blog/">Archive</a></li>
+					<li class="nav-item"><a href="/about/">About Me</a></li>
+				</ul>
+			</nav>
+		</header>
+
+		<main id="skip">
+			
+<h1>Xbox 360 Live Gamercard</h1>
+
+<ul class="post-metadata">
+	<li><time datetime="2010-01-20">2010年01月</time></li>
+	<li><a href="/tags/web-app/" class="post-tag">web app</a>, </li>
+	<li><a href="/tags/facebook/" class="post-tag">facebook</a>, </li>
+	<li><a href="/tags/xbox/" class="post-tag">xbox</a>, </li>
+	<li><a href="/tags/c-sharp/" class="post-tag">c-sharp</a>, </li>
+	<li><a href="/tags/aspnet/" class="post-tag">asp.net</a></li>
+</ul>
+
+<p>Several years back I was an avid Xbox 360 fanboy. I had also just made a couple of Facebook apps as a freelancer. At the time, there was an unofficial Xbox Live Facebook app which just showed an image containing your gamertag, picture, score and recent games as a section on your profile. This data came from a now-defunct website which was a member of Microsoft’s Xbox Community Developer Program (XCDP). Only XCDP members were allowed access to the Xbox Live API.</p>
+<p>While unable to access the official feed, I found an unsecured data feed somewhere within one of Microsoft’s servers. That night I woke up at 2am with the urge to start coding, so I got up and created the majority of what became Xbox 360 Live Gamercard (the name helped me cover all searches in the app directory).</p>
+<p>The app used Xbox Live data to show how many achievements you unlocked in each game on a tab in your Facebook profile, publish to the news feed when you unlocked new achievements in games or went online. There were also game reviews and a tracker that showed who was online and what they were playing.</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/diwYlw_cO--402.avif 402w"><source type="image/webp" srcset="/img/diwYlw_cO--402.webp 402w"><img alt="Gamercard as shown on a [user](https://engtech.wordpress.com/2008/03/31/how-to-get-an-rss-feed-for-your-xbox-360-gamertag/)'s Facebook profile. The scores and achievements for recent games are shown. The gamerpoints image was not loading from Microsoft that day." loading="lazy" decoding="async" src="/img/diwYlw_cO--402.png" width="402" height="346"></picture><figcaption>Gamercard as shown on a <a href="https://engtech.wordpress.com/2008/03/31/how-to-get-an-rss-feed-for-your-xbox-360-gamertag/">user</a>'s Facebook profile. The scores and achievements for recent games are shown. The gamerpoints image was not loading from Microsoft that day.</figcaption></figure></p>
+<h1 id="success" tabindex="-1">Success <a class="header-anchor" href="#success">#</a></h1>
+<p>At its height, I had nearly 2 million registered users, which may have been the majority of Xbox Live subscribers on Facebook, although the number of monthly active users was a tenth of that. Microsoft's Xbox Live product manager contacted me saying he thought I was screen-scraping Xbox.com and would rather I become an XCDP member, so I got access to the real feeds.</p>
+<p>My initial monetization stream was stupid banner ads. AdSense didn’t work on Facebook canvas pages which have no static content. Instead, Facebook apps were full of this “You have 7 love notes” nonsense from small ad networks, but surprisingly people actually click on them, and the payout was quite good. A small amount also came from the Amazon Associates program: The app would link to Xbox games on Amazon, but after clicking the link I would receive 6% of whatever the user bought in the next 24 hours. While I sold video games, referral fees also came from the panoply of junk people bought after using my app, such as a toothbrush which sings we will rock you, sex toys and a copy of Mein Kampf. Unfortunately, Amazon paid by sending me a dollar cheque, which caused massive confusion and fees at the bank.</p>
+<p>There were also some small companies who paid for advertisement on the app. However, looking back on it I wasted a huge opportunity. I had a niche market and a good product, but I didn’t act entrepreneurially. I should have tried to sell it or make way more money or something. I don’t know.</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/AG4sdk7fm--650.avif 650w"><source type="image/webp" srcset="/img/AG4sdk7fm--650.webp 650w"><img alt="A [screenshot](http://blog.yam.com/cocowang/article/24594757) of the app's canvas page showing the links for reviews, finding matches and more. Nice advertising banner at the top!" loading="lazy" decoding="async" src="/img/AG4sdk7fm--650.jpeg" width="650" height="544"></picture><figcaption>A <a href="http://blog.yam.com/cocowang/article/24594757">screenshot</a> of the app's canvas page showing the links for reviews, finding matches and more. Nice advertising banner at the top!</figcaption></figure></p>
+<p>#Code
+I am embarrassed to say that I wrote the app in ASP.NET and C#. This was not ASP.NET 4.0. My app had massive viewstate fields and controls which didn’t play nicely with the ever-changing Facebook canvas spec (a weird modified version of HTML). I also used SQL server, but the express edition which limited the database size to 4gb. Yuk. I really hadn’t expected the success. The number of people made the database size balloon and the ASP.NET code was horrible to maintain.</p>
+<p>Anyway, my profits began to decrease as the golden age of Facebook app ad revenue came to an end. I didn’t bother to maintain it regularly due to the presence of a scary competitor with a $2m seed and a superior app which also worked for PS3. Things were breaking and I was receiving terribly spelled insults by email, but I actually earned more from ad clicks on days when the site was working badly.</p>
+<p>The biggest technical flaw was the updater. This was supposed to publish any new achievements to the users' profiles. That meant calling the API for each gamertag and comparing the scores with those in the database from the last update. However, as the number of users skyrocketed, the length of time it took to loop through and check every user became too long, especially because most players wanted their updates instantly. I probably should have upgraded the server and database, but windows server is expensive, and the emails from users pissed me off, so I just allowed manual updates. The upside was that manually updating made users navigate to the app and see the ads. I'm so evil.</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/E_oDTmsLZH-664.avif 664w"><source type="image/webp" srcset="/img/E_oDTmsLZH-664.webp 664w"><img alt="My epic design skills! Add your gamertag to our massive database and we will never update it OK. [Source](http://home.gamer.com.tw/creationDetail.php?sn=648591)" loading="lazy" decoding="async" src="/img/E_oDTmsLZH-664.jpeg" width="664" height="521"></picture><figcaption>My epic design skills! Add your gamertag to our massive database and we will never update it OK. <a href="http://home.gamer.com.tw/creationDetail.php?sn=648591">Source</a></figcaption></figure></p>
+<p>#Lessons</p>
+<ul>
+<li>Hire a designer!</li>
+<li>Don't invest too heavily in an appstore / platform / ecosystem / API. It's a very unsafe place, with a ruling company which changes its rules at the drop of a hat. They invite you to build your businesses in their garden, but every so often they remind you that they are the lord of the land, upon whom you now depend. They will only listen to their largest clients, and constantly change their rules at short notice. Life is good at the beginning, but soon the company stops being interested in how it treats smaller developers. When they think you are no longer welcome on their platform, you have no real chance to appeal and certainly no employment tribunal for your loss of earnings. You are working in a dictatorship. Thankfully I didn't significantly scale up my hosting requirements. I was there when Facebook apps made money for indie devs. I missed the Apple App Store boom though, and despite having a few Android apps, I don't make money from them.[^1]</li>
+<li>Be prepared for success. Build for scale. A little optimism! Use the correct tools.</li>
+<li>Be more open to business and job opportunities. I'm naturally very skeptical, so it's hard for me to agree to anything, but I should at least speak to see what people can offer me.</li>
+<li>Be more privacy conscious: The app actually became a massive public map of Facebook IDs (and therefore real names) to Xbox Live gamertags, which really was a privacy issue which I didn’t consider.</li>
+<li>Spend money to make money. But not always. My costs here were super low, but I could have invested to make something bigger rather than clinging on to my shitty VPS.</li>
+</ul>
+<p>[^1]: One interesting store I'm happy with at the moment is the Pebble store where many of the apps are free and open source. Pebble currently profit from hardware sales rather than keeping a tightly controlled app store.</p>
+
+<ul class="links-nextprev"><li>Next: <a href="/they-have-your-info/">They Have Your Info</a></li>
+</ul>
+
+		</main>
+
+		<footer></footer>
+
+		<!-- Current page: /xbox-360-live-gamercard/ -->
+	</body>
+</html>

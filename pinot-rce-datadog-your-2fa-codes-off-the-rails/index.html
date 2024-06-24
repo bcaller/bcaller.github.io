@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Pinot RCE, DataDog, your 2FA codes off the rails</title>
+		<meta name="description" content="I am writing about my experiences as a naval navel-gazer.">
+		<link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		<link rel="alternate" href="/feed/feed.json" type="application/json" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		
+		<style>/**
+ * okaidia theme for JavaScript, CSS and HTML
+ * Loosely based on Monokai textmate theme by http://www.monokai.nl/
+ * @author ocodia
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: #f8f8f2;
+	background: none;
+	text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	font-size: 1em;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: 1em;
+	margin: .5em 0;
+	overflow: auto;
+	border-radius: 0.3em;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #272822;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .1em;
+	border-radius: .3em;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: #8292a2;
+}
+
+.token.punctuation {
+	color: #f8f8f2;
+}
+
+.token.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #f92672;
+}
+
+.token.boolean,
+.token.number {
+	color: #ae81ff;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #a6e22e;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.variable {
+	color: #f8f8f2;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.function,
+.token.class-name {
+	color: #e6db74;
+}
+
+.token.keyword {
+	color: #66d9ef;
+}
+
+.token.regex,
+.token.important {
+	color: #fd971f;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+/*
+ * New diff- syntax
+ */
+
+pre[class*="language-diff-"] {
+	--eleventy-code-padding: 1.25em;
+	padding-left: var(--eleventy-code-padding);
+	padding-right: var(--eleventy-code-padding);
+}
+.token.deleted {
+	background-color: hsl(0, 51%, 37%);
+	color: inherit;
+}
+.token.inserted {
+	background-color: hsl(126, 31%, 39%);
+	color: inherit;
+}
+
+/* Make the + and - characters unselectable for copy/paste */
+.token.prefix.unchanged,
+.token.prefix.inserted,
+.token.prefix.deleted {
+	-webkit-user-select: none;
+	user-select: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+.token.prefix.inserted,
+.token.prefix.deleted {
+	width: var(--eleventy-code-padding);
+	background-color: rgba(0,0,0,.2);
+}
+
+/* Optional: full-width background color */
+.token.inserted:not(.prefix),
+.token.deleted:not(.prefix) {
+	display: block;
+	margin-left: calc(-1 * var(--eleventy-code-padding));
+	margin-right: calc(-1 * var(--eleventy-code-padding));
+	text-decoration: none; /* override del, ins, mark defaults */
+	color: inherit; /* override del, ins, mark defaults */
+}
+* { box-sizing: border-box; }
+/* Defaults */
+:root {
+	--font-family: -apple-system, system-ui, sans-serif;
+	--font-family-monospace: Consolas, Menlo, Monaco, Andale Mono WT, Andale Mono, Lucida Console, Lucida Sans Typewriter, DejaVu Sans Mono, Bitstream Vera Sans Mono, Liberation Mono, Nimbus Mono L, Courier New, Courier, monospace;
+}
+
+/* Theme colors */
+:root {
+	--color-gray-20: #e0e0e0;
+	--color-gray-50: #C0C0C0;
+	--color-gray-90: #333;
+
+	--background-color: #fff;
+
+	--text-color: var(--color-gray-90);
+	--text-color-link: #082840;
+	--text-color-link-active: #5f2b48;
+	--text-color-link-visited: #17050F;
+
+	--syntax-tab-size: 2;
+
+	--pinyin-font: 'Arima Madurai';
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-gray-20: #e0e0e0;
+		--color-gray-50: #C0C0C0;
+		--color-gray-90: #dad8d8;
+
+		/* --text-color is assigned to --color-gray-_ above */
+		--text-color-link: #1493fb;
+		--text-color-link-active: #6969f7;
+		--text-color-link-visited: #a6a6f8;
+
+		--background-color: #15202b;
+	}
+}
+
+
+/* Global stylesheet */
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	padding: 0;
+	margin: 0 auto;
+	font-family: var(--font-family);
+	color: var(--text-color);
+	background-color: var(--background-color);
+}
+html {
+	overflow-y: scroll;
+}
+body {
+	max-width: 55em;
+}
+
+/* https://www.a11yproject.com/posts/how-to-hide-content/ */
+.visually-hidden {
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
+p:last-child {
+	margin-bottom: 0;
+}
+p {
+	line-height: 1.5;
+}
+
+li {
+	line-height: 1.5;
+}
+
+a[href] {
+	color: var(--text-color-link);
+}
+a[href]:visited {
+	color: var(--text-color-link-visited);
+}
+a[href]:hover,
+a[href]:active {
+	color: var(--text-color-link-active);
+}
+
+main {
+	padding: 1rem;
+}
+main :first-child {
+	margin-top: 0;
+}
+
+header {
+	border-bottom: 1px dashed var(--color-gray-20);
+}
+header:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.links-nextprev {
+	list-style: none;
+	border-top: 1px dashed var(--color-gray-20);
+	padding: 1em 0;
+}
+
+table {
+	margin: 1em 0;
+}
+table td,
+table th {
+	padding-right: 1em;
+}
+
+pre,
+code {
+	font-family: var(--font-family-monospace);
+}
+pre:not([class*="language-"]) {
+	margin: .5em 0;
+	line-height: 1.375; /* 22px /16 */
+	-moz-tab-size: var(--syntax-tab-size);
+	-o-tab-size: var(--syntax-tab-size);
+	tab-size: var(--syntax-tab-size);
+	-webkit-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+	direction: ltr;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+}
+code {
+	word-break: break-all;
+}
+p > code {
+	color: #722;
+	text-decoration: underline #7222;
+}
+
+/* Header */
+header {
+	display: flex;
+	gap: 1em .5em;
+	flex-wrap: wrap;
+	align-items: center;
+	padding: 1em;
+}
+.home-link {
+	font-size: 1em; /* 16px /16 */
+	font-weight: 700;
+	margin-right: 2em;
+}
+.home-link:link:not(:hover) {
+	text-decoration: none;
+}
+
+/* Nav */
+.nav {
+	display: flex;
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+.nav-item {
+	display: inline-block;
+	margin-right: 1em;
+}
+.nav-item a[href]:not(:hover) {
+	text-decoration: none;
+}
+.nav a[href][aria-current="page"] {
+	text-decoration: underline;
+}
+
+/* Posts list */
+.postlist {
+	list-style: none;
+	padding: 0;
+	padding-left: 1.5rem;
+}
+.postlist-item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	counter-increment: start-from -1;
+	margin-bottom: 1em;
+}
+.postlist-item:before {
+	display: inline-block;
+	pointer-events: none;
+	content: "" counter(start-from, decimal-leading-zero) ". ";
+	line-height: 100%;
+	text-align: right;
+	margin-left: -1.5rem;
+}
+.postlist-date,
+.postlist-item:before {
+	font-size: 0.8125em; /* 13px /16 */
+	color: var(--color-gray-90);
+}
+.postlist-date {
+	word-spacing: -0.5px;
+}
+.postlist-link {
+	font-size: 1.1875em; /* 19px /16 */
+	font-weight: 700;
+	flex-basis: calc(100% - 1.5rem);
+	padding-left: .25em;
+	padding-right: .5em;
+	text-underline-position: from-font;
+	text-underline-offset: 0;
+	text-decoration-thickness: 1px;
+}
+.postlist-item-active .postlist-link {
+	font-weight: bold;
+}
+
+/* Tags */
+.post-tag {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	text-transform: capitalize;
+	font-style: italic;
+}
+.postlist-item > .post-tag {
+	align-self: center;
+}
+
+/* Tags list */
+.post-metadata {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: .5em;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.post-metadata time {
+	margin-right: 1em;
+}
+
+/* Direct Links / Markdown Headers */
+.header-anchor {
+	text-decoration: none;
+	font-style: normal;
+	font-size: 1em;
+	margin-left: .1em;
+}
+a[href].header-anchor,
+a[href].header-anchor:visited {
+	color: transparent;
+}
+a[href].header-anchor:focus,
+a[href].header-anchor:hover {
+	text-decoration: underline;
+}
+a[href].header-anchor:focus,
+:hover > a[href].header-anchor {
+	color: #aaa;
+}
+
+h2 + .header-anchor {
+	font-size: 1.5em;
+}
+
+.pyin {
+	font-family: var(--pinyin-font), cursive;
+}
+
+figure {
+	margin: -1.7em 0 0.7em 0;
+}
+
+figcaption {
+	font-style: italic;
+}
+
+figure img {
+	border: 1px solid #ccc;
+}</style>
+		<link href="https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700" rel="stylesheet" referrerpolicy="no-referrer">
+	</head>
+	<body>
+		<a href="#skip" class="visually-hidden">Skip to main content</a>
+
+		<header>
+			<a href="/" class="home-link">ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ</a>
+			<nav>
+				<h2 class="visually-hidden">Top level navigation menu</h2>
+				<ul class="nav">
+					<li class="nav-item"><a href="/">Home</a></li>
+					<li class="nav-item"><a href="/blog/">Archive</a></li>
+					<li class="nav-item"><a href="/about/">About Me</a></li>
+				</ul>
+			</nav>
+		</header>
+
+		<main id="skip">
+			
+<h1>Pinot RCE, DataDog, your 2FA codes off the rails</h1>
+
+<ul class="post-metadata">
+	<li><time datetime="2023-06-30">2023年06月</time></li>
+	<li><a href="/tags/bounty/" class="post-tag">bounty</a>, </li>
+	<li><a href="/tags/research/" class="post-tag">research</a>, </li>
+	<li><a href="/tags/security/" class="post-tag">security</a></li>
+</ul>
+
+<p>If your web application sends SMSs to your customers, you probably submit the messages via a commercial third-party API. The alternative would be dealing with mobile networks directly, but that would require significantly more engineering resources. Whether you're sending 2FA codes or messages from healthcare providers, this is a sensible decision, but it does expose your data to the vendor's information security practices.</p>
+<p>As your due diligence, you can require vendors to adhere to certain compliance frameworks such as SOC II, HIPAA and the rest of the alphabet soup, but in terms of the real world information security practices of their engineers and data scientists it means very little.</p>
+<p>I previously published research about <a href="/apache-pinot-insecurity/">Apache Pinot</a> on <a href="https://blog.doyensec.com/2022/06/09/apache-pinot-sqli-rce.html">Doyensec's blog</a> where I dropped a few vulnerabilities, the more serious of which have been fixed.</p>
+<p>One of the components of Apache Pinot is the Controller. This service has a web interface allowing you to submit SQL queries to the Pinot Broker. It also allows you to configure the tables, settings and ZooKeeper, essentially giving admin access to the database service. What's more, from the Controller you can access an RCE &quot;feature&quot; giving root access to the Server component.</p>
+<p>Surely nobody would be foolhardy enough to make such a service accessible on the internet!</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/55cnGiU6yu-1200.avif 1200w"><source type="image/webp" srcset="/img/55cnGiU6yu-1200.webp 1200w"><img alt="Surely often means you aren't that sure. Here's a Pinot Controller in the wild." loading="lazy" decoding="async" src="/img/55cnGiU6yu-1200.png" width="1200" height="457"></picture><figcaption>Surely often means you aren't that sure. Here's a Pinot Controller in the wild.</figcaption></figure></p>
+<p>Well, I've looked and there aren't many, but in amongst the test servers you do see the odd cryptocurrency exchange. As described in my previous <a href="/apache-pinot-insecurity/">Pinot research article</a>, RCE is not usually exciting for it's own sake on such a containerised platform. The goal instead is to steal temporary cloud credentials. When I find a Controller hosted in Amazon EKS or EC2, I like to see if, instead of being sandboxed from the rest of the organisation, the RCE gives me fun IAM permissions.</p>
+<p>The enumeration is the same as described in my <a href="/big-data-lake-big-data-leak/">BSides talk about Apache YARN / Hadoop clusters</a>.</p>
+<p>Until now, I had mostly ended up on boring test or staging accounts. The main culprits for storing all of their clients' production and test environments in a single AWS account are in fact AWS consultant companies.</p>
+<p>Permissions for a recently breached target were mostly fine. Appropriate policies were applied so that using AWS credentials exfiltrated via the Pinot RCE, I could only access the staging S3 buckets (not production). Nothing worth reporting to their VDP. When it came to SSM however, I hit the jackpot. Out popped over 2000 SSM parameters. SSM (AWS System Manager) is a cloud-based configuration and secret store. While most parameters were test related, I got lucky with some production secrets:</p>
+<ul>
+<li>a Slack token without read access (write-only)</li>
+<li>a GitHub token with useful permissions</li>
+<li>DataDog <a href="https://docs.datadoghq.com/account_management/api-app-keys/">application and API keys</a></li>
+</ul>
+<p>The Slack token helped me confirm that the system was in fact owned by C*llR*il:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token function">curl</span> <span class="token parameter variable">-s</span> https://slack.com/api/auth.test <span class="token parameter variable">-H</span> <span class="token string">'Authorization: Bearer xoxb-rEdAcTeD'</span> <span class="token operator">|</span> jq</code></pre>
+<pre class="language-json" tabindex="0"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"ok"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"https://c*llr*il.slack.com/"</span><span class="token punctuation">,</span>
+  <span class="token property">"team"</span><span class="token operator">:</span> <span class="token string">"C*llR*il"</span><span class="token punctuation">,</span>
+  <span class="token property">"user"</span><span class="token operator">:</span> <span class="token string">"deploy_bot"</span><span class="token punctuation">,</span>
+  <span class="token property">"team_id"</span><span class="token operator">:</span> <span class="token string">"rEdAcTeD"</span><span class="token punctuation">,</span>
+  <span class="token property">"user_id"</span><span class="token operator">:</span> <span class="token string">"rEdAcTeD"</span><span class="token punctuation">,</span>
+  <span class="token property">"bot_id"</span><span class="token operator">:</span> <span class="token string">"rEdAcTeD"</span><span class="token punctuation">,</span>
+  <span class="token property">"is_enterprise_install"</span><span class="token operator">:</span> <span class="token boolean">false</span>
+<span class="token punctuation">}</span></code></pre>
+<p>It turns out that the DataDog keys were the most interesting both because I'd never played with the API before and because of the confidentiality breach it caused.</p>
+<p>DataDog API keys give basic access to the organisation but not the majority of the API.
+Application keys are created by a user and have the full permissions of that user unless further restricted by <a href="https://docs.datadoghq.com/api/latest/scopes/">scopes</a>.
+Application keys are required for the majority of DataDog API calls.</p>
+<p>All apps need to be deployed with some sort of DataDog API key in order to submit logs. In combination with the Application key retrieved from SSM, however, logs could be queried and read. This is not a level of access that you hope an attacker has, but you don't need an all-of-nothing attitude to security. Rather than saying &quot;if someone has access to all the production logs then it's game over,&quot; defence-in-depth suggests that by not logging secrets or PII you can limit the damage.</p>
+<p>After a very quick poke around I didn't find any evidence of secrets or PII being routinely stored in logs when the application flows along the happy path. When the application encounters errors, however, full SMS messages (metadata and content) are dumped in the logs.</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/xKXETffFDP-840.avif 840w"><source type="image/webp" srcset="/img/xKXETffFDP-840.webp 840w"><img alt="Private SMS to your doctor, in plaintext logs" loading="lazy" decoding="async" src="/img/xKXETffFDP-840.png" width="840" height="352"></picture><figcaption>Private SMS to your doctor, in plaintext logs</figcaption></figure></p>
+<p>Ideally this would be only in exceptional cases rather than commonly occurring problems. To fix the systems it is important that developers are aware of the errors, but consider whether the entire plaintext message content needs to be available to and searchable by all developers. It feels like overkill to encrypt or worry about logs when attackers can't read them... except I have the DataDog keys so I can.</p>
+<p>If the threat of SIM-swapping didn't already make you consider SMS 2FA dead, the following imagined attack scenario should.</p>
+<p>Search the logs for recent errors sending bank 2FA codes. Now you have the name of a bank, the phone number of a customer, and the ability to read SMS messages sent by the bank. You can use your knowledge that the user is having difficulty logging in to your advantage in your smishing (SMS phishing) message.</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token function">curl</span> <span class="token string">"https://api.datadoghq.com/api/v2/logs/events/search"</span> <span class="token punctuation">\</span>
+<span class="token parameter variable">-H</span> <span class="token string">"Accept: application/json"</span> <span class="token punctuation">\</span>
+<span class="token parameter variable">-H</span> <span class="token string">"DD-API-KEY: rEdAcTeD"</span> <span class="token parameter variable">-H</span> <span class="token string">"DD-APPLICATION-KEY: rEdAcTeD"</span> <span class="token punctuation">\</span>
+<span class="token parameter variable">-H</span> <span class="token string">"Content-Type: application/json"</span> <span class="token punctuation">\</span>
+<span class="token parameter variable">-d</span> <span class="token string">'{"filter":{"from":"now-32d","query":"security code"}}'</span> <span class="token punctuation">\</span>
+<span class="token operator">|</span> jq</code></pre>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/n8CzxSAeNs-839.avif 839w"><source type="image/webp" srcset="/img/n8CzxSAeNs-839.webp 839w"><img alt="Super security codes" loading="lazy" decoding="async" src="/img/n8CzxSAeNs-839.png" width="839" height="241"></picture><figcaption>Super security codes</figcaption></figure>
+‌<figure><picture><source type="image/avif" srcset="/img/jicqWlj1Y2-840.avif 840w"><source type="image/webp" srcset="/img/jicqWlj1Y2-840.webp 840w"><img alt="More bank codes" loading="lazy" decoding="async" src="/img/jicqWlj1Y2-840.png" width="840" height="352"></picture><figcaption>More bank codes</figcaption></figure></p>
+<p>Smish to get the user's email address, then follow the reset password flow and intercept the SMS code.</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/VMU7Lb85h6-841.avif 841w"><source type="image/webp" srcset="/img/VMU7Lb85h6-841.webp 841w"><img alt="Password reset via SMS" loading="lazy" decoding="async" src="/img/VMU7Lb85h6-841.png" width="841" height="256"></picture><figcaption>Password reset via SMS</figcaption></figure></p>
+<p>Or, if that requires email access, smish for the username and password. This is still not automatic account access, but two factor authentication is reduced to a single factor.</p>
+<p>The DataDog API also allows user management, retrieving <a href="https://docs.datadoghq.com/api/latest/notebooks/#get-all-notebooks">Notebooks</a> which are used for writing postmortems, and querying <a href="https://docs.datadoghq.com/real_user_monitoring/">Real User Monitoring</a> (RUM). RUM records the URL, activity and browser information for all sessions like a super-powerful Google Analytics but with actual user account information attached.
+This can be used to sniff UUIDs, user email addresses and generally spy on the activity of all users.
+AWS events can also be ingested using the <a href="https://docs.datadoghq.com/logs/guide/forwarder/">Forwarder</a> which is a lambda you deploy in your AWS account.
+If DataDog <a href="https://docs.datadoghq.com/account_management/audit_trail/">Audit Trail</a> is enabled, it should be possible, once alerted, for the security team to spot misuse of the DataDog API by an attacker.</p>
+<p>C*llR*il has a Vulnerability Disclosure Program (VDP) allowing security researchers to notify them of breaches. In contrast to a Bug Bounty program, a VDP does not offer any rewards, but also does not prohibit public disclosure upon resolution. Normally when I report such a critical vulnerability to a VDP, the report gets transferred to the company's private beg bounty program and they pay me a bounty. I feel like C*llR*il are stingy bastards for refusing to do that (if such a private program exists). Oh well, I wasn't expecting money when reporting to a VDP anyway and at least they had some sort of security program. The team says the incident is now resolved.</p>
+<p>In summary:</p>
+<ul>
+<li>I haven't found any many exciting exposed Pinot controllers, majority are for testing</li>
+<li>Pinot Controller provides RCE which gives AWS credentials</li>
+<li>Staging environments should not have access to production secrets with super-admin permissions</li>
+<li>DataDog API/Application key pairs with read access can be a giant persistent confidentiality breach</li>
+<li>Logging PII and secrets is a no-no</li>
+<li>Hacking an SMS provider can lead to bank account takeovers (customers of customers of the provider)</li>
+</ul>
+
+<ul class="links-nextprev"><li>Previous: <a href="/taiwan-motorcycle-scooter-licence-idp-issue/">Taiwan Motorcycle / Scooter Licence - IDP Issue</a></li><li>Next: <a href="/cheeky-bucket-squatting-defeated-by-terraform/">Cheeky Bucket Squatting Defeated by Terraform</a></li>
+</ul>
+
+		</main>
+
+		<footer></footer>
+
+		<!-- Current page: /pinot-rce-datadog-your-2fa-codes-off-the-rails/ -->
+	</body>
+</html>

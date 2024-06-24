@@ -1,0 +1,782 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>v380 IPcam: Firmware patching</title>
+		<meta name="description" content="I am writing about my experiences as a naval navel-gazer.">
+		<link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		<link rel="alternate" href="/feed/feed.json" type="application/json" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		
+		<style>/**
+ * okaidia theme for JavaScript, CSS and HTML
+ * Loosely based on Monokai textmate theme by http://www.monokai.nl/
+ * @author ocodia
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: #f8f8f2;
+	background: none;
+	text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	font-size: 1em;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: 1em;
+	margin: .5em 0;
+	overflow: auto;
+	border-radius: 0.3em;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #272822;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .1em;
+	border-radius: .3em;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: #8292a2;
+}
+
+.token.punctuation {
+	color: #f8f8f2;
+}
+
+.token.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #f92672;
+}
+
+.token.boolean,
+.token.number {
+	color: #ae81ff;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #a6e22e;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.variable {
+	color: #f8f8f2;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.function,
+.token.class-name {
+	color: #e6db74;
+}
+
+.token.keyword {
+	color: #66d9ef;
+}
+
+.token.regex,
+.token.important {
+	color: #fd971f;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+/*
+ * New diff- syntax
+ */
+
+pre[class*="language-diff-"] {
+	--eleventy-code-padding: 1.25em;
+	padding-left: var(--eleventy-code-padding);
+	padding-right: var(--eleventy-code-padding);
+}
+.token.deleted {
+	background-color: hsl(0, 51%, 37%);
+	color: inherit;
+}
+.token.inserted {
+	background-color: hsl(126, 31%, 39%);
+	color: inherit;
+}
+
+/* Make the + and - characters unselectable for copy/paste */
+.token.prefix.unchanged,
+.token.prefix.inserted,
+.token.prefix.deleted {
+	-webkit-user-select: none;
+	user-select: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+.token.prefix.inserted,
+.token.prefix.deleted {
+	width: var(--eleventy-code-padding);
+	background-color: rgba(0,0,0,.2);
+}
+
+/* Optional: full-width background color */
+.token.inserted:not(.prefix),
+.token.deleted:not(.prefix) {
+	display: block;
+	margin-left: calc(-1 * var(--eleventy-code-padding));
+	margin-right: calc(-1 * var(--eleventy-code-padding));
+	text-decoration: none; /* override del, ins, mark defaults */
+	color: inherit; /* override del, ins, mark defaults */
+}
+* { box-sizing: border-box; }
+/* Defaults */
+:root {
+	--font-family: -apple-system, system-ui, sans-serif;
+	--font-family-monospace: Consolas, Menlo, Monaco, Andale Mono WT, Andale Mono, Lucida Console, Lucida Sans Typewriter, DejaVu Sans Mono, Bitstream Vera Sans Mono, Liberation Mono, Nimbus Mono L, Courier New, Courier, monospace;
+}
+
+/* Theme colors */
+:root {
+	--color-gray-20: #e0e0e0;
+	--color-gray-50: #C0C0C0;
+	--color-gray-90: #333;
+
+	--background-color: #fff;
+
+	--text-color: var(--color-gray-90);
+	--text-color-link: #082840;
+	--text-color-link-active: #5f2b48;
+	--text-color-link-visited: #17050F;
+
+	--syntax-tab-size: 2;
+
+	--pinyin-font: 'Arima Madurai';
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-gray-20: #e0e0e0;
+		--color-gray-50: #C0C0C0;
+		--color-gray-90: #dad8d8;
+
+		/* --text-color is assigned to --color-gray-_ above */
+		--text-color-link: #1493fb;
+		--text-color-link-active: #6969f7;
+		--text-color-link-visited: #a6a6f8;
+
+		--background-color: #15202b;
+	}
+}
+
+
+/* Global stylesheet */
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	padding: 0;
+	margin: 0 auto;
+	font-family: var(--font-family);
+	color: var(--text-color);
+	background-color: var(--background-color);
+}
+html {
+	overflow-y: scroll;
+}
+body {
+	max-width: 55em;
+}
+
+/* https://www.a11yproject.com/posts/how-to-hide-content/ */
+.visually-hidden {
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
+p:last-child {
+	margin-bottom: 0;
+}
+p {
+	line-height: 1.5;
+}
+
+li {
+	line-height: 1.5;
+}
+
+a[href] {
+	color: var(--text-color-link);
+}
+a[href]:visited {
+	color: var(--text-color-link-visited);
+}
+a[href]:hover,
+a[href]:active {
+	color: var(--text-color-link-active);
+}
+
+main {
+	padding: 1rem;
+}
+main :first-child {
+	margin-top: 0;
+}
+
+header {
+	border-bottom: 1px dashed var(--color-gray-20);
+}
+header:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.links-nextprev {
+	list-style: none;
+	border-top: 1px dashed var(--color-gray-20);
+	padding: 1em 0;
+}
+
+table {
+	margin: 1em 0;
+}
+table td,
+table th {
+	padding-right: 1em;
+}
+
+pre,
+code {
+	font-family: var(--font-family-monospace);
+}
+pre:not([class*="language-"]) {
+	margin: .5em 0;
+	line-height: 1.375; /* 22px /16 */
+	-moz-tab-size: var(--syntax-tab-size);
+	-o-tab-size: var(--syntax-tab-size);
+	tab-size: var(--syntax-tab-size);
+	-webkit-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+	direction: ltr;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+}
+code {
+	word-break: break-all;
+}
+p > code {
+	color: #722;
+	text-decoration: underline #7222;
+}
+
+/* Header */
+header {
+	display: flex;
+	gap: 1em .5em;
+	flex-wrap: wrap;
+	align-items: center;
+	padding: 1em;
+}
+.home-link {
+	font-size: 1em; /* 16px /16 */
+	font-weight: 700;
+	margin-right: 2em;
+}
+.home-link:link:not(:hover) {
+	text-decoration: none;
+}
+
+/* Nav */
+.nav {
+	display: flex;
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+.nav-item {
+	display: inline-block;
+	margin-right: 1em;
+}
+.nav-item a[href]:not(:hover) {
+	text-decoration: none;
+}
+.nav a[href][aria-current="page"] {
+	text-decoration: underline;
+}
+
+/* Posts list */
+.postlist {
+	list-style: none;
+	padding: 0;
+	padding-left: 1.5rem;
+}
+.postlist-item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	counter-increment: start-from -1;
+	margin-bottom: 1em;
+}
+.postlist-item:before {
+	display: inline-block;
+	pointer-events: none;
+	content: "" counter(start-from, decimal-leading-zero) ". ";
+	line-height: 100%;
+	text-align: right;
+	margin-left: -1.5rem;
+}
+.postlist-date,
+.postlist-item:before {
+	font-size: 0.8125em; /* 13px /16 */
+	color: var(--color-gray-90);
+}
+.postlist-date {
+	word-spacing: -0.5px;
+}
+.postlist-link {
+	font-size: 1.1875em; /* 19px /16 */
+	font-weight: 700;
+	flex-basis: calc(100% - 1.5rem);
+	padding-left: .25em;
+	padding-right: .5em;
+	text-underline-position: from-font;
+	text-underline-offset: 0;
+	text-decoration-thickness: 1px;
+}
+.postlist-item-active .postlist-link {
+	font-weight: bold;
+}
+
+/* Tags */
+.post-tag {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	text-transform: capitalize;
+	font-style: italic;
+}
+.postlist-item > .post-tag {
+	align-self: center;
+}
+
+/* Tags list */
+.post-metadata {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: .5em;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.post-metadata time {
+	margin-right: 1em;
+}
+
+/* Direct Links / Markdown Headers */
+.header-anchor {
+	text-decoration: none;
+	font-style: normal;
+	font-size: 1em;
+	margin-left: .1em;
+}
+a[href].header-anchor,
+a[href].header-anchor:visited {
+	color: transparent;
+}
+a[href].header-anchor:focus,
+a[href].header-anchor:hover {
+	text-decoration: underline;
+}
+a[href].header-anchor:focus,
+:hover > a[href].header-anchor {
+	color: #aaa;
+}
+
+h2 + .header-anchor {
+	font-size: 1.5em;
+}
+
+.pyin {
+	font-family: var(--pinyin-font), cursive;
+}
+
+figure {
+	margin: -1.7em 0 0.7em 0;
+}
+
+figcaption {
+	font-style: italic;
+}
+
+figure img {
+	border: 1px solid #ccc;
+}</style>
+		<link href="https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700" rel="stylesheet" referrerpolicy="no-referrer">
+	</head>
+	<body>
+		<a href="#skip" class="visually-hidden">Skip to main content</a>
+
+		<header>
+			<a href="/" class="home-link">ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ</a>
+			<nav>
+				<h2 class="visually-hidden">Top level navigation menu</h2>
+				<ul class="nav">
+					<li class="nav-item"><a href="/">Home</a></li>
+					<li class="nav-item"><a href="/blog/">Archive</a></li>
+					<li class="nav-item"><a href="/about/">About Me</a></li>
+				</ul>
+			</nav>
+		</header>
+
+		<main id="skip">
+			
+<h1>v380 IPcam: Firmware patching</h1>
+
+<ul class="post-metadata">
+	<li><time datetime="2020-04-04">2020年04月</time></li>
+	<li><a href="/tags/security/" class="post-tag">security</a>, </li>
+	<li><a href="/tags/hardware/" class="post-tag">hardware</a>, </li>
+	<li><a href="/tags/v380-ipcam/" class="post-tag">v380 IPcam</a></li>
+</ul>
+
+<p>I made some progress:</p>
+<ul>
+<li>Running code from a micro SD card as root</li>
+<li>Downloading camera firmware</li>
+<li>Writing custom firmware patches</li>
+<li>Finding the root password hash</li>
+<li>Changing the root password</li>
+</ul>
+<!-- SUMMARY END -->
+<p>To see what's going on, you'll need to pop open the camera casing and connect USB UART to <code>screen</code> or similar as in <a href="/v380-ipcam-hardware-hackz/">#1</a>. Also you need a micro SD card.</p>
+<h2 id="prelude" tabindex="-1">Prelude <a class="header-anchor" href="#prelude">#</a></h2>
+<p>To actually get RTSP working on the camera, I had to <a href="https://community.netcamstudio.com/t/v380-stream-url/2778/37">patch the firmware</a> and <a href="https://mybroadband.co.za/forum/threads/v380-ip-camera.875288/#post-24129369">enable RTSP</a> via the <code>ceshi.ini</code> file. The patch file was provided on a forum from someone who emailed v380 tech support.</p>
+<h2 id="structure-of-patch-zip" tabindex="-1">Structure of patch zip <a class="header-anchor" href="#structure-of-patch-zip">#</a></h2>
+<p>Reverse-engineering that patch <code>AK3918E-V200_V.2.5.9.5 .zip</code> was my first step to understanding the camera.
+The zip file looks like this:</p>
+<pre><code>$ als AK3918E-V200_V.2.5.9.5\ .zip
+Archive:  AK3918E-V200_V.2.5.9.5 .zip
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+       50  2019-07-13 10:18   local_update.conf
+        0  2019-07-13 10:18   patch_reuse
+        0  2019-07-13 10:18   updatepatch/
+  3451562  2019-07-13 10:18   updatepatch/5d4315195544f84f54a52ac757ce200e.patch
+</code></pre>
+<p>where <code>local_update.conf</code> contains the name of the patch file (its MD5 hash)</p>
+<pre class="language-toml" tabindex="0"><code class="language-toml"><span class="token punctuation">[</span><span class="token table class-name">PATCH</span><span class="token punctuation">]</span>
+<span class="token key property">patchmd5</span><span class="token punctuation">=</span>5d4315195544f84f54a52ac757ce200e</code></pre>
+<p>To upgrade the camera, unzip to the root of an sd card, put the card in the camera and boot it up.
+You'll hear
+<audio id="gjgxks" src="{attach}sf_updatestart_cn.mp3" preload="none"></audio>
+<button class="play" style="background:none;border:none;cursor:pointer;" onclick="gjgxks.play()">▶</button>
+固件更新開始 (<span class="pyin"><span class="pyin4 pyineiv">gù</span><span class="pyin4">jiàn</span><span class="pyin1">gēng</span><span class="pyin1">xīn</span><span class="pyin1 pyineiv">kāi</span><span class="pyin3 pyineiv">shǐ</span></span>) and after a few minutes it should reboot itself.</p>
+<h3 id="binwalk-patch" tabindex="-1">Binwalk patch <a class="header-anchor" href="#binwalk-patch">#</a></h3>
+<p>The structure of the patch file wasn't clear (<code>file</code> just said it was data), so I ran <code>binwalk -e</code> on it.
+The most interesting file it extracted was a squashfs file system containing some ARM32 ELFs.</p>
+<pre><code>squashfs-root/apps:
+as9nvserver     gpiotest    log_server  prerun
+as9updatednsip  gzip        motor_test  recorder
+daemon          hu_updater  mqtt_test   vsipbroadcast
+eventhub_core   hwwtd       mvrtsp      wpa_cli_lite
+
+squashfs-root/lib:
+libcurl.so.4                 libmvs_ctk.so         libmvs_tls.so
+libHYWideAreaObjectTrack.so  libmvs_lch_client.so  libonvif.so
+libmval_eventhub.so          libmvs_lch.so         libopencv_core.so
+libmvs_assisttools.so        libmvs_mdq.so         libopencv_imgproc.so
+libmvs_clog.so               libmvs_memp.so
+libmvs_core.so               libmvs_pcc.so
+
+squashfs-root/modules:
+akcamera.ko        aw_gpio_moto_driver.ko  sensor_h42.ko     sensor_sc1135.ko
+akcamera_n1.ko     i2c-gpio-soft.ko        sensor_h62.ko     sensor_sc1145.ko
+akcamera_n2.ko     mv_motor_driver.ko      sensor_sc1035.ko  sensor_sc1235.ko
+ak_gpio_i2c.ko     otg-hs.ko               sensor_sc1037.ko  sensor_sc1245.ko
+ak_sar_adc_drv.ko  sensor_gc1034.ko        sensor_sc1045.ko
+</code></pre>
+<p>I then spent some time looking through strings with <code>rabin2 -zzz</code> and grepping for things.</p>
+<h2 id="hu-updater-prerun" tabindex="-1">hu_updater / prerun <a class="header-anchor" href="#hu-updater-prerun">#</a></h2>
+<p>I loaded <code>hu_updater</code> into Ghidra and it did really well at disassembling ARM code. (I should really have looked at <code>prerun</code>, but the relevant code is similar).</p>
+<h3 id="patch-file-format" tabindex="-1">Patch file format <a class="header-anchor" href="#patch-file-format">#</a></h3>
+<p>From this I was able to reverse-engineer the patch file format. It uses little-endian 32-bit integers and null-terminated strings.</p>
+<p>The header of size 0x80 needs the following parts:</p>
+<ul>
+<li>0x00: 0x0a</li>
+<li>0x04: <code>V380E2_C</code> / <code>V380E2_CA</code> This is the <code>hwname</code> defined in <code>/mnt/mtd/mvconf/patchmanage.conf</code> which depends on the firmware version you have. If this is wrong, there will be a log message containing the expected value: <code>patch not match &lt;V380E2_CA&gt;:&lt;V380E2_C&gt; failed.</code>.</li>
+<li>0x14: <code>0x1f4b59</code> a version</li>
+<li>0x18: Number of files in the patch</li>
+</ul>
+<p>Each file contains a header of size 0x40 before the file contents:</p>
+<ul>
+<li>The filename</li>
+<li>0x38: File size</li>
+</ul>
+<p>As an example, the patch file from the zip file looks like:</p>
+<pre class="language-hexdump" tabindex="0"><code class="language-hexdump">00000000  0a 00 00 00 56 33 38 30  45 32 5f 43 00 00 00 00  |....V380E2_C....|
+00000010  00 00 00 00 59 4b 1f 00  15 00 00 00 aa aa 34 00  |....YK........4.|
+00000020  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+00000080  65 78 73 68 65 6c 6c 5f  61 66 75 2e 73 68 00 00  |exshell_afu.sh..|
+00000090  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+000000b0  00 00 00 00 00 00 00 00  1b 05 00 00 87 7f 00 00  |................| # Length 0x051b
+000000c0  23 21 2f 62 69 6e 2f 73  68 0a 0a 6e 65 65 64 5f  |#!/bin/sh..need_|
+... Contents of exshell_afu.sh ...
+000005c0  6d 74 64 2f 6d 76 63 6f  6e 66 2f 70 61 74 63 68  |mtd/mvconf/patch|
+000005d0  6d 61 6e 61 67 65 2e 63  6f 6e 66 65 78 73 68 65  |manage.confexshe| # EOF / next header
+000005e0  6c 6c 5f 62 66 75 2e 73  68 00 00 00 00 00 00 00  |ll_bfu.sh.......|
+...</code></pre>
+<p>I wrote a tool <a href="https://github.com/bcaller/v380-ipcam-firmware-patch/"><img alt=":octocat:" src="https://github.githubassets.com/images/icons/emoji/octocat.png?v8" style="max-width: 1em; max-height: 1em; display: inline-block;">bcaller/v380-ipcam-firmware-patch</a> so you can see the files in your patch.</p>
+<h3 id="updater-sequence" tabindex="-1">Updater sequence <a class="header-anchor" href="#updater-sequence">#</a></h3>
+<ol>
+<li>The patch MD5 and hwname are checked</li>
+<li>Files are extracted from the patch to subfolders of <code>/tmp/hu_files_tmpdir/</code> depending on their prefix</li>
+<li>If it exists, <code>exshell_bfu.sh</code> is executed (bfu = before update)</li>
+<li>Generic files and sound files are copied over to <code>/mnt/mtd/</code> and <code>/mnt/mtd/mvsound/</code> respectively</li>
+<li>Kernel and <a href="https://en.wikipedia.org/wiki/Memory_Technology_Device">MTD</a> images are flashed using <code>/sbin/updater</code></li>
+<li>If it exists, <code>exshell_afu.sh</code> is executed</li>
+</ol>
+<h2 id="run-code-as-root" tabindex="-1">Run code as root <a class="header-anchor" href="#run-code-as-root">#</a></h2>
+<p>Let's have fun and make a patch containing <code>exshell_bfu.sh</code> e.g.:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token shebang important">#!/bin/sh</span>
+<span class="token builtin class-name">set</span> <span class="token parameter variable">-x</span>
+<span class="token builtin class-name">echo</span> HELLO
+/mnt/mtd/audiofile_player /mnt/mtd/mvsound/sf_sysstarting_en.wav <span class="token number">0</span>
+<span class="token function">whoami</span>
+<span class="token function">ls</span> /
+<span class="token function">ls</span> /etc/
+<span class="token function">ls</span> /mnt/
+<span class="token function">cat</span> /etc/passwd
+<span class="token function">cat</span> /etc/shadow
+<span class="token function">ps</span> waxfu
+<span class="token function">sleep</span> <span class="token number">30</span></code></pre>
+<p>Use <a href="https://github.com/bcaller/v380-ipcam-firmware-patch/">patchv380</a>, copy the patch to <code>/sdcard/updatepatch/</code> and alter the <code>patchmd5</code> in <code>local_update.conf</code>. Then boot up the camera. The <code>sleep 30</code> is there so that you have time to unplug the camera before it runs post-update code (probably not harmful either way).</p>
+<pre><code>IFCReadStringOnce Warning:no such file(/tmp/hu_files_tmpdir/exshells/patchrule.sh)
++ echo HELLO
+HELLO
++ /mnt/mtd/audiofile_player /mnt/mtd/mvsound/sf_sysstarting_en.wav 0
+=== play type : 0 ===
+--AudioFilter Version V1.8.00_svn5047, type:8000--
+## ERROR: CHIP(106552) unsupported
+can't open the sd filter!
+open sdfilter failed!!!!
+Play Finished
++ whoami
+root
++ ls /
+bin   dev   etc   ext   init  lib   mnt   mvs   proc  sbin  sys   tmp   usr   var
++ ls /etc/
+bak            hosts          ld.so.conf     profile        sysconfig
+fstab          init.d         mdev.conf      resolv.conf
+group          inittab        nsswitch.conf  services
+host.conf      jffs2          passwd         shadow
++ ls /mnt/
+mtd     nand    sdcard
++ cat /etc/passwd
+root:x:0:0:root:/:/bin/sh
+daemon:x:1:1:daemon:/usr/sbin:/bin/sh
+bin:x:2:2:bin:/bin:/bin/sh
+nobody:x:99:99:nobody:/home:/bin/sh
+
++ cat /etc/shadow
+root:$5$EvgtGUo1zRnZRW$Ge399ZNp3EYQP1NJt7MF1fbYjfnhtloG5m1N2KCp9l0:10933:0:99999:7:::
+bin:*:10933:0:99999:7:::
+daemon:*:10933:0:99999:7:::
+nobody:*:10933:0:99999:7:::
+
++ps waxfu
+PID   USER     TIME   COMMAND
+    1 root       0:01 init
+...  # I removed the kernel threads in [square brackets] for brevity
+  362 root       0:00 syslogd -n -O /var/log/messages -s 200 -b 3
+  363 root       0:00 klogd -n
+  371 root       0:00 {vg_boot.sh} /bin/sh /mnt/mtd/vg_boot.sh
+  375 root       0:00 /tmp/prerun
+  388 root       0:00 sh -c /tmp/hu_files_tmpdir/exshells/exshell_bfu.sh
+  389 root       0:00 {exshell_bfu.sh} /bin/sh /tmp/hu_files_tmpdir/exshells/ex
+  402 root       0:00 /sbin/getty -L ttySAK0 115200 vt100
+  404 root       0:00 ps waxfu
+</code></pre>
+<p>That <code>sha256crypt</code> password in the shadow file (<code>$5$EvgtGUo1zRnZRW$Ge399ZNp3EYQP1NJt7MF1fbYjfnhtloG5m1N2KCp9l0</code>) looks tough, so I tried to change the password but failed.</p>
+<pre><code>Changing password for root
+New password: 
+Retype password: 
+passwd: /etc/passwd: Read-only file system
+passwd: can't update password file /etc/passwd
+</code></pre>
+<p>Not too upset as I have root anyway. We'll come back to it.</p>
+<h2 id="firmware-flasher" tabindex="-1">Firmware flasher <a class="header-anchor" href="#firmware-flasher">#</a></h2>
+<p>I extracted the hardware flasher <code>cp /sbin/updater /mnt/sdcard/updater</code> and loaded it into Ghidra to see how firmware updates work.
+Updating the kernel, nand, serial number, LOGO (not sure what that is) and mac address use <code>ioctl</code> magic, whereas updating the MTDs looks simpler.</p>
+<p>There are 5 mtd parts:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">MTD</th>
+<th style="text-align:center">Update file prefix</th>
+<th style="text-align:center">Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:center">IMG_RFS</td>
+<td style="text-align:center">SquashFS</td>
+</tr>
+<tr>
+<td style="text-align:center">2</td>
+<td style="text-align:center">IMG_USR</td>
+<td style="text-align:center">SquashFS</td>
+</tr>
+<tr>
+<td style="text-align:center">3</td>
+<td style="text-align:center">IMG_MVS</td>
+<td style="text-align:center">SquashFS</td>
+</tr>
+<tr>
+<td style="text-align:center">4</td>
+<td style="text-align:center">IMG_EXT</td>
+<td style="text-align:center">SquashFS</td>
+</tr>
+<tr>
+<td style="text-align:center">5</td>
+<td style="text-align:center">IMG_JFS</td>
+<td style="text-align:center">jffs2</td>
+</tr>
+</tbody>
+</table>
+<p>To update mtd1, the patch must contain a squashfs file with filename beginning with <code>IMG_RFS</code>.
+<code>/dev/mtd1</code> is erased using an <code>ioctl</code>, but then we just write the squashfs file system to <code>/dev/mtd1</code>.</p>
+<h3 id="grabbing-the-firmware" tabindex="-1">Grabbing the firmware <a class="header-anchor" href="#grabbing-the-firmware">#</a></h3>
+<pre><code>+ ls /dev/
+akfha_char          mem                 mtdblock0           random
+akgpio              mmcblk0             mtdblock1           rfkill
+akpcm_cdev0         mmcblk0p1           mtdblock2           root
+akpcm_cdev1         mtd0                mtdblock3           rtc0
+console             mtd0ro              mtdblock4           tty
+cpu_dma_latency     mtd1                mtdblock5           ttySAK0
+full                mtd1ro              network_latency     ttyp0
+i2c-0               mtd2                network_throughput  ttyp1
+ion                 mtd2ro              null                ttyprintk
+isp_char            mtd3                ptmx                uio0
+kmsg                mtd3ro              pts                 urandom
+log                 mtd4                ptyp0               watchdog
+loop-control        mtd4ro              ptyp1               zero
+loop0               mtd5                ram0
+loop1               mtd5ro              ram1
+</code></pre>
+<p>The &quot;files&quot; <code>/dev/mtd?</code> are character devices, so function like byte streams.
+We can make an exshell_bfu.sh patch e.g. <code>cat /dev/mtd4ro &gt; /mnt/sdcard/mtd4</code> to extract the contents of the MTD parts.</p>
+<h2 id="changing-the-root-password" tabindex="-1">Changing the root password <a class="header-anchor" href="#changing-the-root-password">#</a></h2>
+<p>If I want to set the root password to <code>Hello.123</code>, The shadow file hash can be changed to:</p>
+<pre><code>$ mkpasswd --method=sha256crypt --salt=EvgtGUo1zRnZRW Hello.123
+$5$EvgtGUo1zRnZRW$2A2sE5yjjsR2K6QJH0Te2rKOUGaCRXiEIgdr9e5KlO0
+</code></pre>
+<p>Looking through the files in the MTDs downloaded to the sdcard (with <code>unsquashfs -lls</code>), I found <code>/etc/password</code> in mtd1.
+Now we can make a cheeky update patch:</p>
+<pre><code>$ sudo unsquashfs -d mtdA mtd1
+Parallel unsquashfs: Using 4 processors
+206 inodes (230 blocks) to write
+created 58 files
+created 26 directories
+created 148 symlinks
+created 0 devices
+created 0 fifos
+$ sed -i 's/^root:[^:]*:/root:$5$EvgtGUo1zRnZRW$2A2sE5yjjsR2K6QJH0Te2rKOUGaCRXiEIgdr9e5KlO0:/' mtdA/etc/shadow
+$ mksquashfs mtdA IMG_RFS_mtd1.squashfs -b 128K -comp xz
+</code></pre>
+<p>We used <code>sudo</code> so that we unsquash files with the correct owners (e.g. <code>uid=0</code>). Check that the output of <code>unsquashfs -s</code> looks the same for the old <code>mtd1</code> and patched <code>IMG_RFS_mtd1.squashfs</code>.</p>
+<pre><code>$ patchv380 IMG_RFS_mtd1.squashfs -h V380E2_CA
+</code></pre>
+<h3 id="lets-run-it" tabindex="-1">Let's run it <a class="header-anchor" href="#lets-run-it">#</a></h3>
+<p>Patch copied over to the sdcard correctly (as explained in the zip section above). Camera booting up.</p>
+<pre><code>copy finished normally.
+copy finished normally.
+==== access [/dev/mtd1]
+[updater]erase mtd start...........................erase success!
+
+write mtd start.........................................write OK!
+hardware update finished normally === has img:[1] , has spec:[2]
+=== update success! ===
+sdcard update finished!
+...
+Restarting system.
+</code></pre>
+<p>Now we've successfully flashed our system! Time for some fun...</p>
+<pre><code>V380E login: root
+Password:
+
+welcome to file system
+[root@V380E ~]$
+</code></pre>
+<p>🎉</p>
+
+<ul class="links-nextprev"><li>Previous: <a href="/v380-ipcam-move-with-soap/">v380 IPcam: Move with SOAP</a></li><li>Next: <a href="/socketio-engineio-dos/">SocketIO / EngineIO DoS</a></li>
+</ul>
+
+		</main>
+
+		<footer></footer>
+
+		<!-- Current page: /v380-ipcam-firmware-patching/ -->
+	</body>
+</html>

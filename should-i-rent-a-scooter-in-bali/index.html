@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Should I rent a scooter in Bali?</title>
+		<meta name="description" content="I am writing about my experiences as a naval navel-gazer.">
+		<link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		<link rel="alternate" href="/feed/feed.json" type="application/json" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		
+		<style>/**
+ * okaidia theme for JavaScript, CSS and HTML
+ * Loosely based on Monokai textmate theme by http://www.monokai.nl/
+ * @author ocodia
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: #f8f8f2;
+	background: none;
+	text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	font-size: 1em;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: 1em;
+	margin: .5em 0;
+	overflow: auto;
+	border-radius: 0.3em;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #272822;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .1em;
+	border-radius: .3em;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: #8292a2;
+}
+
+.token.punctuation {
+	color: #f8f8f2;
+}
+
+.token.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #f92672;
+}
+
+.token.boolean,
+.token.number {
+	color: #ae81ff;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #a6e22e;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.variable {
+	color: #f8f8f2;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.function,
+.token.class-name {
+	color: #e6db74;
+}
+
+.token.keyword {
+	color: #66d9ef;
+}
+
+.token.regex,
+.token.important {
+	color: #fd971f;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+/*
+ * New diff- syntax
+ */
+
+pre[class*="language-diff-"] {
+	--eleventy-code-padding: 1.25em;
+	padding-left: var(--eleventy-code-padding);
+	padding-right: var(--eleventy-code-padding);
+}
+.token.deleted {
+	background-color: hsl(0, 51%, 37%);
+	color: inherit;
+}
+.token.inserted {
+	background-color: hsl(126, 31%, 39%);
+	color: inherit;
+}
+
+/* Make the + and - characters unselectable for copy/paste */
+.token.prefix.unchanged,
+.token.prefix.inserted,
+.token.prefix.deleted {
+	-webkit-user-select: none;
+	user-select: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+.token.prefix.inserted,
+.token.prefix.deleted {
+	width: var(--eleventy-code-padding);
+	background-color: rgba(0,0,0,.2);
+}
+
+/* Optional: full-width background color */
+.token.inserted:not(.prefix),
+.token.deleted:not(.prefix) {
+	display: block;
+	margin-left: calc(-1 * var(--eleventy-code-padding));
+	margin-right: calc(-1 * var(--eleventy-code-padding));
+	text-decoration: none; /* override del, ins, mark defaults */
+	color: inherit; /* override del, ins, mark defaults */
+}
+* { box-sizing: border-box; }
+/* Defaults */
+:root {
+	--font-family: -apple-system, system-ui, sans-serif;
+	--font-family-monospace: Consolas, Menlo, Monaco, Andale Mono WT, Andale Mono, Lucida Console, Lucida Sans Typewriter, DejaVu Sans Mono, Bitstream Vera Sans Mono, Liberation Mono, Nimbus Mono L, Courier New, Courier, monospace;
+}
+
+/* Theme colors */
+:root {
+	--color-gray-20: #e0e0e0;
+	--color-gray-50: #C0C0C0;
+	--color-gray-90: #333;
+
+	--background-color: #fff;
+
+	--text-color: var(--color-gray-90);
+	--text-color-link: #082840;
+	--text-color-link-active: #5f2b48;
+	--text-color-link-visited: #17050F;
+
+	--syntax-tab-size: 2;
+
+	--pinyin-font: 'Arima Madurai';
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-gray-20: #e0e0e0;
+		--color-gray-50: #C0C0C0;
+		--color-gray-90: #dad8d8;
+
+		/* --text-color is assigned to --color-gray-_ above */
+		--text-color-link: #1493fb;
+		--text-color-link-active: #6969f7;
+		--text-color-link-visited: #a6a6f8;
+
+		--background-color: #15202b;
+	}
+}
+
+
+/* Global stylesheet */
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	padding: 0;
+	margin: 0 auto;
+	font-family: var(--font-family);
+	color: var(--text-color);
+	background-color: var(--background-color);
+}
+html {
+	overflow-y: scroll;
+}
+body {
+	max-width: 55em;
+}
+
+/* https://www.a11yproject.com/posts/how-to-hide-content/ */
+.visually-hidden {
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
+p:last-child {
+	margin-bottom: 0;
+}
+p {
+	line-height: 1.5;
+}
+
+li {
+	line-height: 1.5;
+}
+
+a[href] {
+	color: var(--text-color-link);
+}
+a[href]:visited {
+	color: var(--text-color-link-visited);
+}
+a[href]:hover,
+a[href]:active {
+	color: var(--text-color-link-active);
+}
+
+main {
+	padding: 1rem;
+}
+main :first-child {
+	margin-top: 0;
+}
+
+header {
+	border-bottom: 1px dashed var(--color-gray-20);
+}
+header:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.links-nextprev {
+	list-style: none;
+	border-top: 1px dashed var(--color-gray-20);
+	padding: 1em 0;
+}
+
+table {
+	margin: 1em 0;
+}
+table td,
+table th {
+	padding-right: 1em;
+}
+
+pre,
+code {
+	font-family: var(--font-family-monospace);
+}
+pre:not([class*="language-"]) {
+	margin: .5em 0;
+	line-height: 1.375; /* 22px /16 */
+	-moz-tab-size: var(--syntax-tab-size);
+	-o-tab-size: var(--syntax-tab-size);
+	tab-size: var(--syntax-tab-size);
+	-webkit-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+	direction: ltr;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+}
+code {
+	word-break: break-all;
+}
+p > code {
+	color: #722;
+	text-decoration: underline #7222;
+}
+
+/* Header */
+header {
+	display: flex;
+	gap: 1em .5em;
+	flex-wrap: wrap;
+	align-items: center;
+	padding: 1em;
+}
+.home-link {
+	font-size: 1em; /* 16px /16 */
+	font-weight: 700;
+	margin-right: 2em;
+}
+.home-link:link:not(:hover) {
+	text-decoration: none;
+}
+
+/* Nav */
+.nav {
+	display: flex;
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+.nav-item {
+	display: inline-block;
+	margin-right: 1em;
+}
+.nav-item a[href]:not(:hover) {
+	text-decoration: none;
+}
+.nav a[href][aria-current="page"] {
+	text-decoration: underline;
+}
+
+/* Posts list */
+.postlist {
+	list-style: none;
+	padding: 0;
+	padding-left: 1.5rem;
+}
+.postlist-item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	counter-increment: start-from -1;
+	margin-bottom: 1em;
+}
+.postlist-item:before {
+	display: inline-block;
+	pointer-events: none;
+	content: "" counter(start-from, decimal-leading-zero) ". ";
+	line-height: 100%;
+	text-align: right;
+	margin-left: -1.5rem;
+}
+.postlist-date,
+.postlist-item:before {
+	font-size: 0.8125em; /* 13px /16 */
+	color: var(--color-gray-90);
+}
+.postlist-date {
+	word-spacing: -0.5px;
+}
+.postlist-link {
+	font-size: 1.1875em; /* 19px /16 */
+	font-weight: 700;
+	flex-basis: calc(100% - 1.5rem);
+	padding-left: .25em;
+	padding-right: .5em;
+	text-underline-position: from-font;
+	text-underline-offset: 0;
+	text-decoration-thickness: 1px;
+}
+.postlist-item-active .postlist-link {
+	font-weight: bold;
+}
+
+/* Tags */
+.post-tag {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	text-transform: capitalize;
+	font-style: italic;
+}
+.postlist-item > .post-tag {
+	align-self: center;
+}
+
+/* Tags list */
+.post-metadata {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: .5em;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.post-metadata time {
+	margin-right: 1em;
+}
+
+/* Direct Links / Markdown Headers */
+.header-anchor {
+	text-decoration: none;
+	font-style: normal;
+	font-size: 1em;
+	margin-left: .1em;
+}
+a[href].header-anchor,
+a[href].header-anchor:visited {
+	color: transparent;
+}
+a[href].header-anchor:focus,
+a[href].header-anchor:hover {
+	text-decoration: underline;
+}
+a[href].header-anchor:focus,
+:hover > a[href].header-anchor {
+	color: #aaa;
+}
+
+h2 + .header-anchor {
+	font-size: 1.5em;
+}
+
+.pyin {
+	font-family: var(--pinyin-font), cursive;
+}
+
+figure {
+	margin: -1.7em 0 0.7em 0;
+}
+
+figcaption {
+	font-style: italic;
+}
+
+figure img {
+	border: 1px solid #ccc;
+}</style>
+		<link href="https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700" rel="stylesheet" referrerpolicy="no-referrer">
+	</head>
+	<body>
+		<a href="#skip" class="visually-hidden">Skip to main content</a>
+
+		<header>
+			<a href="/" class="home-link">ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ</a>
+			<nav>
+				<h2 class="visually-hidden">Top level navigation menu</h2>
+				<ul class="nav">
+					<li class="nav-item"><a href="/">Home</a></li>
+					<li class="nav-item"><a href="/blog/">Archive</a></li>
+					<li class="nav-item"><a href="/about/">About Me</a></li>
+				</ul>
+			</nav>
+		</header>
+
+		<main id="skip">
+			
+<h1>Should I rent a scooter in Bali?</h1>
+
+<ul class="post-metadata">
+	<li><time datetime="2018-10-09">2018年10月</time></li>
+	<li><a href="/tags/travel/" class="post-tag">travel</a>, </li>
+	<li><a href="/tags/bali/" class="post-tag">bali</a></li>
+</ul>
+
+<p><strong>Yes.</strong></p>
+<p>Two reasons:</p>
+<ul>
+<li>Not having a scooter in Bali sucks</li>
+<li>Having a scooter in Bali is fun</li>
+</ul>
+<p>Luckily, this is what you wanted to hear!</p>
+<h2 id="not-having-a-scooter-in-bali-sucks" tabindex="-1">Not having a scooter in Bali sucks <a class="header-anchor" href="#not-having-a-scooter-in-bali-sucks">#</a></h2>
+<p>Walking down the streets, you're going to hear constant hooting from taxis touting for business.
+If you don't have a scooter, you're going to be relying on taxis to transport you around as you realise walking in the heat was over-ambitious.
+The taxi prices are of course much cheaper than your London black cab, but the experience is constantly frustrating.</p>
+<p>Each ride begins with bargaining the price which I find annoying.
+It's certainly not in your favour if you want a fair local price.
+Then there is the confusion over the taxi companies. Blue Bird Group is supposedly the reputable taxi company in Bali with their blue taxis.
+However you also see purple-ish taxis blatantly driving around the tourist areas with the name &quot;Blue BIRO Group&quot; (not BIRD) to catch you out.</p>
+<p>There are taxi hailing apps. The first one I tried was the official Blue Bird Group app.
+It works like Uber, and you can pay with the credit card linked with the app.
+The app is buggy though. I tried to order a taxi to my hotel and four arrived, completely overwhelming the tiny hotel parking bay.
+The security guard was trying to help my fifth taxi enter the car park when I explained what had happened.
+It all worked out, and since the fare was metered and paid automatically by card there was no haggling or dodgy dealing.
+I did eventually dare try the app again, but it seems to only have cars in certain areas.</p>
+<p>Go-jek is an Indonesian everything-app like the Chinese WeChat. The original feature is hailing moto-taxis, who wear Go-jek branded clothing and helmets.
+Since topping up the wallet seemed complicated, I made a booking where I was supposed to pay the driver by cash. The price was cheap but I didn't actually ever get picked up.
+After a series of driver cancellations and what seemed to be a driver pretending he'd picked me up when he hadn't (possibly a bug) I decided it was probably for the best that I don't use a moto-taxi.
+The one time I rode on the back of a motorbike in Bali was terrifying and I was in constant fear of my knees smashing into something.
+Grab also operates cars and moto-taxis in Bali and the quoted prices are super cheap even between cities. You see lots of anti-Grab and anti-Uber signs around.
+The drivers turned up but they all renegotiated / begged the price up.</p>
+<p>It's not a great situation. On top of that, the roads can't really cope with the volume of cars. Your cab will be stuck in perpetual traffic jams while you see the scooters freely zooming around.</p>
+<h2 id="now-onto-the-fun" tabindex="-1">Now onto the fun <a class="header-anchor" href="#now-onto-the-fun">#</a></h2>
+<p>The situation finally wore me down so I gave in and rented a scooter on my final 2 days in Bali. It was a brilliant decision and <em>wish I'd dared to rent one earlier</em>.
+I rented from the first shop I came across near my hotel (not just some guy) in Sanur for 60,000 IDR / day. No insurance included.
+My IDP and passport were scanned and I paid, but didn't leave any deposit. Make sure to take a helmet!
+I spent 15,000 IDR on half a tank of petrol. I probably did about 200km.
+So total for 2 days was £7.</p>
+<h3 id="you-want-a-scooter" tabindex="-1">You want a scooter <a class="header-anchor" href="#you-want-a-scooter">#</a></h3>
+<p>Scooter = independent travel.
+Complete freedom to go where you want whenever you want without needing to haggle.
+On longer trips you aren't just going from A to B, it's a journey.
+You can stop anywhere to enjoy the beautiful scenery, take an ill-advised detour down an interesting looking track, take selfies, have a snack and chat at a friendly roadside warung.
+Pay the local price. Since you're able to explore local shops away from touristland your adventurousness is rewarded handsomely in 5,000 IDR ice creams.
+The big difference compared to a car is that with a scooter you're much freer to park anywhere on the roadside and to stop or U-turn in the road if you shoot past your turning.</p>
+<p>Try the road trip to <a href="https://goo.gl/maps/V7HuESrGHA17gpMaA">Bukit Putung</a> recommended by Lonely Planet.</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/XfzgRAd7Tw-1200.avif 1200w"><source type="image/webp" srcset="/img/XfzgRAd7Tw-1200.webp 1200w"><img alt="You can stop at the roadside and take pictures like this!" loading="lazy" decoding="async" src="/img/XfzgRAd7Tw-1200.jpeg" width="1200" height="900"></picture><figcaption>You can stop at the roadside and take pictures like this!</figcaption></figure></p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/0YxkJdhMSG-1200.avif 1200w"><source type="image/webp" srcset="/img/0YxkJdhMSG-1200.webp 1200w"><img alt="Cool." loading="lazy" decoding="async" src="/img/0YxkJdhMSG-1200.jpeg" width="1200" height="900"></picture><figcaption>Cool.</figcaption></figure></p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/gUsjZYc6Qm-1200.avif 1200w"><source type="image/webp" srcset="/img/gUsjZYc6Qm-1200.webp 1200w"><img alt="Can just stop at this Warung for some non-touristy grub." loading="lazy" decoding="async" src="/img/gUsjZYc6Qm-1200.jpeg" width="1200" height="900"></picture><figcaption>Can just stop at this Warung for some non-touristy grub.</figcaption></figure></p>
+<h2 id="tips" tabindex="-1">Tips <a class="header-anchor" href="#tips">#</a></h2>
+<p>Knee-burn: Wear full-length trousers or put suncream on your knees since they'll be in direct sunglight. Don't get burned like me.
+On the mountain roads e.g. towards Bukit Putung hoot your horn and don't cut corners at blind bends.
+When you park at a hotel or busy ice-cream shop there is usually a parking attendant. He might move the bikes around to make efficient use of parking space.
+Ride carefully. Continue riding carefully even as you gain in confidence.
+It seemed a little less safe than my previous scooter destination of Taiwan due to the lack of designated cycle / scooter lanes and slightly worse infrastructure.
+It seems chaotic, but drivers are very aware of the omnipresence of scooters in Asia unlike places where they are rare.</p>
+<p><strong>Your travel insurance probably doesn't cover you unless you have a full motorcycle licence in your home country, so maybe disregard this post.</strong></p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/Pi13Cy3yZS-1200.avif 1200w"><source type="image/webp" srcset="/img/Pi13Cy3yZS-1200.webp 1200w"><img alt="Why did the chicken cross the road?" loading="lazy" decoding="async" src="/img/Pi13Cy3yZS-1200.jpeg" width="1200" height="754"></picture><figcaption>Why did the chicken cross the road?</figcaption></figure></p>
+
+<ul class="links-nextprev"><li>Previous: <a href="/avoiding-injection-with-taint-analysis/">Avoiding injection with taint analysis</a></li><li>Next: <a href="/man-in-the-middling-android-apps/">Man-in-the-middling Android apps</a></li>
+</ul>
+
+		</main>
+
+		<footer></footer>
+
+		<!-- Current page: /should-i-rent-a-scooter-in-bali/ -->
+	</body>
+</html>

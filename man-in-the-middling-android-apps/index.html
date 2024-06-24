@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Man-in-the-middling Android apps</title>
+		<meta name="description" content="I am writing about my experiences as a naval navel-gazer.">
+		<link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		<link rel="alternate" href="/feed/feed.json" type="application/json" title="ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ">
+		
+		<style>/**
+ * okaidia theme for JavaScript, CSS and HTML
+ * Loosely based on Monokai textmate theme by http://www.monokai.nl/
+ * @author ocodia
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: #f8f8f2;
+	background: none;
+	text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	font-size: 1em;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: 1em;
+	margin: .5em 0;
+	overflow: auto;
+	border-radius: 0.3em;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #272822;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .1em;
+	border-radius: .3em;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: #8292a2;
+}
+
+.token.punctuation {
+	color: #f8f8f2;
+}
+
+.token.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #f92672;
+}
+
+.token.boolean,
+.token.number {
+	color: #ae81ff;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #a6e22e;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.variable {
+	color: #f8f8f2;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.function,
+.token.class-name {
+	color: #e6db74;
+}
+
+.token.keyword {
+	color: #66d9ef;
+}
+
+.token.regex,
+.token.important {
+	color: #fd971f;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+/*
+ * New diff- syntax
+ */
+
+pre[class*="language-diff-"] {
+	--eleventy-code-padding: 1.25em;
+	padding-left: var(--eleventy-code-padding);
+	padding-right: var(--eleventy-code-padding);
+}
+.token.deleted {
+	background-color: hsl(0, 51%, 37%);
+	color: inherit;
+}
+.token.inserted {
+	background-color: hsl(126, 31%, 39%);
+	color: inherit;
+}
+
+/* Make the + and - characters unselectable for copy/paste */
+.token.prefix.unchanged,
+.token.prefix.inserted,
+.token.prefix.deleted {
+	-webkit-user-select: none;
+	user-select: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+.token.prefix.inserted,
+.token.prefix.deleted {
+	width: var(--eleventy-code-padding);
+	background-color: rgba(0,0,0,.2);
+}
+
+/* Optional: full-width background color */
+.token.inserted:not(.prefix),
+.token.deleted:not(.prefix) {
+	display: block;
+	margin-left: calc(-1 * var(--eleventy-code-padding));
+	margin-right: calc(-1 * var(--eleventy-code-padding));
+	text-decoration: none; /* override del, ins, mark defaults */
+	color: inherit; /* override del, ins, mark defaults */
+}
+* { box-sizing: border-box; }
+/* Defaults */
+:root {
+	--font-family: -apple-system, system-ui, sans-serif;
+	--font-family-monospace: Consolas, Menlo, Monaco, Andale Mono WT, Andale Mono, Lucida Console, Lucida Sans Typewriter, DejaVu Sans Mono, Bitstream Vera Sans Mono, Liberation Mono, Nimbus Mono L, Courier New, Courier, monospace;
+}
+
+/* Theme colors */
+:root {
+	--color-gray-20: #e0e0e0;
+	--color-gray-50: #C0C0C0;
+	--color-gray-90: #333;
+
+	--background-color: #fff;
+
+	--text-color: var(--color-gray-90);
+	--text-color-link: #082840;
+	--text-color-link-active: #5f2b48;
+	--text-color-link-visited: #17050F;
+
+	--syntax-tab-size: 2;
+
+	--pinyin-font: 'Arima Madurai';
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-gray-20: #e0e0e0;
+		--color-gray-50: #C0C0C0;
+		--color-gray-90: #dad8d8;
+
+		/* --text-color is assigned to --color-gray-_ above */
+		--text-color-link: #1493fb;
+		--text-color-link-active: #6969f7;
+		--text-color-link-visited: #a6a6f8;
+
+		--background-color: #15202b;
+	}
+}
+
+
+/* Global stylesheet */
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	padding: 0;
+	margin: 0 auto;
+	font-family: var(--font-family);
+	color: var(--text-color);
+	background-color: var(--background-color);
+}
+html {
+	overflow-y: scroll;
+}
+body {
+	max-width: 55em;
+}
+
+/* https://www.a11yproject.com/posts/how-to-hide-content/ */
+.visually-hidden {
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
+p:last-child {
+	margin-bottom: 0;
+}
+p {
+	line-height: 1.5;
+}
+
+li {
+	line-height: 1.5;
+}
+
+a[href] {
+	color: var(--text-color-link);
+}
+a[href]:visited {
+	color: var(--text-color-link-visited);
+}
+a[href]:hover,
+a[href]:active {
+	color: var(--text-color-link-active);
+}
+
+main {
+	padding: 1rem;
+}
+main :first-child {
+	margin-top: 0;
+}
+
+header {
+	border-bottom: 1px dashed var(--color-gray-20);
+}
+header:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.links-nextprev {
+	list-style: none;
+	border-top: 1px dashed var(--color-gray-20);
+	padding: 1em 0;
+}
+
+table {
+	margin: 1em 0;
+}
+table td,
+table th {
+	padding-right: 1em;
+}
+
+pre,
+code {
+	font-family: var(--font-family-monospace);
+}
+pre:not([class*="language-"]) {
+	margin: .5em 0;
+	line-height: 1.375; /* 22px /16 */
+	-moz-tab-size: var(--syntax-tab-size);
+	-o-tab-size: var(--syntax-tab-size);
+	tab-size: var(--syntax-tab-size);
+	-webkit-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+	direction: ltr;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+}
+code {
+	word-break: break-all;
+}
+p > code {
+	color: #722;
+	text-decoration: underline #7222;
+}
+
+/* Header */
+header {
+	display: flex;
+	gap: 1em .5em;
+	flex-wrap: wrap;
+	align-items: center;
+	padding: 1em;
+}
+.home-link {
+	font-size: 1em; /* 16px /16 */
+	font-weight: 700;
+	margin-right: 2em;
+}
+.home-link:link:not(:hover) {
+	text-decoration: none;
+}
+
+/* Nav */
+.nav {
+	display: flex;
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+.nav-item {
+	display: inline-block;
+	margin-right: 1em;
+}
+.nav-item a[href]:not(:hover) {
+	text-decoration: none;
+}
+.nav a[href][aria-current="page"] {
+	text-decoration: underline;
+}
+
+/* Posts list */
+.postlist {
+	list-style: none;
+	padding: 0;
+	padding-left: 1.5rem;
+}
+.postlist-item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	counter-increment: start-from -1;
+	margin-bottom: 1em;
+}
+.postlist-item:before {
+	display: inline-block;
+	pointer-events: none;
+	content: "" counter(start-from, decimal-leading-zero) ". ";
+	line-height: 100%;
+	text-align: right;
+	margin-left: -1.5rem;
+}
+.postlist-date,
+.postlist-item:before {
+	font-size: 0.8125em; /* 13px /16 */
+	color: var(--color-gray-90);
+}
+.postlist-date {
+	word-spacing: -0.5px;
+}
+.postlist-link {
+	font-size: 1.1875em; /* 19px /16 */
+	font-weight: 700;
+	flex-basis: calc(100% - 1.5rem);
+	padding-left: .25em;
+	padding-right: .5em;
+	text-underline-position: from-font;
+	text-underline-offset: 0;
+	text-decoration-thickness: 1px;
+}
+.postlist-item-active .postlist-link {
+	font-weight: bold;
+}
+
+/* Tags */
+.post-tag {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	text-transform: capitalize;
+	font-style: italic;
+}
+.postlist-item > .post-tag {
+	align-self: center;
+}
+
+/* Tags list */
+.post-metadata {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: .5em;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.post-metadata time {
+	margin-right: 1em;
+}
+
+/* Direct Links / Markdown Headers */
+.header-anchor {
+	text-decoration: none;
+	font-style: normal;
+	font-size: 1em;
+	margin-left: .1em;
+}
+a[href].header-anchor,
+a[href].header-anchor:visited {
+	color: transparent;
+}
+a[href].header-anchor:focus,
+a[href].header-anchor:hover {
+	text-decoration: underline;
+}
+a[href].header-anchor:focus,
+:hover > a[href].header-anchor {
+	color: #aaa;
+}
+
+h2 + .header-anchor {
+	font-size: 1.5em;
+}
+
+.pyin {
+	font-family: var(--pinyin-font), cursive;
+}
+
+figure {
+	margin: -1.7em 0 0.7em 0;
+}
+
+figcaption {
+	font-style: italic;
+}
+
+figure img {
+	border: 1px solid #ccc;
+}</style>
+		<link href="https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700" rel="stylesheet" referrerpolicy="no-referrer">
+	</head>
+	<body>
+		<a href="#skip" class="visually-hidden">Skip to main content</a>
+
+		<header>
+			<a href="/" class="home-link">ℬ㏒.㎈ℓℯℛ.ⓧⓨℤ</a>
+			<nav>
+				<h2 class="visually-hidden">Top level navigation menu</h2>
+				<ul class="nav">
+					<li class="nav-item"><a href="/">Home</a></li>
+					<li class="nav-item"><a href="/blog/">Archive</a></li>
+					<li class="nav-item"><a href="/about/">About Me</a></li>
+				</ul>
+			</nav>
+		</header>
+
+		<main id="skip">
+			
+<h1>Man-in-the-middling Android apps</h1>
+
+<ul class="post-metadata">
+	<li><time datetime="2019-01-13">2019年01月</time></li>
+	<li><a href="/tags/android/" class="post-tag">android</a>, </li>
+	<li><a href="/tags/security/" class="post-tag">security</a></li>
+</ul>
+
+<p>This is a walk-through of how I go about investigating Android apps.
+I'm not a subject matter expert, so take everything here with a pinch of salt.
+As a case-study, I'll look at the <a href="https://play.google.com/store/apps/details?id=com.raildeliverygroup.railcard">Railcards</a> app which aims to replace physical railcards with ones which can run out of battery.</p>
+<p>I have no relationship with the Rail Delivery Group, and I won't be conducting an unsolicited penetration test. Nor should you. I will however man-in-the-middle the app so I can see all the communication between the app and its server. Combined with reverse-engineering, I can then understand how the app and service work.</p>
+<h2 id="development-environment" tabindex="-1">Development Environment <a class="header-anchor" href="#development-environment">#</a></h2>
+<p>In this section we'll set up a proxy server which will allow you to inspect app communication to and from your Android device (physical or emulator).</p>
+<h3 id="start-your-proxy" tabindex="-1">Start your proxy <a class="header-anchor" href="#start-your-proxy">#</a></h3>
+<p>Install ZAP (or mitmproxy or equivalent). In Options &gt; Local Proxies, choose the correct address. This is probably <code>localhost</code> to proxy emulator traffic, or your network adapter IP to proxy traffic from your phone.</p>
+<h3 id="emu" tabindex="-1">Emu <a class="header-anchor" href="#emu">#</a></h3>
+<p>It's helpful to have an Android emulator to play with. You don't need to be scared about breaking anything with an emulator and you can choose whichever Android version you want. As a starting point, I recommend the <a href="https://www.genymotion.com/fun-zone/">Genymotion Personal Edition</a>.</p>
+<p>You want to be able to connect to your device with <code>adb</code> which allows you to e.g. get a shell <code>adb shell</code>. For a physical device, install the <a href="https://developer.android.com/studio/releases/platform-tools">Android SDK Platform Tools</a>. Genymotion emulator has it's own version of adb.</p>
+<h3 id="route-wi-fi-traffic-through-proxy" tabindex="-1">Route Wi-Fi traffic through proxy <a class="header-anchor" href="#route-wi-fi-traffic-through-proxy">#</a></h3>
+<p>You need to modify the advanced options of your device's Wi-Fi connection. Set the proxy to Manual and enter the hostname and port.
+For the Genymotion emulator, put the special IP <code>10.0.3.2</code> for the hostname. Otherwise you probably want the IP of your ZAP proxy.
+I often put <code>*.google.com,*.googleapis.com,*.gstatic.com</code> in the bypass section if I need Google services and things are broken.</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/V5Hs8VOv32-869.avif 869w"><source type="image/webp" srcset="/img/V5Hs8VOv32-869.webp 869w"><img alt="Android proxy setup" loading="lazy" decoding="async" src="/img/V5Hs8VOv32-869.png" width="869" height="1354"></picture><figcaption>Android proxy setup</figcaption></figure></p>
+<p>Now, when you open your device's browser and visit <code>http://example.com</code>, you should see the request and response appear in ZAP.
+When you visit <code>https://caller.xyz</code> or another HTTPS site, the page should load but with a certificate error.</p>
+<h3 id="install-zap-ca-certificate" tabindex="-1">Install ZAP CA certificate <a class="header-anchor" href="#install-zap-ca-certificate">#</a></h3>
+<p>Clients can access HTTPS servers via the proxy using the CONNECT method. A normal proxy should allow creation of a secure client-server tunnel where the proxy can't read the plaintext communication. ZAP behaves differently: it connects the client and server via  a server-ZAP HTTPS connection and a ZAP-client HTTPS connection. Using two separate connections, ZAP can intercept plaintext communication from the server before forwarding it to the client and vice versa.</p>
+<p>Since ZAP doesn't have a valid certificate to pretend to be the server (in the ZAP-client connection), it dynamically generates a certificate. This would be flagged as insecure as it isn't signed by a trusted CA. To get around this, add your auto-generated ZAP CA certificate to your device's certificate store.</p>
+<ol>
+<li>Export ZAP certificate: Options &gt; Dynamic SSL Certificates &gt; Save</li>
+<li>Copy it over to the device with adb: <code>adb push path/to/zap.cer</code></li>
+<li>In your device's security settings there should be an option like &quot;Install from SD card&quot; which allows the certificate to be installed.</li>
+</ol>
+<p>Now the browser should load HTTPS sites without showing a certificate error.</p>
+<h2 id="poking-the-app" tabindex="-1">Poking the app <a class="header-anchor" href="#poking-the-app">#</a></h2>
+<h3 id="get-the-apk-on-your-computer" tabindex="-1">Get the apk on your computer <a class="header-anchor" href="#get-the-apk-on-your-computer">#</a></h3>
+<p>Search for the apk. There are many sites hosting them. Alternatively, download it to your device from the Play store and pull it via adb.
+I used v1.1.3 with SHA256 b45a5528922eadfed49e38039cff6365aacd8370e98b3d27d5bab2f53690811a.</p>
+<h3 id="install-the-apk" tabindex="-1">Install the apk <a class="header-anchor" href="#install-the-apk">#</a></h3>
+<p>Install it with <code>adb install railcards.apk</code>. Run the app. Hmmmm it doesn't work.</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/nWsLwJOmZD-767.avif 767w"><source type="image/webp" srcset="/img/nWsLwJOmZD-767.webp 767w"><img alt="Apps says it's offline" loading="lazy" decoding="async" src="/img/nWsLwJOmZD-767.png" width="767" height="1183"></picture><figcaption>Apps says it's offline</figcaption></figure></p>
+<p>The internet is working in the browser, but no requests from the Railcards app can be seen in ZAP. Wireshark shows the emulator connecting to ZAP, but the ZAP certificate is being rejected by the app.</p>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/T-UsDHcpKW-1200.avif 1200w"><source type="image/webp" srcset="/img/T-UsDHcpKW-1200.webp 1200w"><img alt="Wireshark shows TLS connection between ZAP and emulator" loading="lazy" decoding="async" src="/img/T-UsDHcpKW-1200.png" width="1200" height="785"></picture><figcaption>Wireshark shows TLS connection between ZAP and emulator</figcaption></figure></p>
+<h3 id="tear-it-apart" tabindex="-1">Tear it apart <a class="header-anchor" href="#tear-it-apart">#</a></h3>
+<p>Let's decode the apk with apktool and see what's going on <code>apktool d --no-res railcards.apk</code>.</p>
+<p>Android code is compiled, obfuscated with proguard, and targeted at Dalvik rather than the standard JVM. This means that the tooling for reverse engineering rarely gives you perfect decompilation into Java.
+A reasonable attempt at browsing the Java decompilation is by running <code>dex2jar railcards.apk</code> and then opening the <code>railcards_dex2jar.jar</code> in <code>jd-gui</code>. I searched around for the code which makes requests, and in <code>com.raildeliverygroup.railcard.app.net.b</code> found:</p>
+<pre class="language-java" tabindex="0"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> a
+<span class="token punctuation">{</span>
+  <span class="token class-name">CertificatePinner</span> <span class="token function">c</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">CertificatePinner<span class="token punctuation">.</span>Builder</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token string">"prod.digital-railcard.co.uk"</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{</span> <span class="token string">"sha256/rfNAS9FMyvxACLmHPLTQIHnFNs+MIde1t7Vcym6qMM4="</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token string">"prod.digital-railcard.co.uk"</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{</span> <span class="token string">"sha256/5kJvNEMw0KjrCAu7eXY5HZdvyCS13BbA0VJG1RSP91w="</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">build</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>The first reason we're getting connection errors is due to the use of certificate pinning as described in the <a href="https://square.github.io/okhttp/3.x/okhttp/okhttp3/CertificatePinner.html">OkHttp library docs</a>. The app requires the connection to be made using specific certificates. Since our dynamically-generated ZAP certificate doesn't have <a href="https://stackoverflow.com/a/46309453">those hashes</a> in its chain of trust, validation fails.</p>
+<h3 id="get-rid-of-the-certificate-pinning" tabindex="-1">Get rid of the certificate pinning <a class="header-anchor" href="#get-rid-of-the-certificate-pinning">#</a></h3>
+<p>Apktool created a smali directory. Smali/baksmali is the assembly language for the Dalvik machine code.
+As such, browsing the smali code is much more reliable than looking at the Java, and it can be reassembled.
+The smali file at <code>smali/com/raildeliverygroup/railcard/app/net/b/a.smali</code> (originally from <code>NetworkModule.java</code>) contains:</p>
+<pre class="language-smali" tabindex="0"><code class="language-smali"><span class="token keyword">.method</span> <span class="token function">c</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token class-name"><span class="token builtin">L</span><span class="token namespace">okhttp3<span class="token punctuation">/</span></span><span class="token class-name">CertificatePinner</span></span><span class="token punctuation">;</span>
+    <span class="token keyword">.locals</span> <span class="token number">6</span>
+    <span class="token keyword">.prologue</span>
+    const/4 <span class="token register variable">v5</span><span class="token punctuation">,</span> <span class="token number">0x1</span>
+    const/4 <span class="token register variable">v4</span><span class="token punctuation">,</span> <span class="token number">0x0</span>
+    <span class="token keyword">.line</span> <span class="token number">48</span>
+    new-instance <span class="token register variable">v0</span><span class="token punctuation">,</span> <span class="token class-name"><span class="token builtin">L</span><span class="token namespace">okhttp3<span class="token punctuation">/</span></span><span class="token class-name">CertificatePinner$Builder</span></span><span class="token punctuation">;</span>
+    invoke-direct <span class="token punctuation">{</span><span class="token register variable">v0</span><span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token class-name"><span class="token builtin">L</span><span class="token namespace">okhttp3<span class="token punctuation">/</span></span><span class="token class-name">CertificatePinner$Builder</span></span><span class="token punctuation">;</span><span class="token operator">-></span><span class="token function">&lt;init></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token builtin">V</span>
+    const-string <span class="token register variable">v1</span><span class="token punctuation">,</span> <span class="token string">"prod.digital-railcard.co.uk"</span>
+    new-array <span class="token register variable">v2</span><span class="token punctuation">,</span> <span class="token register variable">v5</span><span class="token punctuation">,</span> <span class="token operator">[</span><span class="token class-name"><span class="token builtin">L</span><span class="token namespace">java<span class="token punctuation">/</span>lang<span class="token punctuation">/</span></span><span class="token class-name">String</span></span><span class="token punctuation">;</span>
+    const-string <span class="token register variable">v3</span><span class="token punctuation">,</span> <span class="token string">"sha256/rfNAS9FMyvxACLmHPLTQIHnFNs+MIde1t7Vcym6qMM4="</span>
+    aput-object <span class="token register variable">v3</span><span class="token punctuation">,</span> <span class="token register variable">v2</span><span class="token punctuation">,</span> <span class="token register variable">v4</span>
+    <span class="token keyword">.line</span> <span class="token number">49</span>
+    invoke-virtual <span class="token punctuation">{</span><span class="token register variable">v0</span><span class="token punctuation">,</span> <span class="token register variable">v1</span><span class="token punctuation">,</span> <span class="token register variable">v2</span><span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token class-name"><span class="token builtin">L</span><span class="token namespace">okhttp3<span class="token punctuation">/</span></span><span class="token class-name">CertificatePinner$Builder</span></span><span class="token punctuation">;</span><span class="token operator">-></span><span class="token function">add</span><span class="token punctuation">(</span><span class="token class-name"><span class="token builtin">L</span><span class="token namespace">java<span class="token punctuation">/</span>lang<span class="token punctuation">/</span></span><span class="token class-name">String</span></span><span class="token punctuation">;</span><span class="token operator">[</span><span class="token class-name"><span class="token builtin">L</span><span class="token namespace">java<span class="token punctuation">/</span>lang<span class="token punctuation">/</span></span><span class="token class-name">String</span></span><span class="token punctuation">;</span><span class="token punctuation">)</span><span class="token class-name"><span class="token builtin">L</span><span class="token namespace">okhttp3<span class="token punctuation">/</span></span><span class="token class-name">CertificatePinner$Builder</span></span><span class="token punctuation">;</span>
+    move-result-object <span class="token register variable">v0</span>
+    const-string <span class="token register variable">v1</span><span class="token punctuation">,</span> <span class="token string">"prod.digital-railcard.co.uk"</span>
+    new-array <span class="token register variable">v2</span><span class="token punctuation">,</span> <span class="token register variable">v5</span><span class="token punctuation">,</span> <span class="token operator">[</span><span class="token class-name"><span class="token builtin">L</span><span class="token namespace">java<span class="token punctuation">/</span>lang<span class="token punctuation">/</span></span><span class="token class-name">String</span></span><span class="token punctuation">;</span>
+    const-string <span class="token register variable">v3</span><span class="token punctuation">,</span> <span class="token string">"sha256/5kJvNEMw0KjrCAu7eXY5HZdvyCS13BbA0VJG1RSP91w="</span>
+    aput-object <span class="token register variable">v3</span><span class="token punctuation">,</span> <span class="token register variable">v2</span><span class="token punctuation">,</span> <span class="token register variable">v4</span>
+    <span class="token keyword">.line</span> <span class="token number">50</span>
+    invoke-virtual <span class="token punctuation">{</span><span class="token register variable">v0</span><span class="token punctuation">,</span> <span class="token register variable">v1</span><span class="token punctuation">,</span> <span class="token register variable">v2</span><span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token class-name"><span class="token builtin">L</span><span class="token namespace">okhttp3<span class="token punctuation">/</span></span><span class="token class-name">CertificatePinner$Builder</span></span><span class="token punctuation">;</span><span class="token operator">-></span><span class="token function">add</span><span class="token punctuation">(</span><span class="token class-name"><span class="token builtin">L</span><span class="token namespace">java<span class="token punctuation">/</span>lang<span class="token punctuation">/</span></span><span class="token class-name">String</span></span><span class="token punctuation">;</span><span class="token operator">[</span><span class="token class-name"><span class="token builtin">L</span><span class="token namespace">java<span class="token punctuation">/</span>lang<span class="token punctuation">/</span></span><span class="token class-name">String</span></span><span class="token punctuation">;</span><span class="token punctuation">)</span><span class="token class-name"><span class="token builtin">L</span><span class="token namespace">okhttp3<span class="token punctuation">/</span></span><span class="token class-name">CertificatePinner$Builder</span></span><span class="token punctuation">;</span>
+    move-result-object <span class="token register variable">v0</span>
+    <span class="token keyword">.line</span> <span class="token number">51</span>
+    invoke-virtual <span class="token punctuation">{</span><span class="token register variable">v0</span><span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token class-name"><span class="token builtin">L</span><span class="token namespace">okhttp3<span class="token punctuation">/</span></span><span class="token class-name">CertificatePinner$Builder</span></span><span class="token punctuation">;</span><span class="token operator">-></span><span class="token function">build</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token class-name"><span class="token builtin">L</span><span class="token namespace">okhttp3<span class="token punctuation">/</span></span><span class="token class-name">CertificatePinner</span></span><span class="token punctuation">;</span>
+    move-result-object <span class="token register variable">v0</span>
+    <span class="token keyword">.line</span> <span class="token number">48</span>
+    return-object <span class="token register variable">v0</span>
+<span class="token keyword">.end</span> <span class="token keyword">method</span></code></pre>
+<p>I kept the method signature the same, but deleted the lines specifying the pins, so the method now returns an empty, impotent <code>CertificatePinner</code>.
+Removing all 12 command lines after the call to <code>init</code> and before the call to <code>build</code> left code which functions like <code>return new CertificatePinner.Builder().build()</code>.</p>
+<h3 id="rebuild-and-sign-the-apk" tabindex="-1">Rebuild and sign the apk <a class="header-anchor" href="#rebuild-and-sign-the-apk">#</a></h3>
+<p>The altered smali can now be reassembled into machine code to make an apk with altered code. Since we don't have the proper apk signing key:</p>
+<ul>
+<li>we'll need to use our own one (<code>keytool -genkey -v -keystore my-release-key.keystore -alias alias_name -keyalg RSA -keysize 2048 -validity 10000</code>)</li>
+<li>we need to uninstall the original apk before we can install our cooked one</li>
+</ul>
+<pre><code>apktool b -f -d com.raildeliverygroup.railcard_2018-05-30 &amp;&amp; jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore my-release-key.keystore com.raildeliverygroup.railcard_2018-05-30/dist/com.raildeliverygroup.railcard_2018-05-30.apk alias_name &amp;&amp; adb uninstall com.raildeliverygroup.railcard &amp;&amp; adb install com.raildeliverygroup.railcard_2018-05-30/dist/com.raildeliverygroup.railcard_2018-05-30.apk
+</code></pre>
+<p>On my emulator I can now see traffic 🎉, but I can't get it to work on my phone.
+This is due to a <a href="https://android-developers.googleblog.com/2016/07/changes-to-trusted-certificate.html">change since Nougat</a> (7.0 or API level 24). Apps now don't respect that user CA store we added the ZAP cert to earlier.
+The apps only use the root CAs, or they can use their own custom request handling.</p>
+<h3 id="patch-tls-certificate-validation" tabindex="-1">Patch TLS certificate validation <a class="header-anchor" href="#patch-tls-certificate-validation">#</a></h3>
+<p>Since I don't have the private key of a trusted CA, I instead made the app not care about invalid certificates. It was a bit more involved than the pinning change, so I wrote the Android java code I wanted first. You can play with it at <a href="https://github.com/bcaller/unsafe-okhttp3-android/blob/master/app/src/main/java/xyz/caller/insecurity/UnsafeOkHttpClient.java"><img alt=":octocat:" src="https://github.githubassets.com/images/icons/emoji/octocat.png?v8" style="max-width: 1em; max-height: 1em; display: inline-block;">bcaller/unsafe-okhttp3-android</a>. Then I decoded the apk to get the smali code I needed for the railcards project so that the method <code>OkHttpClient.Builder b()</code> returns a builder with a <em>special custom trust model</em> of accepting all certs. If you're interested in learning smali, writing Android Java code and disassembling the apk to smali is the second best way (after reading the smali docs).</p>
+<p><em>Oops: It may have been easier to just add <a href="https://developer.android.com/training/articles/security-config">network security config</a> to AndroidManifest.xml</em></p>
+<h3 id="profit" tabindex="-1">Profit <a class="header-anchor" href="#profit">#</a></h3>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/ZDhlAeds3x-1200.avif 1200w"><source type="image/webp" srcset="/img/ZDhlAeds3x-1200.webp 1200w"><img alt="It works" loading="lazy" decoding="async" src="/img/ZDhlAeds3x-1200.png" width="1200" height="1029"></picture><figcaption>It works</figcaption></figure></p>
+<p>Now we have MitM'd the connection, we can see what the app is saying about us and to whom!</p>
+<h2 id="more-poking" tabindex="-1">More poking <a class="header-anchor" href="#more-poking">#</a></h2>
+<h3 id="secret-password" tabindex="-1">Secret password <a class="header-anchor" href="#secret-password">#</a></h3>
+<p>If you make a request to <code>https://prod.digital-railcard.co.uk/api/v0.0.2/devices/a/railcards</code> then you get a 401. Browsing the code, I found <code>smali/com/raildeliverygroup/railcard/app/net/c/a.smali</code> (originally <code>AuthorizationInterceptor.java</code>) containing some amusing code.</p>
+<pre class="language-java" tabindex="0"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> a <span class="token keyword">implements</span> <span class="token class-name">Interceptor</span>
+<span class="token punctuation">{</span>
+  <span class="token keyword">public</span> <span class="token class-name">Response</span> <span class="token function">intercept</span><span class="token punctuation">(</span><span class="token class-name">Interceptor<span class="token punctuation">.</span>Chain</span> paramChain<span class="token punctuation">)</span>
+  <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> paramChain<span class="token punctuation">.</span><span class="token function">proceed</span><span class="token punctuation">(</span>
+      paramChain<span class="token punctuation">.</span><span class="token function">request</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">newBuilder</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">header</span><span class="token punctuation">(</span><span class="token string">"Authorization"</span><span class="token punctuation">,</span> <span class="token string">"Basic YXBwbGljYXRpb25AZXhhbXBsZS5jb206dGVzdHJhaWxhcGk="</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">build</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>Hard-coded basic auth creds: <strong><code>application@example.com:testrailapi</code></strong>. It's not really a security issue since this had to be baked into the client app anyway.</p>
+<h3 id="data" tabindex="-1">Data <a class="header-anchor" href="#data">#</a></h3>
+<p>To see and modify the app's data, try looking for XML and sqlite3 files in <code>/data/data/com.raildeliverygroup.railcard</code>. Nothing particularly interesting to report for this app.</p>
+<h3 id="diy-railcard-forgery-saved-by-the-barcode" tabindex="-1">DIY-railcard forgery / Saved by the barcode <a class="header-anchor" href="#diy-railcard-forgery-saved-by-the-barcode">#</a></h3>
+<p>We can also use ZAP to <em>rewrite</em> intercepted responses (start by setting break points) to give our app a shiny new railcard:</p>
+<pre class="language-json" tabindex="0"><code class="language-json"><span class="token punctuation">{</span>
+    <span class="token property">"data"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">{</span>
+            <span class="token property">"cardholders"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+                <span class="token punctuation">{</span>
+                    <span class="token property">"cardholder_forename"</span><span class="token operator">:</span> <span class="token string">"Thomas"</span><span class="token punctuation">,</span>
+                    <span class="token property">"cardholder_id"</span><span class="token operator">:</span> <span class="token number">1111111</span><span class="token punctuation">,</span>
+                    <span class="token property">"cardholder_photo_url"</span><span class="token operator">:</span> <span class="token string">"https://crossvale.com/wp-content/uploads/2018/10/ttte.jpg"</span><span class="token punctuation">,</span>
+                    <span class="token property">"cardholder_surname"</span><span class="token operator">:</span> <span class="token string">"Engine"</span><span class="token punctuation">,</span>
+                    <span class="token property">"cardholder_title"</span><span class="token operator">:</span> <span class="token string">"Mr"</span><span class="token punctuation">,</span>
+                    <span class="token property">"cardholder_type"</span><span class="token operator">:</span> <span class="token string">"Primary"</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">]</span><span class="token punctuation">,</span>
+            <span class="token property">"railcard_barcode"</span><span class="token operator">:</span> <span class="token string">"05XTNVW5BYQ 2ABCDEFGHIJKLMNOPQRSTUVWXYZAAAAAAAAAABCDEFGHIJKLMNOPQRSTUVWXYZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABCDEFGHIJKLMNOPQRSTUVWXYZAAAAAAAAAAAAAAAAAAABCDEFGHIJKLMNOPQRSTUVWXYZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"</span><span class="token punctuation">,</span>
+            <span class="token property">"railcard_id"</span><span class="token operator">:</span> <span class="token string">"b16b00b5-ffff-ffff-ffff-123456789abc"</span><span class="token punctuation">,</span>
+            <span class="token property">"railcard_issued"</span><span class="token operator">:</span> <span class="token string">"Online"</span><span class="token punctuation">,</span>
+            <span class="token property">"railcard_name"</span><span class="token operator">:</span> <span class="token string">"TwentysixToThirty"</span><span class="token punctuation">,</span>
+            <span class="token property">"railcard_number"</span><span class="token operator">:</span> <span class="token string">"05ABC0123456789"</span><span class="token punctuation">,</span>
+            <span class="token property">"railcard_requested_date"</span><span class="token operator">:</span> <span class="token string">"2019-01-19T11:11:11+00:00"</span><span class="token punctuation">,</span>
+            <span class="token property">"railcard_transaction_reference"</span><span class="token operator">:</span> <span class="token string">"55555555555555555555555555555"</span><span class="token punctuation">,</span>
+            <span class="token property">"railcard_type"</span><span class="token operator">:</span> <span class="token string">"TwentySixToThirty"</span><span class="token punctuation">,</span>
+            <span class="token property">"railcard_valid_from"</span><span class="token operator">:</span> <span class="token string">"2019-01-19T00:00:00+00:00"</span><span class="token punctuation">,</span>
+            <span class="token property">"railcard_valid_to"</span><span class="token operator">:</span> <span class="token string">"3000-01-18T00:00:00+00:00"</span><span class="token punctuation">,</span>
+            <span class="token property">"state"</span><span class="token operator">:</span> <span class="token string">"Active"</span><span class="token punctuation">,</span>
+            <span class="token property">"token"</span><span class="token operator">:</span> <span class="token string">"ABCDEF"</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token property">"http_status_code"</span><span class="token operator">:</span> <span class="token number">200</span><span class="token punctuation">,</span>
+    <span class="token property">"message"</span><span class="token operator">:</span> <span class="token string">"Success"</span><span class="token punctuation">,</span>
+    <span class="token property">"status"</span><span class="token operator">:</span> <span class="token string">"success"</span>
+<span class="token punctuation">}</span></code></pre>
+<p>‌<figure><picture><source type="image/avif" srcset="/img/WqIKCi3ph_-767.avif 767w"><source type="image/webp" srcset="/img/WqIKCi3ph_-767.webp 767w"><img alt="Choo Choo Motherf****r" loading="lazy" decoding="async" src="/img/WqIKCi3ph_-767.png" width="767" height="1181"></picture><figcaption>Choo Choo Motherf****r</figcaption></figure></p>
+<p>The National Rail logo in the bottom-right corner is the <code>SecurityFeatureView</code> which flips when you tap it, and changes colour to show it isn't just a screenshot (the anti-screenshot protection can be disabled by removing <code>FLAG_SECURE</code> in <code>android.view.window.setFlags(0x2000)</code>).
+While this railcard looks legit, there is nothing in the app describing the contents of the railcard barcode. This is the key security feature of the system. Depending on its purpose and contents, a forged railcard will be rejected by any inspector who scans the AZTEC (not QR) barcode. Since I don't know what data the barcode contains, I am <strong>unable</strong> to forge my own railcard without risking detection.</p>
+
+<ul class="links-nextprev"><li>Previous: <a href="/should-i-rent-a-scooter-in-bali/">Should I rent a scooter in Bali?</a></li><li>Next: <a href="/what-the-fuzz/">What The Fuzz</a></li>
+</ul>
+
+		</main>
+
+		<footer></footer>
+
+		<!-- Current page: /man-in-the-middling-android-apps/ -->
+	</body>
+</html>

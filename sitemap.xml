@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="utf-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+	
+	<url>
+		<loc>https://blog.caller.xyz/xbox-360-live-gamercard/</loc>
+		<lastmod>2010-01-20</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/they-have-your-info/</loc>
+		<lastmod>2014-12-12</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/pebble-xin-nian-kuai-le/</loc>
+		<lastmod>2016-01-25</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/slack-bingo-bot/</loc>
+		<lastmod>2016-02-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/chinese-character-of-the-day-chang/</loc>
+		<lastmod>2016-02-15</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/pebble-bike-sharer/</loc>
+		<lastmod>2016-04-20</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/v380-ipcam-hardware-hackz/</loc>
+		<lastmod>2018-02-22</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/avoiding-injection-with-taint-analysis/</loc>
+		<lastmod>2018-09-27</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/should-i-rent-a-scooter-in-bali/</loc>
+		<lastmod>2018-10-09</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/man-in-the-middling-android-apps/</loc>
+		<lastmod>2019-01-13</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/what-the-fuzz/</loc>
+		<lastmod>2019-01-17</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/your-s3-buckets-are-leaking/</loc>
+		<lastmod>2019-05-03</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/apache-zeppelin-vulnerability-metasploit/</loc>
+		<lastmod>2019-05-10</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/big-data-lake-big-data-leak/</loc>
+		<lastmod>2019-11-13</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/two-redos-vulns-in-cpython/</loc>
+		<lastmod>2019-11-17</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/exploit-grafana-cve-2019-15043/</loc>
+		<lastmod>2019-12-10</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/jenkins-udp-ping-pong-cve-2020-2100/</loc>
+		<lastmod>2020-02-12</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/user-agent-parsing-redos-cve-2020-5243/</loc>
+		<lastmod>2020-02-12</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/sectalks-ctf-rop-aslr-500/</loc>
+		<lastmod>2020-03-13</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/v380-ipcam-move-with-soap/</loc>
+		<lastmod>2020-03-24</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/v380-ipcam-firmware-patching/</loc>
+		<lastmod>2020-04-04</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/socketio-engineio-dos/</loc>
+		<lastmod>2020-05-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/wo-men-du-bu-wan-mei/</loc>
+		<lastmod>2020-07-01</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/python-tarfile-infinite-loop-dos/</loc>
+		<lastmod>2020-07-08</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/defconsm-car-hacking/</loc>
+		<lastmod>2020-08-08</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/google-ctf-2020-writeup/</loc>
+		<lastmod>2020-08-24</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/defcon29-rtv-ctf/</loc>
+		<lastmod>2021-08-09</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/redos-in-ruby-net-http-when-parsing-response-headers/</loc>
+		<lastmod>2022-04-01</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/salesforce-hardest-hitting-hacker/</loc>
+		<lastmod>2022-04-01</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/apache-pinot-insecurity/</loc>
+		<lastmod>2022-06-09</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/taiwan-motorcycle-scooter-licence-idp-issue/</loc>
+		<lastmod>2023-03-01</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/pinot-rce-datadog-your-2fa-codes-off-the-rails/</loc>
+		<lastmod>2023-06-30</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/about/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/blog/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/security/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/research/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/ctf/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/aws/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/bounty/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/cloud/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/conference/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/poc/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/redos/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/android/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/slack/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/node/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/bot/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/travel/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/bali/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/vehicle/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/chinese/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/pebble/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/c/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/bike/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/cycling/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/velib/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/chinese-new-year/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/watch-face/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/fonts/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/regex/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/python/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/external/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/taint/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/fuzzing/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/nodejs/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/taiwan/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/motorcycle/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/file-format/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/web-app/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/location/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/google/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/data-mining/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/maps/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/clustering/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/hardware/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/v380-ipcam/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/facebook/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/xbox/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/c-sharp/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/aspnet/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/tags/metasploit/</loc>
+		<lastmod>2023-07-07</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/cheeky-bucket-squatting-defeated-by-terraform/</loc>
+		<lastmod>2023-12-01</lastmod>
+	</url>
+	
+	<url>
+		<loc>https://blog.caller.xyz/htb-cyber-apocalypse-ctf-2024-writeup/</loc>
+		<lastmod>2024-03-14</lastmod>
+	</url>
+</urlset>
